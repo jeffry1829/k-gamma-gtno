@@ -1,0 +1,269 @@
+#python excitation_ising_input_ori.py --GLOBALARGS_dtype complex128 --bond_dim 2 --chi 8 --size 11 --seed 123 --hx 3.5 --instate ex-hx35D2chi8c4v_state.json
+import context
+import time
+import torch
+import argparse
+import config as cfg
+from ipeps.ipeps import *
+from ctm.generic.env import *
+from ctm.generic.rdm import *
+from ctm.generic import ctmrg
+from ctm.generic.ctm_projectors import *
+from Norm_ori import *
+from Hami_ori import *
+# from Spec_ori import *
+# from Test import *
+from models import ising
+from groups.pg import *
+import groups.su2 as su2
+from optim.ad_optim_lbfgs_mod import optimize_state
+from tn_interface import contract, einsum
+from tn_interface import conj
+from tn_interface import contiguous, view, permute
+import numpy as np
+import scipy as scipy
+import scipy.linalg as linalg
+import scipy.sparse.linalg as spr_linalg
+import scipy.io
+import unittest
+import logging
+log = logging.getLogger(__name__)
+
+tStart = time.time()
+
+# parse command line args and build necessary configuration objects
+parser= cfg.get_args_parser()
+# additional model-dependent arguments
+parser.add_argument("--hx", type=float, default=0., help="transverse field")
+parser.add_argument("--q", type=float, default=0., help="next nearest-neighbour coupling")
+parser.add_argument("--size", type=int, default=10, help="effective size")
+args, unknown_args = parser.parse_known_args()
+
+cfg.configure(args)
+#cfg.print_config()
+torch.set_num_threads(args.omp_cores)
+torch.manual_seed(args.seed)
+
+model = ising.ISING(hx=args.hx, q=args.q)
+
+state = read_ipeps(args.instate, vertexToSite=None)
+# def symmetrize(state):
+#     A= state.site((0,0))
+#     A_symm= make_c4v_symm_A1(A)
+#     symm_state= IPEPS({(0,0): A_symm}, vertexToSite=state.vertexToSite)
+#     return symm_state
+# state= symmetrize(state)
+sitesDL=dict()
+for coord,A in state.sites.items():
+    dimsA = A.size()
+    a = contiguous(einsum('mefgh,mabcd->eafbgchd',A,conj(A)))
+    a = view(a, (dimsA[1]**2,dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
+    sitesDL[coord]=a
+stateDL = IPEPS(sitesDL,state.vertexToSite)
+
+def ctmrg_conv_energy(state2, env, history, ctm_args=cfg.ctm_args):
+    if not history:
+        history=[]
+
+    if (len(history)>0):
+        old = history[:4*env.chi]
+    new = []
+    u,s,v = torch.svd(env.C[((0,0),(-1,-1))])
+    for i in range(env.chi):
+        new.append(s[i].item())
+    u,s,v = torch.svd(env.C[((0,0),(1,-1))])
+    for i in range(env.chi):
+        new.append(s[i].item())
+    u,s,v = torch.svd(env.C[((0,0),(1,-1))])
+    for i in range(env.chi):
+        new.append(s[i].item())
+    u,s,v = torch.svd(env.C[((0,0),(1,1))])
+    for i in range(env.chi):
+        new.append(s[i].item())
+
+    diff = 0.
+    if (len(history)>0):
+        for i in range(4*env.chi):
+            history[i] = new[i]
+            if (abs(old[i]-new[i])>diff):
+                diff = abs(old[i]-new[i])
+    else:
+        for i in range(4*env.chi):
+            history.append(new[i])
+    history.append(diff)
+
+    if (len(history[4*env.chi:]) > 1 and diff < ctm_args.ctm_conv_tol)\
+        or len(history[4*env.chi:]) >= ctm_args.ctm_max_iter:
+        log.info({"history_length": len(history[4*env.chi:]), "history": history[4*env.chi:]})
+        #print (len(history[4*env.chi:]))
+        return True, history
+    return False, history
+
+env = ENV(args.chi, state)
+init_env(state, env)
+
+env, P, Pt, *ctm_log = ctmrg.run(state, env, conv_check=ctmrg_conv_energy)
+print ("E_per_site=", model.energy_1x1(state, env).item())
+
+trans_m = torch.einsum('ijk,jlmn,mab->ilaknb',env.T[((0,0),(0,-1))],stateDL.sites[(0,0)],env.T[((0,0),(0,1))])
+trans_m = trans_m.reshape(((args.chi*args.bond_dim)**2,(args.chi*args.bond_dim)**2))
+trans_m2 = trans_m.detach().cpu().numpy()
+e, v = np.linalg.eig(trans_m2)
+idx = np.argsort(e.real)   
+e = e[idx]
+v = v[:,idx]
+print ("correlation_length=", -1/np.log(e[(args.chi*args.bond_dim)**2-2]/e[(args.chi*args.bond_dim)**2-1]).item().real)
+################Hamiltonian################
+torch.pi = torch.tensor(np.pi, dtype=torch.complex128)
+kx_int = 24
+ky_int = 0
+kx = kx_int*torch.pi/24.
+ky = ky_int*torch.pi/24.
+print ("kx=", kx/torch.pi*(2*args.size+2))
+print ("ky=", ky/torch.pi*(2*args.size+2))
+SzSz = model.h2
+Sx = model.h1
+iden= torch.eye(2,dtype=cfg.global_args.torch_dtype,device=cfg.global_args.device).contiguous()
+H_temp = -SzSz - args.hx * (torch.einsum('ij,kl->ikjl',Sx,iden)+torch.einsum('ij,kl->ikjl',iden,Sx))/4
+lam = torch.tensor(0.0,dtype=cfg.global_args.torch_dtype,device=cfg.global_args.device).requires_grad_(True)
+lamb = torch.tensor(1.0,dtype=cfg.global_args.torch_dtype,device=cfg.global_args.device)
+iden2 = torch.einsum('ij,kl->ikjl',iden,iden)
+H = iden2 + lam * H_temp
+H2 = iden2
+rdm2x1= rdm2x1((0,0),state,env)
+energy_per_site= torch.einsum('ijkl,ijkl',rdm2x1,H_temp)
+print ("E_per_bond=", 2*energy_per_site.item().real)
+
+s2 = su2.SU2(2,dtype=cfg.global_args.torch_dtype,device=cfg.global_args.device)
+spin = [2*s2.SZ(),2*s2.SX()]
+spin_rot = [2*s2.SZ(),iden]
+################Excited state################
+bond_dim = args.bond_dim
+#ctm_env_ex = env.clone()
+################Effective norm################
+B_grad = torch.zeros((len(state.sites), model.phys_dim, bond_dim, bond_dim, bond_dim, bond_dim),\
+                     dtype=cfg.global_args.torch_dtype,device=cfg.global_args.device).requires_grad_(True)
+if len(state.sites)==1:
+    sitesB = {(0,0): B_grad[0]}
+    stateB = IPEPS(sitesB, state.vertexToSite)
+with torch.no_grad():
+    P, Pt = Create_Projectors(state, stateDL, env, args)
+C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right = Create_Norm_Env(state, stateDL, stateB, env, P, Pt, lamb, kx, ky, args)
+Norm, Norm2 = Create_Norm(state, env, C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right, args)
+
+if len(state.sites)==1:
+    Norm_0 = contract(Norm2[(0,0)],conj(state.site((0,0))),([0,1,2,3,4],[0,1,2,3,4]))
+    N_para = state.site((0,0)).size()[0]*state.site((0,0)).size()[1]*state.site((0,0)).size()[2]*state.site((0,0)).size()[3]*state.site((0,0)).size()[4]
+
+    N_final = np.zeros((N_para,N_para), dtype=np.complex128)
+    
+    filename1 = 'Norm_kx'+str(kx_int)+'ky'+str(ky_int)+'.txt'
+    with open(filename1, 'r') as file_to_read2:
+        lines2 = file_to_read2.readline()
+        q_tmp = [complex(k) for k in lines2.replace('i', 'j').split()]
+        for i in range(N_para):
+            for j in range(N_para):
+                N_final[i][j]=q_tmp[i*N_para+j]
+
+    N_final = N_final+conj(N_final.transpose(1,0))
+    N_cmn = N_final.copy()
+
+
+tEnd = time.time()
+print ("time_Norm=", tEnd - tStart)
+################Effective H################
+if len(state.sites)==1:
+    N_para = state.site((0,0)).size()[0]*state.site((0,0)).size()[1]*state.site((0,0)).size()[2]*state.site((0,0)).size()[3]*state.site((0,0)).size()[4]
+
+    H_final = np.zeros((N_para,N_para), dtype=np.complex128)
+
+    filename1 = 'Hami_kx'+str(kx_int)+'ky'+str(ky_int)+'.txt'
+    with open(filename1, 'r') as file_to_read2:
+        lines2 = file_to_read2.readline()
+        q_tmp = [complex(k) for k in lines2.replace('i', 'j').split()]
+        for i in range(N_para):
+            for j in range(N_para):
+                H_final[i][j]=q_tmp[i*N_para+j]
+
+    H_final = H_final+conj(H_final.transpose(1,0))
+    H_cmn = H_final.copy()
+
+
+tEnd = time.time()
+print ("time_Hami=", tEnd - tStart)
+################Energy###############
+e, v = np.linalg.eig(N_cmn)
+idx = np.argsort(-e.real)   
+e = e[idx]
+v = v[:,idx]
+#print (e)
+e2, v2 = np.linalg.eig(H_cmn)
+idx = np.argsort(-e2.real)   
+e2 = e2[idx]
+v2 = v2[:,idx]
+################Projector###############
+eig_size = 1
+vt = np.zeros((N_para,eig_size), dtype=np.complex128)
+for i in range(eig_size):
+    vt[:,i] = v[:,i]
+
+N_cmn2 = np.matmul(N_cmn, vt)
+N_cmn2 = np.matmul(np.transpose(np.conj(vt)), N_cmn2)
+H_cmn2 = np.matmul(H_cmn, vt)
+H_cmn2 = np.matmul(np.transpose(np.conj(vt)), H_cmn2)
+
+N_cmn_inv = linalg.pinvh(N_cmn2)#, cond=0.000001, rcond=0.000001)
+ef, vf = np.linalg.eig(np.matmul(N_cmn_inv,H_cmn2))
+idx = np.argsort(ef)   
+ef = ef[idx]
+vf = vf[:,idx]
+print (ef)
+    
+
+if kx == ky == 0:
+    print ("E_lowest_ex=",(2*args.size+2)*(2*args.size+1)*(ef[1]-2*energy_per_site.item().real))
+else:
+    print ("E_lowest_ex=",(2*args.size+2)*(2*args.size+1)*(ef[0]-2*energy_per_site.item().real))
+    
+print ("ALL_E_lowest_ex=",(2*args.size+2)*(2*args.size+1)*(ef-2*energy_per_site.item().real))
+
+norm_nnn1 = []
+ener_nnn1 = []
+torch.autograd.set_detect_anomaly(True)
+for i in range(len(ef)):
+    if len(state.sites)==1:
+        B_tensor = np.matmul(vt, vf[:,i])
+        sitesB = {(0,0): torch.as_tensor(B_tensor.reshape(state.site((0,0)).size()[0],state.site((0,0)).size()[1],\
+                                                        state.site((0,0)).size()[2],state.site((0,0)).size()[3],\
+                                                        state.site((0,0)).size()[4]),dtype=cfg.global_args.torch_dtype,device=cfg.global_args.device)}
+        stateB = IPEPS(sitesB, state.vertexToSite)
+        ###new P Pt?###
+        lamb = torch.tensor(0.0,dtype=cfg.global_args.torch_dtype,device=cfg.global_args.device).requires_grad_(True)
+        C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right = Create_Norm_Env(state, stateDL, stateB, env, P, Pt, lamb, kx, ky, args)
+        Norm, Norm2 = Create_Norm(state, env, C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right, args)
+        Nor = contract(Norm[(0,0)],conj(stateB.site((0,0))),([0,1,2,3,4],[0,1,2,3,4]))
+        Nor.real.backward()
+        norm_nnn1.append(lamb.grad.item())
+
+        lam = torch.tensor(0.0,dtype=cfg.global_args.torch_dtype,device=cfg.global_args.device).requires_grad_(True)
+        lamb = torch.tensor(0.0,dtype=cfg.global_args.torch_dtype,device=cfg.global_args.device).requires_grad_(True)
+        H = iden2 + lam * H_temp
+        C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right = Create_Hami_Env(state, stateDL, stateB, env, P, Pt, lamb, H, H2, kx, ky, args)
+        Hami, Hami2 = Create_Hami(state, env, C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right, H, H2, args)
+        Ham = contract(Hami[(0,0)],conj(stateB.site((0,0))),([0,1,2,3,4],[0,1,2,3,4]))
+        g = torch.autograd.grad(Ham.real,lam,create_graph=True)
+        g[0].real.backward()
+        ener_nnn1.append(lamb.grad.item())
+
+        print ("E=", (2*(ener_nnn1[i]/norm_nnn1[i])/(2*args.size+2)/(2*args.size+1)).real)
+
+if kx == ky == 0:
+    E_gtot = 2*energy_per_site.item().real*(2*args.size+2)*(2*args.size+1)
+    print ("E_gap=", 2*(ener_nnn1[1]/norm_nnn1[1]).real-E_gtot)
+else:
+    E_gtot = 2*energy_per_site.item().real*(2*args.size+2)*(2*args.size+1)
+    print ("E_gap=", 2*(ener_nnn1[0]/norm_nnn1[0]).real-E_gtot)
+
+
+tEnd = time.time()
+print ("time_ener=", tEnd - tStart)
