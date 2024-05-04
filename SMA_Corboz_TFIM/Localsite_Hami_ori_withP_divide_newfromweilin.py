@@ -59,8 +59,8 @@ def Create_Hami_Env(state, stateDL, B_grad, env, P, Pt, lam, Hx, Hy, kx, ky, arg
                     nC2 = contract(C_up["left"], env.T[(
                         new_coord_l, (-1, 0))], ([0], [0]))
                     nC2 = contract(nC2, P2, ([0, 2], [0, 1]))
-                    print("nC2", nC2.abs().max())
-                    C_up["left"] = nC2
+                    print("nC2", nC2.detach().abs().max())
+                    C_up["left"] = nC2/nC2.detach().abs().max()
 
                     vec_coord_r = (args.size+1, -args.size+i)
                     new_coord_r = state.vertexToSite(
@@ -80,8 +80,8 @@ def Create_Hami_Env(state, stateDL, B_grad, env, P, Pt, lam, Hx, Hy, kx, ky, arg
                     nC1 = contract(C_up["right"], env.T[(
                         new_coord_r, (1, 0))], ([1], [0]))
                     nC1 = contract(Pt1, nC1, ([0, 1], [0, 1]))
-                    print("nC1", nC1.abs().max())
-                    C_up["right"] = nC1
+                    print("nC1", nC1.detach().abs().max())
+                    C_up["right"] = nC1/nC1.detach().abs().max()
 
                     for j in range(2*args.size+2):
                         vec_coord = (-args.size+j, -args.size+i)
@@ -119,8 +119,8 @@ def Create_Hami_Env(state, stateDL, B_grad, env, P, Pt, lam, Hx, Hy, kx, ky, arg
                             #         permute(nT, (1, 3, 7, 8, 2, 0, 4, 5, 6)))
 
                             norm = tempT.detach()
-                            print("norm", norm.abs().max())
-                            T_up[(j)] = tempT
+                            print("norm", norm.detach().abs().max())
+                            T_up[(j)] = tempT/norm.detach().abs().max()
                         else:
                             if i == 0:
                                 nT = contract(Pt2, T_up[(j)], ([0], [0]))
@@ -134,9 +134,17 @@ def Create_Hami_Env(state, stateDL, B_grad, env, P, Pt, lam, Hx, Hy, kx, ky, arg
                                 tempT = contiguous(nT)
 
                                 norm = tempT.detach()
-                                print("norm", norm.abs().max())
-                                T_up[(j)] = tempT
-
+                                print("norm", norm.detach().abs().max())
+                                T_up[(j)] = tempT/norm.detach().abs().max()
+                                print("Hermitian test begin!")
+                                _H = contiguous(einsum('aabcde,fcg,hei->fbhgdi',DL,Pt2,P1).reshape([env.chi**2*args.bond_dim**2]*2))
+                                _H = _H.resolve_conj().detach().cpu().numpy()
+                                # Check Hermitian
+                                import numpy as np
+                                if not np.allclose(_H,np.conj(np.transpose(_H)), atol=1e-5):
+                                    print("_H is not Hermitian")
+                                else:
+                                    print("_H is Hermitian")
                             else:
                                 nT = contract(Pt2, T_up[(j)], ([0], [0]))
                                 dimsA = state.site(new_coord).size()
@@ -158,8 +166,8 @@ def Create_Hami_Env(state, stateDL, B_grad, env, P, Pt, lam, Hx, Hy, kx, ky, arg
                                 #         permute(nT, (0, 1, 4, 2, 3)))
 
                                 norm = tempT.detach()
-                                print("norm", norm.abs().max())
-                                T_up[(j)] = tempT
+                                print("norm", norm.detach().abs().max())
+                                T_up[(j)] = tempT/norm.detach().abs().max()
 
             elif direction == (0, 1):
                 vec = (-1, 0)
@@ -196,8 +204,8 @@ def Create_Hami_Env(state, stateDL, B_grad, env, P, Pt, lam, Hx, Hy, kx, ky, arg
                     nC1 = contract(C_down["left"], env.T[(
                         new_coord_l, (-1, 0))], ([0], [1]))
                     nC1 = contract(nC1, Pt1, ([0, 2], [0, 1]))
-                    print("nC1", nC1.abs().max())
-                    C_down["left"] = nC1
+                    print("nC1", nC1.detach().abs().max())
+                    C_down["left"] = nC1/nC1.detach().abs().max()
 
                     vec_coord_r = (args.size+1, args.size-i+1)
                     new_coord_r = state.vertexToSite(
@@ -217,8 +225,8 @@ def Create_Hami_Env(state, stateDL, B_grad, env, P, Pt, lam, Hx, Hy, kx, ky, arg
                     nC2 = contract(C_down["right"], env.T[(
                         new_coord_r, (1, 0))], ([0], [2]))
                     nC2 = contract(nC2, P2, ([0, 2], [0, 1]))
-                    print("nC2", nC2.abs().max())
-                    C_down["right"] = nC2
+                    print("nC2", nC2.detach().abs().max())
+                    C_down["right"] = nC2/nC2.detach().abs().max()
 
                     for j in range(2*args.size+2):
                         vec_coord = (-args.size+j, args.size-i+1)
@@ -247,10 +255,10 @@ def Create_Hami_Env(state, stateDL, B_grad, env, P, Pt, lam, Hx, Hy, kx, ky, arg
                             nT = contract(nT, Pt2, ([1, 5], [0, 1]))
                             # contiguous(permute(nT, (1,0,2)))
                             tempT = contiguous(nT)
-                            print("norm", norm.abs().max())
                             norm = tempT.detach()
+                            print("norm", norm.detach().abs().max())
 
-                            T_down[(j)] = tempT
+                            T_down[(j)] = tempT/norm.detach().abs().max()
                         else:
                             nT = contract(P1, T_down[(j)], ([0], [0]))
                             dimsA = state.site(new_coord).size()
@@ -271,8 +279,8 @@ def Create_Hami_Env(state, stateDL, B_grad, env, P, Pt, lam, Hx, Hy, kx, ky, arg
 
                             norm = tempT.detach()
 
-                            print("norm", norm.abs().max())
-                            T_down[(j)] = tempT
+                            print("norm", norm.detach().abs().max())
+                            T_down[(j)] = tempT/norm.detach().abs().max()
 
             elif direction == (-1, 0):
                 vec = (0, -1)
@@ -309,8 +317,8 @@ def Create_Hami_Env(state, stateDL, B_grad, env, P, Pt, lam, Hx, Hy, kx, ky, arg
                     nC1 = contract(C_left["up"], env.T[(
                         new_coord_u, (0, -1))], ([1], [0]))
                     nC1 = contract(Pt1, nC1, ([0, 1], [0, 1]))
-                    print("nC1", nC1.abs().max())
-                    C_left["up"] = nC1
+                    print("nC1", nC1.detach().abs().max())
+                    C_left["up"] = nC1/nC1.detach().abs().max()
 
                     vec_coord_d = (-args.size+i, args.size+1)
                     new_coord_d = state.vertexToSite(
@@ -330,8 +338,8 @@ def Create_Hami_Env(state, stateDL, B_grad, env, P, Pt, lam, Hx, Hy, kx, ky, arg
                     nC2 = contract(C_left["down"], env.T[(
                         new_coord_d, (0, 1))], ([1], [1]))
                     nC2 = contract(P2, nC2, ([0, 1], [0, 1]))
-                    print("nC2", nC2.abs().max())
-                    C_left["down"] = nC2
+                    print("nC2", nC2.detach().abs().max())
+                    C_left["down"] = nC2/nC2.detach().abs().max()
 
                     for j in range(2*args.size+2):
                         vec_coord = (-args.size+i, -args.size+j)
@@ -370,8 +378,8 @@ def Create_Hami_Env(state, stateDL, B_grad, env, P, Pt, lam, Hx, Hy, kx, ky, arg
 
                             norm = tempT.detach()
 
-                            print("norm", norm.abs().max())
-                            T_left[(j)] = tempT
+                            print("norm", norm.detach().abs().max())
+                            T_left[(j)] = tempT/norm.detach().abs().max()
                         else:
                             if i == 0:
                                 nT = contract(P1, T_left[(j)], ([0], [0]))
@@ -387,8 +395,8 @@ def Create_Hami_Env(state, stateDL, B_grad, env, P, Pt, lam, Hx, Hy, kx, ky, arg
 
                                 norm = tempT.detach()
 
-                                print("norm", norm.abs().max())
-                                T_left[(j)] = tempT
+                                print("norm", norm.detach().abs().max())
+                                T_left[(j)] = tempT/norm.detach().abs().max()
                             else:
                                 nT = contract(P1, T_left[(j)], ([0], [0]))
                                 dimsA = state.site(new_coord).size()
@@ -411,8 +419,8 @@ def Create_Hami_Env(state, stateDL, B_grad, env, P, Pt, lam, Hx, Hy, kx, ky, arg
 
                                 norm = tempT.detach()
 
-                                print("norm", norm.abs().max())
-                                T_left[(j)] = tempT
+                                print("norm", norm.detach().abs().max())
+                                T_left[(j)] = tempT/norm.detach().abs().max()
 
             elif direction == (1, 0):
                 vec = (0, 1)
@@ -449,8 +457,8 @@ def Create_Hami_Env(state, stateDL, B_grad, env, P, Pt, lam, Hx, Hy, kx, ky, arg
                     nC2 = contract(C_right["up"], env.T[(
                         new_coord_u, (0, -1))], ([0], [2]))
                     nC2 = contract(nC2, P2, ([0, 2], [0, 1]))
-                    print("nC2", nC2.abs().max())
-                    C_right["up"] = nC2
+                    print("nC2", nC2.detach().abs().max())
+                    C_right["up"] = nC2/nC2.detach().abs().max()
 
                     vec_coord_d = (args.size-i+1, args.size+1)
                     new_coord_d = state.vertexToSite(
@@ -470,8 +478,8 @@ def Create_Hami_Env(state, stateDL, B_grad, env, P, Pt, lam, Hx, Hy, kx, ky, arg
                     nC1 = contract(C_right["down"], env.T[(
                         new_coord_d, (0, 1))], ([1], [2]))
                     nC1 = contract(Pt1, nC1, ([0, 1], [0, 1]))
-                    print("nC1", nC1.abs().max())
-                    C_right["down"] = nC1
+                    print("nC1", nC1.detach().abs().max())
+                    C_right["down"] = nC1/nC1.detach().abs().max()
 
                     for j in range(2*args.size+2):
                         vec_coord = (args.size-i+1, -args.size+j)
@@ -502,8 +510,8 @@ def Create_Hami_Env(state, stateDL, B_grad, env, P, Pt, lam, Hx, Hy, kx, ky, arg
 
                             norm = tempT.detach()
 
-                            print("norm", norm.abs().max())
-                            T_right[(j)] = tempT
+                            print("norm", norm.detach().abs().max())
+                            T_right[(j)] = tempT/norm.detach().abs().max()
                         else:
                             nT = contract(Pt2, T_right[(j)], ([0], [0]))
                             dimsA = state.site(new_coord).size()
@@ -524,8 +532,8 @@ def Create_Hami_Env(state, stateDL, B_grad, env, P, Pt, lam, Hx, Hy, kx, ky, arg
 
                             norm = tempT.detach()
 
-                            print("norm", norm.abs().max())
-                            T_right[(j)] = tempT
+                            print("norm", norm.detach().abs().max())
+                            T_right[(j)] = tempT/norm.detach().abs().max()
 
     return C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right
 
@@ -537,11 +545,11 @@ def Create_Hami(state, env, C_up, T_up, C_left, T_left, C_down, T_down, C_right,
     for coord in state.sites.keys():
         with torch.no_grad():
             FL = contract(C_up["left"], C_down["left"], ([0], [0]))
-            print("Create_Hami:", FL.abs().max())
-            # FL = FL/FL.abs().max()
+            print("Create_Hami:", FL.detach().abs().max())
+            FL = FL/FL.detach().abs().max()
             FU = contract(C_left["up"], C_right["up"], ([1], [0]))
-            print("Create_Hami:", FU.abs().max())
-            # FU = FU/FU.abs().max()
+            print("Create_Hami:", FU.detach().abs().max())
+            FU = FU/FU.detach().abs().max()
 
         for i in range(args.size):
             temp = contract(FL, T_up[(i)], ([0], [0]))
@@ -549,24 +557,24 @@ def Create_Hami(state, env, C_up, T_up, C_left, T_left, C_down, T_down, C_right,
             FL = contract(temp, Hy, ([0, 1, 3, 4], [0, 2, 1, 3]))
 
             FL2 = FL.detach()
-            print("Create_Hami:", FL2.abs().max())
-            # FL = FL/FL2.abs().max()
+            print("Create_Hami:", FL2.detach().abs().max())
+            FL = FL/FL2.detach().abs().max()
 
             temp = contract(FU, T_left[(i)], ([0], [0]))
             temp = contract(temp, T_right[(i)], ([0, 3], [0, 3]))
             FU = contract(temp, Hx, ([0, 1, 3, 4], [0, 2, 1, 3]))
 
             FU2 = FU.detach()
-            print("Create_Hami:", FU2.abs().max())
-            # FU = FU/FU2.abs().max()
+            print("Create_Hami:", FU2.detach().abs().max())
+            FU = FU/FU2.detach().abs().max()
 
         with torch.no_grad():
             FR = contract(C_up["right"], C_down["right"], ([1], [0]))
-            print("Create_Hami:", FR.abs().max())
-            # FR = FR/FR.abs().max()
+            print("Create_Hami:", FR.detach().abs().max())
+            FR = FR/FR.detach().abs().max()
             FD = contract(C_left["down"], C_right["down"], ([1], [1]))
-            print("Create_Hami:", FD.abs().max())
-            # FD = FD/FD.abs().max()
+            print("Create_Hami:", FD.detach().abs().max())
+            FD = FD/FD.detach().abs().max()
 
         for i in range(args.size+1):
             temp = contract(FR, T_up[(2*args.size+1-i)], ([0], [4]))
@@ -574,16 +582,16 @@ def Create_Hami(state, env, C_up, T_up, C_left, T_left, C_down, T_down, C_right,
             FR = contract(temp, Hy, ([1, 2, 4, 5], [0, 2, 1, 3]))
 
             FR2 = FR.detach()
-            print("Create_Hami:", FR2.abs().max())
-            # FR = FR/FR2.abs().max()
+            print("Create_Hami:", FR2.detach().abs().max())
+            FR = FR/FR2.detach().abs().max()
 
             temp = contract(FD, T_left[(2*args.size+1-i)], ([0], [4]))
             temp = contract(temp, T_right[(2*args.size+1-i)], ([0, 4], [4, 3]))
             FD = contract(temp, Hx, ([1, 2, 4, 5], [0, 2, 1, 3]))
 
             FD2 = FD.detach()
-            print("Create_Hami:", FD2.abs().max())
-            # FD = FD/FD2.abs().max()
+            print("Create_Hami:", FD2.detach().abs().max())
+            FD = FD/FD2.detach().abs().max()
 
         dimsA = state.site(coord).size()
 
@@ -596,8 +604,8 @@ def Create_Hami(state, env, C_up, T_up, C_left, T_left, C_down, T_down, C_right,
             permute(contract(H1, FR, ([3, 5], [0, 1])), (4, 0, 1, 3, 2)))
 
         H12 = H1.detach()
-        print("Create_Hami:", H12.abs().max())
-        # H1 = H1/H12.abs().max()
+        print("Create_Hami:", H12.detach().abs().max())
+        H1 = H1/H12.detach().abs().max()
 
         H2 = contract(FU, T_left[(args.size)], ([0], [0]))
         H2 = contract(H2, view(T_right[(
@@ -607,8 +615,8 @@ def Create_Hami(state, env, C_up, T_up, C_left, T_left, C_down, T_down, C_right,
             permute(contract(H2, FD, ([3, 5], [0, 1])), (4, 0, 1, 2, 3)))
 
         H22 = H2.detach()
-        print("Create_Hami:", H22.abs().max())
-        # H2 = H2/H22.abs().max()
+        print("Create_Hami:", H22.detach().abs().max())
+        H2 = H2/H22.detach().abs().max()
 
         # else:
         #     H1 = contract(FL, T_up[(args.size)], ([0], [0]))
@@ -620,7 +628,7 @@ def Create_Hami(state, env, C_up, T_up, C_left, T_left, C_down, T_down, C_right,
 
         #     H12 = H1.detach()
 
-        #     H1 = H1/H12.abs().max()
+        #     H1 = H1/H12.detach().abs().max()
 
         #     H2 = contract(FU, T_left[(args.size)], ([0], [0]))
         #     H2 = contract(H2, view(T_right[(
@@ -630,7 +638,7 @@ def Create_Hami(state, env, C_up, T_up, C_left, T_left, C_down, T_down, C_right,
 
         #     H22 = H2.detach()
 
-        #     H2 = H2/H22.abs().max()
+        #     H2 = H2/H22.detach().abs().max()
 
         # Hami[coord] = H1/2. + H2/2.
         Hami[coord] = H1 + H2

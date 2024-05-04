@@ -23,14 +23,14 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
 
     # HyAndOnsiteFst = contiguous(contract(Honsite, Hy, ([1],[0])))
     # HyAndOnsiteLst = contiguous(contract(Hy, Honsite, ([3],[0])))
-    OI = torch.einsum('ij,ab->iajb', Honsite, Id)
-    IO = torch.einsum('ij,ab->iajb', Id, Honsite)
+    # OI = torch.einsum('ij,ab->iajb', Honsite, Id)
+    # IO = torch.einsum('ij,ab->iajb', Id, Honsite)
 
     HyAndOnsiteFst = Hy
     HyAndOnsiteLst = Hy
-    if isOnsiteWorking:
-        HyAndOnsiteFst = Hy + OI
-        HyAndOnsiteLst = Hy + IO
+    # if isOnsiteWorking:
+    #     HyAndOnsiteFst = Hy + OI
+    #     HyAndOnsiteLst = Hy + IO
 
     phys_dim = state.site((0, 0)).size()[0]
     for coord in stateDL.sites.keys():
@@ -78,6 +78,9 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                         (coord[0]+vec_coord[0], coord[1]+vec_coord[1]))
                     # if (j) not in T_up:
                     T_up[(j)] = env.T[(new_coord, direction)].clone()
+                    _, s, _ = torch.svd(
+                        env.T[(new_coord, direction)].reshape(env.chi, env.chi*args.bond_dim**2))
+                    print("direction:", direction, "original s:", s)
 
                 for i in range(args.size+1):
                     vec_coord_l = (-args.size, -args.size+i)
@@ -99,7 +102,7 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                         new_coord_l, (-1, 0))], ([0], [0]))
                     nC2 = contract(nC2, P2, ([0, 2], [0, 1]))
                     print(nC2.abs().max())
-                    C_up["left"] = nC2
+                    C_up["left"] = nC2/nC2.abs().max()
                     # env.C[(new_coord_l,(-1,-1))] = C_up["left"]
 
                     vec_coord_r = (args.size+1, -args.size+i)
@@ -121,7 +124,7 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                         new_coord_r, (1, 0))], ([1], [0]))
                     nC1 = contract(Pt1, nC1, ([0, 1], [0, 1]))
                     print(nC1.abs().max())
-                    C_up["right"] = nC1
+                    C_up["right"] = nC1/nC1.abs().max()
                     # env.C[(new_coord_r,(1,-1))] = C_up["right"]
 
                     for j in range(2*args.size+2):
@@ -189,7 +192,7 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                                 #        |---5  A  7--|
                                 #               6
                                 print(norm.abs().max())
-                                T_up[(j)] = tempT
+                                T_up[(j)] = tempT/norm.abs().max()
                             else:
                                 if i == 0 and firsttime:
                                     # Guess nT=
@@ -223,10 +226,27 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
 
                                     norm = tempT.detach()
                                     print(norm.abs().max())
-                                    T_up[(j)] = tempT
+                                    T_up[(j)] = tempT/norm.abs().max()
                                     # Guess now
                                     #    0---T--4
                                     #        3      phy 1,2
+                                    print("Hermitian test begin!")
+                                    _H = contiguous(einsum(
+                                        'aabcde,fcg,hei->fbhgdi', DL, Pt2, P1).reshape([env.chi**2*args.bond_dim**2]*2))
+                                    _H = _H.resolve_conj().detach().cpu().numpy()
+                                    # Check Hermitian
+                                    import numpy as np
+                                    if not np.allclose(_H, np.conj(np.transpose(_H)), atol=1e-3):
+                                        print("_H is not Hermitian")
+                                    else:
+                                        print("_H is Hermitian")
+
+                                    # newT = torch.einsum('abbcd', T_up[(j)])
+                                    # newT = newT/newT.abs().max()
+                                    # _, s, _ = torch.svd(
+                                    #     newT.reshape(env.chi, env.chi*args.bond_dim**2))
+                                    # print("direction:", direction,
+                                    #       "modified s:", s)
 
                                 else:
                                     # Guess now
@@ -275,6 +295,7 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                                         #  0 chi---Pt2    |     P1---chi 3
                                         #           |-----DL----|             phy_in_DL 4,1
                                         #                 2
+                                        print("here")
                                         tempT = contiguous(
                                             permute(nT, (0, 4, 1, 2, 3)))
                                         # Guess now
@@ -300,7 +321,14 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
 
                                     norm = tempT.detach()
                                     print(norm.abs().max())
-                                    T_up[(j)] = tempT
+                                    T_up[(j)] = tempT/norm.abs().max()
+
+                                    newT = torch.einsum('abbcd', T_up[(j)])
+                                    newT = newT/newT.abs().max()
+                                    _, s, _ = torch.svd(
+                                        newT.reshape(env.chi, env.chi*args.bond_dim**2))
+                                    print("direction:", direction,
+                                          "modified s:", s)
 
                         else:
                             if i == args.size and j == args.size and lasttime:
@@ -351,7 +379,7 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
 
                                 norm = tempT.detach()
                                 print(norm.abs().max())
-                                T_up[(j)] = tempT
+                                T_up[(j)] = tempT/norm.abs().max()
                             else:
                                 if i == 0 and firsttime:
                                     # Guess now
@@ -387,7 +415,7 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
 
                                     norm = tempT.detach()
                                     print(norm.abs().max())
-                                    T_up[(j)] = tempT
+                                    T_up[(j)] = tempT/norm.abs().max()
                                     # Guess now
                                     #    0--T--4          phy 1,2
                                     #       3
@@ -414,7 +442,7 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
 
                                     norm = tempT.detach()
                                     print(norm.abs().max())
-                                    T_up[(j)] = tempT
+                                    T_up[(j)] = tempT/norm.abs().max()
 
             elif direction == (0, 1):
                 local_device = cfg.global_args.device
@@ -459,6 +487,9 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                         (coord[0]+vec_coord[0], coord[1]+vec_coord[1]))
                     # if (j) not in T_down:
                     T_down[(j)] = env.T[(new_coord, direction)].clone()
+                    _, s, _ = torch.svd(
+                        env.T[(new_coord, direction)].permute(1, 0, 2).reshape(env.chi, env.chi*args.bond_dim**2))
+                    print("direction:", direction, "original s:", s)
 
                 for i in range(args.size+1):
                     vec_coord_l = (-args.size, args.size-i+1)
@@ -480,7 +511,7 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                         new_coord_l, (-1, 0))], ([0], [1]))
                     nC1 = contract(nC1, Pt1, ([0, 2], [0, 1]))
                     print(nC1.abs().max())
-                    C_down["left"] = nC1
+                    C_down["left"] = nC1/nC1.abs().max()
                     # env.C[(new_coord_l,(-1,1))] = C_down["left"]
 
                     vec_coord_r = (args.size+1, args.size-i+1)
@@ -502,7 +533,7 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                         new_coord_r, (1, 0))], ([0], [2]))
                     nC2 = contract(nC2, P2, ([0, 2], [0, 1]))
                     print(nC2.abs().max())
-                    C_down["right"] = nC2
+                    C_down["right"] = nC2/nC2.abs().max()
                     # env.C[(new_coord_r,(1,1))] = C_down["right"]
 
                     for j in range(2*args.size+2):
@@ -536,7 +567,15 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
 
                                 norm = tempT.detach()
                                 print(norm.abs().max())
-                                T_down[(j)] = tempT
+                                T_down[(j)] = tempT/norm.abs().max()
+
+                                newT = torch.einsum(
+                                    'abbcd', T_down[(j)])
+                                newT = newT/newT.abs().max()
+                                _, s, _ = torch.svd(
+                                    newT.reshape(env.chi, env.chi*args.bond_dim**2))
+                                print("direction:", direction,
+                                      "modified s:", s)
                             else:
                                 nT = contract(P1, T_down[(j)], ([0], [0]))
                                 dimsA = state.site(new_coord).size()
@@ -559,8 +598,7 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
 
                                 norm = tempT.detach()
                                 print(norm.abs().max())
-                                T_down[(j)] = tempT
-
+                                T_down[(j)] = tempT/norm.abs().max()
                         else:
                             if i == 0 and firsttime:
                                 nT = contract(P1, T_down[(j)], ([0], [1]))
@@ -576,7 +614,7 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
 
                                 norm = tempT.detach()
                                 print(norm.abs().max())
-                                T_down[(j)] = tempT
+                                T_down[(j)] = tempT/norm.abs().max()
                             else:
                                 nT = contract(P1, T_down[(j)], ([0], [0]))
                                 dimsA = state.site(new_coord).size()
@@ -599,7 +637,7 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
 
                                 norm = tempT.detach()
                                 print(norm.abs().max())
-                                T_down[(j)] = tempT
+                                T_down[(j)] = tempT/norm.abs().max()
             elif direction == (-1, 0):
                 local_device = cfg.global_args.device
                 if (MultiGPU):
@@ -643,6 +681,9 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                         (coord[0]+vec_coord[0], coord[1]+vec_coord[1]))
                     # if (j) not in T_left:
                     T_left[(j)] = env.T[(new_coord, direction)].clone()
+                    _, s, _ = torch.svd(
+                        env.T[(new_coord, direction)].permute(0, 2, 1).reshape(env.chi, env.chi*args.bond_dim**2))
+                    print("direction:", direction, "original s:", s)
 
                 for i in range(args.size+1):
                     vec_coord_u = (-args.size+i, -args.size)
@@ -664,7 +705,7 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                         new_coord_u, (0, -1))], ([1], [0]))
                     nC1 = contract(Pt1, nC1, ([0, 1], [0, 1]))
                     print(nC1.abs().max())
-                    C_left["up"] = nC1
+                    C_left["up"] = nC1/nC1.abs().max()
                     # env.C[(new_coord_u,(-1,-1))] = C_left["up"]
 
                     vec_coord_d = (-args.size+i, args.size+1)
@@ -686,7 +727,7 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                         new_coord_d, (0, 1))], ([1], [1]))
                     nC2 = contract(P2, nC2, ([0, 1], [0, 1]))
                     print(nC2.abs().max())
-                    C_left["down"] = nC2
+                    C_left["down"] = nC2/nC2.abs().max()
                     # env.C[(new_coord_d,(-1,1))] = C_left["down"]
 
                     for j in range(2*args.size+2):
@@ -728,7 +769,7 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
 
                                 norm = tempT.detach()
                                 print(norm.abs().max())
-                                T_left[(j)] = tempT
+                                T_left[(j)] = tempT/norm.abs().max()
                             else:
                                 if i == 0 and firsttime:
                                     nT = contract(P1, T_left[(j)], ([0], [0]))
@@ -744,7 +785,15 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
 
                                     norm = tempT.detach()
                                     print(norm.abs().max())
-                                    T_left[(j)] = tempT
+                                    T_left[(j)] = tempT/norm.abs().max()
+
+                                    newT = torch.einsum(
+                                        'abbcd', T_left[(j)])
+                                    newT = newT/newT.abs().max()
+                                    _, s, _ = torch.svd(
+                                        newT.reshape(env.chi, env.chi*args.bond_dim**2))
+                                    print("direction:", direction,
+                                          "modified s:", s)
                                 else:
                                     nT = contract(P1, T_left[(j)], ([0], [0]))
                                     dimsA = state.site(new_coord).size()
@@ -767,8 +816,7 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
 
                                     norm = tempT.detach()
                                     print(norm.abs().max())
-                                    T_left[(j)] = tempT
-
+                                    T_left[(j)] = tempT/norm.abs().max()
                         else:
                             if i == args.size and j == args.size and lasttime:
                                 nT = contract(P1, T_left[(j)], ([0], [0]))
@@ -793,7 +841,7 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
 
                                 norm = tempT.detach()
                                 print(norm.abs().max())
-                                T_left[(j)] = tempT
+                                T_left[(j)] = tempT/norm.abs().max()
                             else:
                                 if i == 0 and firsttime:
                                     nT = contract(P1, T_left[(j)], ([0], [0]))
@@ -809,7 +857,7 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
 
                                     norm = tempT.detach()
                                     print(norm.abs().max())
-                                    T_left[(j)] = tempT
+                                    T_left[(j)] = tempT/norm.abs().max()
                                 else:
                                     nT = contract(P1, T_left[(j)], ([0], [0]))
                                     dimsA = state.site(new_coord).size()
@@ -832,7 +880,7 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
 
                                     norm = tempT.detach()
                                     print(norm.abs().max())
-                                    T_left[(j)] = tempT
+                                    T_left[(j)] = tempT/norm.abs().max()
 
             elif direction == (1, 0):
                 if (MultiGPU):
@@ -876,6 +924,9 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                         (coord[0]+vec_coord[0], coord[1]+vec_coord[1]))
                     # if (j) not in T_right:
                     T_right[(j)] = env.T[(new_coord, direction)].clone()
+                    _, s, _ = torch.svd(
+                        env.T[(new_coord, direction)].reshape(env.chi, env.chi*args.bond_dim**2))
+                    print("direction:", direction, "original s:", s)
 
                 for i in range(args.size+1):
                     vec_coord_u = (args.size-i+1, -args.size)
@@ -897,7 +948,7 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                         new_coord_u, (0, -1))], ([0], [2]))
                     nC2 = contract(nC2, P2, ([0, 2], [0, 1]))
                     print(nC2.abs().max())
-                    C_right["up"] = nC2
+                    C_right["up"] = nC2/nC2.abs().max()
                     # env.C[(new_coord_u,(1,-1))] = C_right["up"]
 
                     vec_coord_d = (args.size-i+1, args.size+1)
@@ -919,7 +970,7 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                         new_coord_d, (0, 1))], ([1], [2]))
                     nC1 = contract(Pt1, nC1, ([0, 1], [0, 1]))
                     print(nC1.abs().max())
-                    C_right["down"] = nC1
+                    C_right["down"] = nC1/nC1.abs().max()
                     # env.C[(new_coord_d,(1,1))] = C_right["down"]
                     for j in range(2*args.size+2):
                         vec_coord = (args.size-i+1, -args.size+j)
@@ -986,7 +1037,15 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
 
                                 norm = tempT.detach()
                                 print(norm.abs().max())
-                                T_right[(j)] = tempT
+                                T_right[(j)] = tempT/norm.abs().max()
+
+                                newT = torch.einsum(
+                                    'abbcd', T_right[(j)])
+                                newT = newT/newT.abs().max()
+                                _, s, _ = torch.svd(
+                                    newT.reshape(env.chi, env.chi*args.bond_dim**2))
+                                print("direction:", direction,
+                                      "modified s:", s)
                             else:
                                 nT = contract(Pt2, T_right[(j)], ([0], [0]))
                                 dimsA = state.site(new_coord).size()
@@ -1009,8 +1068,7 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
 
                                 norm = tempT.detach()
                                 print(norm.abs().max())
-                                T_right[(j)] = tempT
-
+                                T_right[(j)] = tempT/norm.abs().max()
                         else:
                             if i == 0 and firsttime:
                                 nT = contract(Pt2, T_right[(j)], ([0], [0]))
@@ -1025,7 +1083,7 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
 
                                 norm = tempT.detach()
                                 print(norm.abs().max())
-                                T_right[(j)] = tempT
+                                T_right[(j)] = tempT/norm.abs().max()
                             else:
                                 nT = contract(Pt2, T_right[(j)], ([0], [0]))
                                 dimsA = state.site(new_coord).size()
@@ -1048,7 +1106,7 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
 
                                 norm = tempT.detach()
                                 print(norm.abs().max())
-                                T_right[(j)] = tempT
+                                T_right[(j)] = tempT/norm.abs().max()
 
     lam = lam.to(cfg.global_args.device)
     B_grad = B_grad.to(cfg.global_args.device)
@@ -1094,8 +1152,8 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
 def Create_Localsite_Hami(state, env, C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right, Hx, Hy, Honsite, Id, args, isOnsiteWorking):
     phys_dim = state.site((0, 0)).size()[0]
     Hami = dict()
-    OI = torch.einsum('ij,ab->iajb', Honsite, Id)
-    IO = torch.einsum('ij,ab->iajb', Id, Honsite)
+    # OI = torch.einsum('ij,ab->iajb', Honsite, Id)
+    # IO = torch.einsum('ij,ab->iajb', Id, Honsite)
 
     HyAndOnsiteFst = Hy
     HyAndOnsiteLst = Hy
@@ -1103,13 +1161,14 @@ def Create_Localsite_Hami(state, env, C_up, T_up, C_left, T_left, C_down, T_down
     HxAndOnsiteFst = Hx
     HxAndOnsiteLst = Hx
     HxAndOnsiteBoth = Hx
-    if isOnsiteWorking:
-        HyAndOnsiteFst = Hy + OI
-        HyAndOnsiteLst = Hy + IO
-        HyAndOnsiteBoth = Hy + OI + IO
-        HxAndOnsiteFst = Hx + OI
-        HxAndOnsiteLst = Hx + IO
-        HxAndOnsiteBoth = Hx + OI + IO
+    # if isOnsiteWorking:
+    #     HyAndOnsiteFst = Hy + OI
+    #     HyAndOnsiteLst = Hy + IO
+    #     HyAndOnsiteBoth = Hy + OI + IO
+    #     HxAndOnsiteFst = Hx + OI
+    #     HxAndOnsiteLst = Hx + IO
+    #     HxAndOnsiteBoth = Hx + OI + IO
+
     #    0--T--4
     #       3         phy 1,2
 
@@ -1130,10 +1189,10 @@ def Create_Localsite_Hami(state, env, C_up, T_up, C_left, T_left, C_down, T_down
         with torch.no_grad():
             FL = contract(C_up["left"], C_down["left"], ([0], [0]))
             print("CreateHami: ", FL.abs().max())
-            # FL = FL/FL.abs().max()
+            FL = FL/FL.abs().max()
             FU = contract(C_left["up"], C_right["up"], ([1], [0]))
             print("CreateHami: ", FU.abs().max())
-            # FU = FU/FU.abs().max()
+            FU = FU/FU.abs().max()
 
         for i in range(args.size):
             if i % 2 == 0:
@@ -1155,7 +1214,7 @@ def Create_Localsite_Hami(state, env, C_up, T_up, C_left, T_left, C_down, T_down
 
                 FL2 = FL.detach()
                 print("CreateHami: ", FL2.abs().max())
-                # FL=FL/FL2.abs().max()
+                FL = FL/FL2.abs().max()
 
                 temp = contract(FU, T_left[(i)], ([0], [0]))
                 temp = contract(temp, T_right[(i)], ([0, 3], [0, 3]))
@@ -1163,7 +1222,7 @@ def Create_Localsite_Hami(state, env, C_up, T_up, C_left, T_left, C_down, T_down
 
                 FU2 = FU.detach()
                 print("CreateHami: ", FU2.abs().max())
-                # FU=FU/FU2.abs().max()
+                FU = FU/FU2.abs().max()
 
             else:
                 temp = contract(FL, T_up[(i)], ([0], [0]))
@@ -1173,7 +1232,7 @@ def Create_Localsite_Hami(state, env, C_up, T_up, C_left, T_left, C_down, T_down
 
                 FL2 = FL.detach()
                 print("CreateHami: ", FL2.abs().max())
-                # FL=FL/FL2.abs().max()
+                FL = FL/FL2.abs().max()
 
                 temp = contract(FU, T_left[(i)], ([0], [0]))
                 temp = contract(temp, T_right[(i)], ([0, 3], [0, 3]))
@@ -1182,15 +1241,15 @@ def Create_Localsite_Hami(state, env, C_up, T_up, C_left, T_left, C_down, T_down
 
                 FU2 = FU.detach()
                 print("CreateHami: ", FU2.abs().max())
-                # FU=FU/FU2.abs().max()
+                FU = FU/FU2.abs().max()
 
         with torch.no_grad():
             FR = contract(C_up["right"], C_down["right"], ([1], [0]))
             print("CreateHami: ", FR.abs().max())
-            # FR=FR/FR.abs().max()
+            FR = FR/FR.abs().max()
             FD = contract(C_left["down"], C_right["down"], ([1], [1]))
             print("CreateHami: ", FD.abs().max())
-            # FD=FD/FD.abs().max()
+            FD = FD/FD.abs().max()
 
         for i in range(args.size+1):
             if i % 2 == 0:
@@ -1202,7 +1261,7 @@ def Create_Localsite_Hami(state, env, C_up, T_up, C_left, T_left, C_down, T_down
 
                 FR2 = FR.detach()
                 print("CreateHami: ", FR2.abs().max())
-                # FR=FR/FR2.abs().max()
+                FR = FR/FR2.abs().max()
 
                 temp = contract(FD, T_left[(2*args.size+1-i)], ([0], [4]))
                 temp = contract(
@@ -1212,7 +1271,7 @@ def Create_Localsite_Hami(state, env, C_up, T_up, C_left, T_left, C_down, T_down
 
                 FD2 = FD.detach()
                 print("CreateHami: ", FD2.abs().max())
-                # FD=FD/FD2.abs().max()
+                FD = FD/FD2.abs().max()
             else:
                 temp = contract(FR, T_up[(2*args.size+1-i)], ([0], [4]))
                 temp = contract(
@@ -1222,7 +1281,7 @@ def Create_Localsite_Hami(state, env, C_up, T_up, C_left, T_left, C_down, T_down
 
                 FR2 = FR.detach()
                 print("CreateHami: ", FR2.abs().max())
-                # FR=FR/FR2.abs().max()
+                FR = FR/FR2.abs().max()
 
                 temp = contract(FD, T_left[(2*args.size+1-i)], ([0], [4]))
                 temp = contract(
@@ -1231,7 +1290,7 @@ def Create_Localsite_Hami(state, env, C_up, T_up, C_left, T_left, C_down, T_down
 
                 FD2 = FD.detach()
                 print("CreateHami: ", FD2.abs().max())
-                # FD=FD/FD2.abs().max()
+                FD = FD/FD2.abs().max()
 
         dimsA = state.site(coord).size()
 
@@ -1245,7 +1304,7 @@ def Create_Localsite_Hami(state, env, C_up, T_up, C_left, T_left, C_down, T_down
 
             H12 = H1.detach()
             print("CreateHami: ", H12.abs().max())
-            # H1=H1/H12.abs().max()
+            H1 = H1/H12.abs().max()
 
             H2 = contract(FU, T_left[(args.size)], ([0], [0]))
             H2 = contract(H2, view(T_right[(
@@ -1256,7 +1315,7 @@ def Create_Localsite_Hami(state, env, C_up, T_up, C_left, T_left, C_down, T_down
 
             H22 = H2.detach()
             print("CreateHami: ", H22.abs().max())
-            # H2=H2/H22.abs().max()
+            H2 = H2/H22.abs().max()
 
         else:
             H1 = contract(FL, T_up[(args.size)], ([0], [0]))
@@ -1268,7 +1327,7 @@ def Create_Localsite_Hami(state, env, C_up, T_up, C_left, T_left, C_down, T_down
 
             H12 = H1.detach()
             print("CreateHami: ", H12.abs().max())
-            # H1=H1/H12.abs().max()
+            H1 = H1/H12.abs().max()
 
             H2 = contract(FU, T_left[(args.size)], ([0], [0]))
             H2 = contract(H2, view(T_right[(
@@ -1278,7 +1337,7 @@ def Create_Localsite_Hami(state, env, C_up, T_up, C_left, T_left, C_down, T_down
 
             H22 = H2.detach()
             print("CreateHami: ", H22.abs().max())
-            # H2=H2/H22.abs().max()
+            H2 = H2/H22.abs().max()
 
         # Hami[coord] = H1/2. + H2/2.
         Hami[coord] = H1 + H2

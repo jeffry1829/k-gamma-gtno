@@ -19,9 +19,9 @@ from ctm.generic.rdm import *
 from ctm.generic import ctmrg
 from ctm.generic.ctm_projectors import *
 from Stat_ori import *
-from Norm_ori import *
+from Norm_ori_withP import *
 # from Hami_ori import *
-from Localsite_Hami_ori import *
+from Localsite_Hami_ori_withP import *
 # from Test import *
 # from models import j1j2
 # from models import ising
@@ -176,7 +176,7 @@ def ctmrg_conv_energy(state2, env, history, ctm_args=cfg.ctm_args):
         for i in range(4*env.chi):
             history.append(new[i])
     history.append(diff)
-    # print("diff=", diff)
+    print("diff=", diff)
 
     if (len(history[4*env.chi:]) > 1 and diff < ctm_args.ctm_conv_tol)\
             or len(history[4*env.chi:]) >= ctm_args.ctm_max_iter:
@@ -190,10 +190,10 @@ def ctmrg_conv_energy(state2, env, history, ctm_args=cfg.ctm_args):
 
 env = ENV(args.chi, state)
 init_env(state, env)
-if args.removeCTMRGenv and (os.path.exists(ENVfilenameC) or os.path.exists(ENVfilenameT)):
-    print("Removing CTMRG ENV")
-    os.remove(ENVfilenameC)
-    os.remove(ENVfilenameT)
+# if args.removeCTMRGenv and (os.path.exists(ENVfilenameC) or os.path.exists(ENVfilenameT)):
+#     print("Removing CTMRG ENV")
+#     os.remove(ENVfilenameC)
+#     os.remove(ENVfilenameT)
 if args.reuseCTMRGenv and (os.path.exists(ENVfilenameC) and os.path.exists(ENVfilenameT)):
     print("Loading CTMRG ENV: "+ENVfilenameC+" "+ENVfilenameT)
     env.C = torch.load(ENVfilenameC)
@@ -225,18 +225,18 @@ ZZ = torch.einsum('ij,ab->iajb', Sz, Sz).reshape(2, 2, 2, 2)
 # rdm2x1= rdm2x1((0,0),state,env)
 # energy_per_site= torch.einsum('ijkl,ijkl',rdm2x1,-(ZZ + args.hx*(IX+XI)/4))
 energy_per_site = 0
-if args.statefile == "KitaevLG.json":
-    print("KitaevLG shortcut energy_per_site")
-    energy_per_site = torch.tensor(-0.16346756553739336,
-                                   dtype=cfg.global_args.torch_dtype, device=cfg.global_args.device)
-elif args.statefile == "KitaevLGDG.json":
-    print("KitaevLGDG shortcut energy_per_site")
-    energy_per_site = torch.tensor(-0.19628756414493875,
-                                   dtype=cfg.global_args.torch_dtype, device=cfg.global_args.device)
-else:
-    energy_per_site = energy_f(
-        state, env)
-print("E_per_bond=", energy_per_site.item().real)
+# if args.statefile == "KitaevLG.json":
+#     print("KitaevLG shortcut energy_per_site")
+#     energy_per_site = torch.tensor(-0.16346756553739336,
+#                                    dtype=cfg.global_args.torch_dtype, device=cfg.global_args.device)
+# elif args.statefile == "KitaevLGDG.json":
+#     print("KitaevLGDG shortcut energy_per_site")
+#     energy_per_site = torch.tensor(-0.19628756414493875,
+#                                    dtype=cfg.global_args.torch_dtype, device=cfg.global_args.device)
+# else:
+energy_per_site = energy_f(
+    state, env)
+print("E_per_bond=", energy_per_site.item())
 
 NormMat = np.load(args.datadir+"kx{}ky{}NormMat.npy".format(args.kx, args.ky))
 HamiMat = np.load(args.datadir+"kx{}ky{}HamiMat.npy".format(args.kx, args.ky))
@@ -245,6 +245,12 @@ NormMat = NormMat.reshape(
 HamiMat = HamiMat.reshape(
     np.prod(HamiMat.shape[:5]), np.prod(HamiMat.shape[5:]))
 
+# I dunno whether this is necessary
+NormMat = (NormMat + np.conj(np.transpose(NormMat)))/2.
+HamiMat = (HamiMat + np.conj(np.transpose(HamiMat)))/2.
+print("symmetrized")
+print("NormMat diag sum=", np.trace(NormMat))
+
 state_t = view(state.site((0, 0)), (NormMat.shape[0]))
 temp = contract(torch.from_numpy(NormMat).to(
     device=cfg.global_args.device), conj(state_t), ([1], [0]))
@@ -252,13 +258,16 @@ norm_factor____ = contract(temp, state_t,
                            ([0], [0])).item()
 print("norm_factor____=", norm_factor____)
 print("<Norm>=", contract(temp, state_t,
-      ([0], [0])).item().real/(2*args.size+2)**2)
+      ([0], [0])).item())
+NormMat = NormMat/norm_factor____
+HamiMat = HamiMat/norm_factor____
+print("norm_factor____ divided")
 
 state_t = view(state.site((0, 0)), (HamiMat.shape[0]))
 temp = contract(torch.from_numpy(HamiMat).to(
     device=cfg.global_args.device), conj(state_t), ([1], [0]))
-print("<Hami>=", 2*contract(temp, state_t, ([0], [0])).item(
-).real/(2*args.size+2)**3/(2*args.size+1))
+print("<Hami>=", contract(temp, state_t, ([0], [0])).item(
+))
 
 # NormMat = NormMat/((2*args.size+2))**2
 # HamiMat = 2*HamiMat/((2*args.size+2))**3/((2*args.size+1))
@@ -275,10 +284,6 @@ print("<Hami>=", 2*contract(temp, state_t, ([0], [0])).item(
 np.set_printoptions(threshold=np.inf)
 # print("NormMat", NormMat)
 # print("HamiMat", HamiMat)
-
-# I dunno whether this is necessary
-NormMat = (NormMat + np.conj(np.transpose(NormMat)))/2.
-HamiMat = (HamiMat + np.conj(np.transpose(HamiMat)))/2.
 
 # This is for Testing Only
 # e, v = np.linalg.eig(NormMat)
@@ -418,7 +423,8 @@ OpZ = IZ+ZI
 OpXX = XX
 OpZZ = ZZ
 A_Ori = state.site((0, 0)).flatten().detach().cpu().numpy()
-cA_Ori = conj(state.site((0, 0))).flatten().detach().cpu().numpy()
+cA_Ori = conj(state.site((0, 0))).resolve_conj(
+).flatten().detach().cpu().numpy()
 SxA = torch.einsum('ij,jabcd->iabcd', OpX, conj(state.site((0, 0)))
                    ).reshape(state.site((0, 0)).shape).flatten().detach().cpu().numpy()
 SyA = torch.einsum('ij,jabcd->iabcd', OpY, conj(state.site((0, 0)))
@@ -543,7 +549,7 @@ print("cA_Ori Norm: ", np.linalg.norm(cA_Ori))
 ans = ((A_Ori))@HamiMat_Ori@cA_Ori
 # print("GS Energy: ", ans/4/((2*args.size+2))/((2*args.size+1)))
 # below vv       sigma_x = 2*Sz and 4*3*2 bonds, 4*4 normMats
-print("GS Energy: ", ans/4/(2*args.size+2)**3/(2*args.size+1)/2)
+print("GS Energy: ", ans/4/(2*args.size+2)/(2*args.size+1)/2)
 rdm2x2 = rdm.rdm2x2((0, 0), state, env)
 # Anorm = torch.einsum('abcdabcd', rdm2x2)
 # print("ANorm: ", Anorm.item())
@@ -631,6 +637,17 @@ GS_trial += torch.einsum('abcdafch,bdfh', rdm2x2,
                          args.Jy*YIIY_permute + 0*args.Jx*(IIXX_permute+XXII_permute) /
                          4 - args.h*(HHII_permute+IIHH_permute)/4)
 print("GS_trial3: ", GS_trial.item()/16)
+GS_trial = torch.einsum('abcdefcd,abef', rdm2x2, args.Jz*IZZI + args.Jx*(IIXX+XXII) /
+                        4 - args.h*(HHII+IIHH)/4)
+GS_trial += torch.einsum('abcdebgd,aceg', rdm2x2,
+                         args.Jy*YIIY + args.Jx*(IIXX+XXII) /
+                         4 - args.h*(HHII+IIHH)/4)
+GS_trial += torch.einsum('abcdabgh,cdgh', rdm2x2, args.Jz*IZZI + args.Jx*(IIXX+XXII) /
+                         4 - args.h*(HHII+IIHH)/4)
+GS_trial += torch.einsum('abcdafch,bdfh', rdm2x2,
+                         args.Jy*YIIY + args.Jx*(IIXX+XXII) /
+                         4 - args.h*(HHII+IIHH)/4)
+print("GS_trial4: ", GS_trial.item()/16)
 # SSF
 if (args.SSF == True):
     with torch.no_grad():

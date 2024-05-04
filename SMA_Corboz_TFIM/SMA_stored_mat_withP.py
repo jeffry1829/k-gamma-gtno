@@ -77,6 +77,10 @@ def _cast_to_real(t):
 
 
 state = read_ipeps(args.datadir+args.statefile)
+# ##########################################################################################
+# state.sites[(0,0)] = torch.from_numpy(np.load(args.datadir+"test.npy"))
+# ##########################################################################################
+
 for key, site in state.sites.items():
     state.sites[key] = site.type(
         cfg.global_args.torch_dtype).to(cfg.global_args.device)
@@ -163,13 +167,16 @@ Id = torch.eye(2, dtype=cfg.global_args.torch_dtype,
                device=cfg.global_args.device)
 Sz = 2*s2.SZ()
 Sx = s2.SP()+s2.SM()
+Sy = -(s2.SP()-s2.SM())*1j
 IX = torch.einsum('ij,ab->iajb', Id, Sx).reshape(2, 2, 2, 2)
 XI = torch.einsum('ij,ab->iajb', Sx, Id).reshape(2, 2, 2, 2)
 ZZ = torch.einsum('ij,ab->iajb', Sz, Sz).reshape(2, 2, 2, 2)
+YY = torch.einsum('ij,ab->iajb', Sy, Sy).reshape(2, 2, 2, 2)
 rdm2x1 = rdm2x1((0, 0), state, env)
-energy_per_site = torch.einsum('ijkl,ijkl', rdm2x1, -(ZZ + args.hx*(IX+XI)/4))
+energy_per_site = torch.einsum(
+    'ijkl,ijkl', rdm2x1, -(ZZ + YY + args.hx*(IX+XI)/4))
 print("E_per_bond=", 2*energy_per_site.item().real)
-print("E_per_bond2=", energy_per_site.item()/4/1)
+print("E_per_bond2=", energy_per_site.item())
 
 NormMat = np.load(args.datadir+"kx{}ky{}NormMat.npy".format(args.kx, args.ky))
 HamiMat = np.load(args.datadir+"kx{}ky{}HamiMat.npy".format(args.kx, args.ky))
@@ -284,7 +291,8 @@ OpX = Sx
 OpY = Sy
 OpZ = Sz
 A_Ori = state.site((0, 0)).flatten().detach().cpu().numpy()
-cA_Ori = conj(state.site((0, 0))).flatten().detach().cpu().numpy()
+cA_Ori = conj(state.site((0, 0))).resolve_conj(
+).flatten().detach().cpu().numpy()
 SxA = torch.einsum('ij,jabcd->iabcd', OpX, state.site((0, 0))
                    ).reshape(state.site((0, 0)).shape).flatten().detach().cpu().numpy()
 SyA = torch.einsum('ij,jabcd->iabcd', OpY, state.site((0, 0))
@@ -346,7 +354,7 @@ print("cA_Ori Norm: ", np.linalg.norm(cA_Ori))
 ans = ((A_Ori))@HamiMat_Ori@cA_Ori
 # print("GS Energy: ", ans/4/((2*args.size+2))/((2*args.size+1)))
 # below vv       sigma_x = 2*Sz and 4*3*2 bonds
-print("GS Energy: ", ans/4/4/3/2)
+print("GS Energy: ", ans/4/3/2/4/4)
 
 # grid_z2 = griddata(points, values, (grid_x, grid_y), method='cubic')
 

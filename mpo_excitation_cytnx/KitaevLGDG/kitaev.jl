@@ -12,9 +12,9 @@ end
 ##
 ######### Initial states
 # βx, βz = 0.4, 1.3
-Jx = -1.0
-Jy = -1.0
-Jz = -1.0
+Jx = 1.0
+Jy = 1.0
+Jz = 1.0
 h = 0.0
 Dmps = 8
 # print("Kz = ", Kz, " icnt = ", icnt, "\n")
@@ -57,6 +57,13 @@ AL = rand(Dmps, d, Dmps);
 
 λ, AL, C, AR, FL, FR = vumpsfixedpts(AL, W; tol=1e-6);
 W = W / λ;
+
+@tensor AC[a, s, b] := AL[a, s, b'] * C[b', b]
+
+@pyimport numpy as np
+AC_np = np.array(AC)
+np.save(folder_out * "$(filename)_AC.npy", AC_np)
+
 ##
 ########## Excitation
 num_ω = 15

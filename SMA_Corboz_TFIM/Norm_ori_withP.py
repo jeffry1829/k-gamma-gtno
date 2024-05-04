@@ -108,7 +108,7 @@ def Create_Norm_Env(state, stateDL, B_grad, env, P, Pt, lam, kx, ky, args):
                         new_coord_l, (-1, 0))], ([0], [0]))
                     nC2 = contract(nC2, P2, ([0, 2], [0, 1]))
                     print(nC2.abs().max())
-                    C_up["left"] = nC2
+                    C_up["left"] = nC2/nC2.abs().max()
                     # env.C[(new_coord_l,(-1,-1))] = C_up["left"]
 
                     vec_coord_r = (args.size+1, -args.size+i)
@@ -130,7 +130,7 @@ def Create_Norm_Env(state, stateDL, B_grad, env, P, Pt, lam, kx, ky, args):
                         new_coord_r, (1, 0))], ([1], [0]))
                     nC1 = contract(Pt1, nC1, ([0, 1], [0, 1]))
                     print(nC1.abs().max())
-                    C_up["right"] = nC1
+                    C_up["right"] = nC1/nC1.abs().max()
                     # env.C[(new_coord_r,(1,-1))] = C_up["right"]
 
                     for j in range(2*args.size+2):
@@ -164,7 +164,7 @@ def Create_Norm_Env(state, stateDL, B_grad, env, P, Pt, lam, kx, ky, args):
 
                             tempT2 = tempT.detach()
                             print(tempT2.abs().max())
-                            T_up[(j)] = tempT
+                            T_up[(j)] = tempT/tempT2.abs().max()
                             # env.T[(new_coord,direction)] = T_up[(j)]
                         else:
                             nT = contract(Pt2, T_up[(j)], ([0], [0]))
@@ -179,7 +179,7 @@ def Create_Norm_Env(state, stateDL, B_grad, env, P, Pt, lam, kx, ky, args):
 
                             tempT2 = tempT.detach()
                             print(tempT2.abs().max())
-                            T_up[(j)] = tempT
+                            T_up[(j)] = tempT/tempT2.abs().max()
                             # env.T[(new_coord,direction)] = T_up[(j)]
 
             elif direction == (0, 1):
@@ -218,7 +218,7 @@ def Create_Norm_Env(state, stateDL, B_grad, env, P, Pt, lam, kx, ky, args):
                         new_coord_l, (-1, 0))], ([0], [1]))
                     nC1 = contract(nC1, Pt1, ([0, 2], [0, 1]))
                     print(nC1.abs().max())
-                    C_down["left"] = nC1
+                    C_down["left"] = nC1/nC1.abs().max()
                     # env.C[(new_coord_l,(-1,1))] = C_down["left"]
 
                     vec_coord_r = (args.size+1, args.size-i+1)
@@ -240,7 +240,7 @@ def Create_Norm_Env(state, stateDL, B_grad, env, P, Pt, lam, kx, ky, args):
                         new_coord_r, (1, 0))], ([0], [2]))
                     nC2 = contract(nC2, P2, ([0, 2], [0, 1]))
                     print(nC2.abs().max())
-                    C_down["right"] = nC2
+                    C_down["right"] = nC2/nC2.abs().max()
                     # env.C[(new_coord_r,(1,1))] = C_down["right"]
 
                     for j in range(2*args.size+2):
@@ -271,7 +271,7 @@ def Create_Norm_Env(state, stateDL, B_grad, env, P, Pt, lam, kx, ky, args):
 
                         tempT2 = tempT.detach()
                         print(tempT2.abs().max())
-                        T_down[(j)] = tempT
+                        T_down[(j)] = tempT/tempT2.abs().max()
                         # env.T[(new_coord,direction)] = T_down[(j)]
 
             elif direction == (-1, 0):
@@ -310,7 +310,7 @@ def Create_Norm_Env(state, stateDL, B_grad, env, P, Pt, lam, kx, ky, args):
                         new_coord_u, (0, -1))], ([1], [0]))
                     nC1 = contract(Pt1, nC1, ([0, 1], [0, 1]))
                     print(nC1.abs().max())
-                    C_left["up"] = nC1
+                    C_left["up"] = nC1/nC1.abs().max()
                     # env.C[(new_coord_u,(-1,-1))] = C_left["up"]
 
                     vec_coord_d = (-args.size+i, args.size+1)
@@ -332,7 +332,7 @@ def Create_Norm_Env(state, stateDL, B_grad, env, P, Pt, lam, kx, ky, args):
                         new_coord_d, (0, 1))], ([1], [1]))
                     nC2 = contract(P2, nC2, ([0, 1], [0, 1]))
                     print(nC2.abs().max())
-                    C_left["down"] = nC2
+                    C_left["down"] = nC2/nC2.abs().max()
                     # env.C[(new_coord_d,(-1,1))] = C_left["down"]
 
                     for j in range(2*args.size+2):
@@ -366,7 +366,7 @@ def Create_Norm_Env(state, stateDL, B_grad, env, P, Pt, lam, kx, ky, args):
 
                             tempT2 = tempT.detach()
                             print(tempT2.abs().max())
-                            T_left[(j)] = tempT
+                            T_left[(j)] = tempT/tempT2.abs().max()
                             # env.T[(new_coord,direction)] = T_left[(j)]
                         else:
                             nT = contract(P1, T_left[(j)], ([0], [0]))
@@ -381,7 +381,7 @@ def Create_Norm_Env(state, stateDL, B_grad, env, P, Pt, lam, kx, ky, args):
 
                             tempT2 = tempT.detach()
                             print(tempT2.abs().max())
-                            T_left[(j)] = tempT
+                            T_left[(j)] = tempT/tempT2.abs().max()
                             # env.T[(new_coord,direction)] = T_left[(j)]
 
             elif direction == (1, 0):
@@ -420,7 +420,7 @@ def Create_Norm_Env(state, stateDL, B_grad, env, P, Pt, lam, kx, ky, args):
                         new_coord_u, (0, -1))], ([0], [2]))
                     nC2 = contract(nC2, P2, ([0, 2], [0, 1]))
                     print(nC2.abs().max())
-                    C_right["up"] = nC2
+                    C_right["up"] = nC2/nC2.abs().max()
                     # env.C[(new_coord_u,(1,-1))] = C_right["up"]
 
                     vec_coord_d = (args.size-i+1, args.size+1)
@@ -442,7 +442,7 @@ def Create_Norm_Env(state, stateDL, B_grad, env, P, Pt, lam, kx, ky, args):
                         new_coord_d, (0, 1))], ([1], [2]))
                     nC1 = contract(Pt1, nC1, ([0, 1], [0, 1]))
                     print(nC1.abs().max())
-                    C_right["down"] = nC1
+                    C_right["down"] = nC1/nC1.abs().max()
                     # env.C[(new_coord_d,(1,1))] = C_right["down"]
 
                     for j in range(2*args.size+2):
@@ -473,7 +473,7 @@ def Create_Norm_Env(state, stateDL, B_grad, env, P, Pt, lam, kx, ky, args):
 
                         tempT2 = tempT.detach()
                         print(tempT2.abs().max())
-                        T_right[(j)] = tempT
+                        T_right[(j)] = tempT/tempT2.abs().max()
                         # env.T[(new_coord,direction)] = T_right[(j)]
     return C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right
 
@@ -485,10 +485,10 @@ def Create_Norm(state, env, C_up, T_up, C_left, T_left, C_down, T_down, C_right,
         with torch.no_grad():
             FL = contract(C_up["left"], C_down["left"], ([0], [0]))
             print("Create_Norm", FL.abs().max())
-            FL = FL
+            FL = FL/FL.abs().max()
             FU = contract(C_left["up"], C_right["up"], ([1], [0]))
             print("Create_Norm", FU.abs().max())
-            FU = FU
+            FU = FU/FU.abs().max()
 
         for i in range(args.size):
             temp = contract(FL, T_up[(i)], ([0], [0]))
@@ -496,22 +496,22 @@ def Create_Norm(state, env, C_up, T_up, C_left, T_left, C_down, T_down, C_right,
 
             FL2 = FL.detach()
             print("Create_Norm", FL2.abs().max())
-            FL = FL
+            FL = FL/FL2.abs().max()
 
             temp = contract(FU, T_left[(i)], ([0], [0]))
             FU = contract(temp, T_right[(i)], ([0, 2], [0, 1]))
 
             FU2 = FU.detach()
             print("Create_Norm", FU2.abs().max())
-            FU = FU
+            FU = FU/FU2.abs().max()
 
         with torch.no_grad():
             FR = contract(C_up["right"], C_down["right"], ([1], [0]))
             print("Create_Norm", FR.abs().max())
-            FR = FR
+            FR = FR/FR.abs().max()
             FD = contract(C_left["down"], C_right["down"], ([1], [1]))
             print("Create_Norm", FD.abs().max())
-            FD = FD
+            FD = FD/FD.abs().max()
 
         for i in range(args.size+1):
             temp = contract(FR, T_up[(2*args.size+1-i)], ([0], [2]))
@@ -519,14 +519,14 @@ def Create_Norm(state, env, C_up, T_up, C_left, T_left, C_down, T_down, C_right,
 
             FR2 = FR.detach()
             print("Create_Norm", FR2.abs().max())
-            FR = FR
+            FR = FR/FR2.abs().max()
 
             temp = contract(FD, T_left[(2*args.size+1-i)], ([0], [1]))
             FD = contract(temp, T_right[(2*args.size+1-i)], ([0, 2], [2, 1]))
 
             FD2 = FD.detach()
             print("Create_Norm", FD2.abs().max())
-            FD = FD
+            FD = FD/FD2.abs().max()
 
         dimsA = state.site(coord).size()
 
@@ -538,7 +538,7 @@ def Create_Norm(state, env, C_up, T_up, C_left, T_left, C_down, T_down, C_right,
 
         H12 = H1.detach()
         print("Create_Norm", H12.abs().max())
-        H1 = H1
+        H1 = H1/H12.abs().max()
 
         H2 = contract(FU, T_left[(args.size)], ([0], [0]))
         H2 = contract(H2, view(
@@ -547,7 +547,7 @@ def Create_Norm(state, env, C_up, T_up, C_left, T_left, C_down, T_down, C_right,
 
         H22 = H2.detach()
         print("Create_Norm", H22.abs().max())
-        H2 = H2
+        H2 = H2/H22.abs().max()
 
         Norm[coord] = H1/2. + H2/2.
         Norm2[coord] = H1.detach()/2. + H2.detach()/2.

@@ -3,6 +3,52 @@
 # python SMA.py --GLOBALARGS_dtype complex128 --bond_dim 1 --hx 3.0 --chi 8 --statefile D=2TFIM_output_state.json --size 11 --CTMARGS_ctm_max_iter 1000 --GLOBALARGS_device cpu
 # python SMA_withP.py --GLOBALARGS_dtype complex128 --bond_dim 2 --hx 3.0 --chi 8 --statefile D=2TFIM_output_state.json --size 11 --CTMARGS_ctm_max_iter 1000 --GLOBALARGS_device cpu
 # python SMA.py --GLOBALARGS_dtype complex128 --bond_dim 2 --hx 2.5 --chi 8 --statefile D=2TFIM_output_state.json --size 11 --CTMARGS_ctm_max_iter 1000 --GLOBALARGS_device cpu
+
+#                       _oo0oo_
+#                      o8888888o
+#                      88" . "88
+#                      (| -_- |)
+#                      0\  =  /0
+#                    ___/`---'\___
+#                  .' \\|     |# '.
+#                 / \\|||  :  |||# \
+#                / _||||| -:- |||||- \
+#               |   | \\\  -  #/ |   |
+#               | \_|  ''\---/''  |_/ |
+#               \  .-\__  '-'  ___/-. /
+#             ___'. .'  /--.--\  `. .'___
+#          ."" '<  `.___\_<|>_/___.' >' "".
+#         | | :  `- \`.;`\ _ /`;.`/ - ` : | |
+#         \  \ `_.   \_ __\ /__ _/   .-` /  /
+#     =====`-.____`.___ \_____/___.-`___.-'=====
+#                       `=---='
+
+# ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣤⣤⣤⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+# ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣀⠀⠀⠀⢀⣴⠟⠉⠀⠀⠀⠈⠻⣦⡀⠀⠀⠀⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+# ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣷⣀⢀⣾⠿⠻⢶⣄⠀⠀⣠⣶⡿⠶⣄⣠⣾⣿⠗⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+# ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠉⢻⣿⣿⡿⣿⠿⣿⡿⢼⣿⣿⡿⣿⣎⡟⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+# ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⡟⠉⠛⢛⣛⡉⠀⠀⠙⠛⠻⠛⠑⣷⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+# ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣿⣧⣤⣴⠿⠿⣷⣤⡤⠴⠖⠳⣄⣀⣹⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+# ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⣿⣀⣟⠻⢦⣀⡀⠀⠀⠀⠀⣀⡈⠻⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+# ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣼⡿⠉⡇⠀⠀⠛⠛⠛⠋⠉⠉⠀⠀⠀⠹⢧⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+# ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⡟⠀⢦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠃⠀⠈⠑⠪⠷⠤⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+# ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣾⣿⣿⣿⣦⣼⠛⢦⣤⣄⡀⠀⠀⠀⠀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠑⠢⡀⠀⠀⠀⠀⠀
+# ⠀⠀⠀⠀⠀⠀⠀⢀⣠⠴⠲⠖⠛⠻⣿⡿⠛⠉⠉⠻⠷⣦⣽⠿⠿⠒⠚⠋⠉⠁⡞⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⢦⠀⠀⠀⠀
+# ⠀⠀⠀⠀⠀⢀⣾⠛⠁⠀⠀⠀⠀⠀⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠤⠒⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢣⠀⠀⠀
+# ⠀⠀⠀⠀⣰⡿⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣑⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⡇⠀⠀
+# ⠀⠀⠀⣰⣿⣁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣷⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣾⣧⣄⠀⠀⠀⠀⠀⠀⢳⡀⠀
+# ⠀⠀⠀⣿⡾⢿⣀⢀⣀⣦⣾⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣾⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡰⣫⣿⡿⠟⠻⠶⠀⠀⠀⠀⠀⢳⠀
+# ⠀⠀⢀⣿⣧⡾⣿⣿⣿⣿⣿⡷⣶⣤⡀⠀⠀⠀⠀⠀⠀⠀⢀⡴⢿⣿⣧⠀⡀⠀⢀⣀⣀⢒⣤⣶⣿⣿⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⡇
+# ⠀⠀⡾⠁⠙⣿⡈⠉⠙⣿⣿⣷⣬⡛⢿⣶⣶⣴⣶⣶⣶⣤⣤⠤⠾⣿⣿⣿⡿⠿⣿⠿⢿⣿⣿⣿⣿⣧⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡇
+# ⠀⣸⠃⠀⠀⢸⠃⠀⠀⢸⣿⣿⣿⣿⣿⣿⣷⣾⣿⣿⠟⡉⠀⠀⠀⠈⠙⠛⠻⢿⣿⣿⣿⣿⣿⣿⣿⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡇
+# ⠀⣿⠀⠀⢀⡏⠀⠀⠀⢸⣿⣿⣿⣿⣿⣿⣿⠿⠿⠛⠛⠉⠁⠀⠀⠀⠀⠀⠉⠠⠿⠟⠻⠟⠋⠉⢿⣿⣦⡀⢰⡀⠀⠀⠀⠀⠀⠀⠁
+# ⢀⣿⡆⢀⡾⠀⠀⠀⠀⣾⠏⢿⣿⣿⣿⣯⣙⢷⡄⠀⠀⠀⠀⠀⢸⡄⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⣿⣻⢿⣷⣀⣷⣄⠀⠀⠀⠀⢸⠀
+# ⢸⠃⠠⣼⠃⠀⠀⣠⣾⡟⠀⠈⢿⣿⡿⠿⣿⣿⡿⠿⠿⠿⠷⣄⠈⠿⠛⠻⠶⢶⣄⣀⣀⡠⠈⢛⡿⠃⠈⢿⣿⣿⡿⠀⠀⠀⠀⠀⡀
+# ⠟⠀⠀⢻⣶⣶⣾⣿⡟⠁⠀⠀⢸⣿⢅⠀⠈⣿⡇⠀⠀⠀⠀⠀⣷⠂⠀⠀⠀⠀⠐⠋⠉⠉⠀⢸⠁⠀⠀⠀⢻⣿⠛⠀⠀⠀⠀⢀⠇
+# ⠀⠀⠀⠀⠹⣿⣿⠋⠀⠀⠀⠀⢸⣧⠀⠰⡀⢸⣷⣤⣤⡄⠀⠀⣿⡀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡆⠀⠀⠀⠀⡾⠀⠀⠀⠀⠀⠀⢼⡇
+# ⠀⠀⠀⠀⠀⠙⢻⠄⠀⠀⠀⠀⣿⠉⠀⠀⠈⠓⢯⡉⠉⠉⢱⣶⠏⠙⠛⠚⠁⠀⠀⠀⠀⠀⣼⠇⠀⠀⠀⢀⡇⠀⠀⠀⠀⠀⠀⠀⡇
+# ⠀⠀⠀⠀⠀⠀⠻⠄⠀⠀⠀⢀⣿⠀⢠⡄⠀⠀⠀⣁⠁⡀⠀⢠⠀⠀⠀⠀⠀⠀⠀⠀⢀⣐⡟⠀⠀⠀⠀⢸⡇⠀⠀⠀⠀⠀⠀⢠⡇
+
 from GTNOs import *
 import context
 import time
@@ -15,13 +61,15 @@ from ctm.generic.rdm import *
 # from ctm.generic import ctmrg_ex
 from ctm.generic import ctmrg
 from ctm.generic.ctm_projectors import *
-from Stat_ori import *
+# from Stat_ori import *
+from Norm_ori_withP import *
 # from Norm_ori_withP_divide import *
-from Norm_ori_withP_divide_newfromweilin import *
+# from Norm_ori_withP_divide_newfromweilin import *
 # from Hami_ori import *
 
+from Localsite_Hami_ori_withP import *
 # from Localsite_Hami_ori_withP_divide import *
-from Localsite_Hami_ori_withP_divide_newfromweilin import *
+# from Localsite_Hami_ori_withP_divide_newfromweilin import *
 
 # from Test import *
 # from models import j1j2
@@ -44,21 +92,22 @@ import logging
 from ctm.generic import rdm
 import os
 from pathlib import Path
+from torchviz import make_dot
 log = logging.getLogger(__name__)
 
 tStart = time.time()
 
 # from models import aniso_k_HsuKe
 parser = cfg.get_args_parser()
-parser.add_argument("--kx", type=float, default=1.,
+parser.add_argument("--kx", type=float, default=0.,
                     help="kx")
-parser.add_argument("--ky", type=float, default=1.,
+parser.add_argument("--ky", type=float, default=0.,
                     help="ky")
-parser.add_argument("--Jx", type=float, default=-1.,
+parser.add_argument("--Jx", type=float, default=1.,
                     help="Jx of Kitave")
-parser.add_argument("--Jy", type=float, default=-1.,
+parser.add_argument("--Jy", type=float, default=1.,
                     help="Jy of Kitave")
-parser.add_argument("--Jz", type=float, default=-1.,
+parser.add_argument("--Jz", type=float, default=1.,
                     help="Jz of Kitave")
 parser.add_argument("--h", type=float, default=0.,
                     help="h of Kitave")
@@ -78,6 +127,7 @@ parser.add_argument("--NormMat", type=str, default="True",
                     help="Whether to calculate NormMat")
 parser.add_argument("--HamiMat", type=str, default="True",
                     help="Whether to calculate HamiMat")
+parser.add_argument("--UseVUMPSansazAC", type=str, default="False")
 args, unknown_args = parser.parse_known_args()
 
 cfg.configure(args)
@@ -102,6 +152,10 @@ if args.HamiMat == "True":
     args.HamiMat = True
 else:
     args.HamiMat = False
+if args.UseVUMPSansazAC == "True":
+    args.UseVUMPSansazAC = True
+else:
+    args.UseVUMPSansazAC = False
 # cfg.print_config()
 # torch.set_num_threads(args.omp_cores)
 torch.set_num_threads(64)
@@ -117,6 +171,10 @@ def _cast_to_real(t):
 
 
 state = read_ipeps(args.datadir+args.statefile)
+# print("Replace state to random state")
+# state.sites[(0, 0)] = torch.randn_like(
+#     state.sites[(0, 0)], dtype=torch.complex128).to(torch.complex128)
+# print("state:", state.sites[(0, 0)])
 
 # # try to normalize state
 # print("state norm: ", torch.einsum('abcde,abcde', state.sites[(0, 0)], conj(
@@ -170,12 +228,15 @@ def ctmrg_conv_rdm2x1(state, env, history, ctm_args=cfg.ctm_args):
     return False, history
 
 
+difftograph = []
+
+
 def ctmrg_conv_energy(state2, env, history, ctm_args=cfg.ctm_args):
     if not history:
         history = []
     old = []
     if (len(history) > 0):
-        old = history[:4*env.chi]
+        old = history[:8*env.chi+4]
     new = []
     u, s, v = torch.svd(env.C[((0, 0), (-1, -1))])
     for i in range(env.chi):
@@ -190,26 +251,180 @@ def ctmrg_conv_energy(state2, env, history, ctm_args=cfg.ctm_args):
     for i in range(env.chi):
         new.append(s[i].item())
 
+    u, s, v = torch.svd(
+        env.T[((0, 0), (0, -1))].reshape(env.chi, env.chi*args.bond_dim**2))
+    for i in range(env.chi):
+        new.append(s[i].item())
+    u, s, v = torch.svd(
+        env.T[((0, 0), (0, 1))].permute(1, 0, 2).reshape(env.chi, env.chi*args.bond_dim**2))
+    for i in range(env.chi):
+        new.append(s[i].item())
+    u, s, v = torch.svd(
+        env.T[((0, 0), (-1, 0))].permute(0, 2, 1).reshape(env.chi, env.chi*args.bond_dim**2))
+    for i in range(env.chi):
+        new.append(s[i].item())
+    u, s, v = torch.svd(
+        env.T[((0, 0), (1, 0))].reshape(env.chi, env.chi*args.bond_dim**2))
+    for i in range(env.chi):
+        new.append(s[i].item())
+    # from hosvd import sthosvd as hosvd
+    # core, _, _ = hosvd(env.T[((0, 0), (0, -1))], [env.chi]*3)
+    # new.append(core)
+    # core, _, _ = hosvd(env.T[((0, 0), (0, 1))], [env.chi]*3)
+    # new.append(core)
+    # core, _, _ = hosvd(env.T[((0, 0), (-1, 0))], [env.chi]*3)
+    # new.append(core)
+    # core, _, _ = hosvd(env.T[((0, 0), (1, 0))], [env.chi]*3)
+    # new.append(core)
+    # print("core.shape: ", core.shape)
+    # print("core: ", core)
+
+    new.append(env.T[((0, 0), (0, -1))])
+    new.append(env.T[((0, 0), (0, 1))])
+    new.append(env.T[((0, 0), (-1, 0))])
+    new.append(env.T[((0, 0), (1, 0))])
+    # new.append(env.C[((0, 0), (-1, -1))])
+    # new.append(env.C[((0, 0), (-1, 1))])
+    # new.append(env.C[((0, 0), (1, -1))])
+    # new.append(env.C[((0, 0), (1, 1))])
+
     diff = 0.
     if (len(history) > 0):
-        for i in range(4*env.chi):
+        for i in range(8*env.chi):
             history[i] = new[i]
             if (abs(old[i]-new[i]) > diff):
                 diff = abs(old[i]-new[i])
+        for i in range(4):
+            history[8*env.chi+i] = new[8*env.chi+i]
+            if ((old[8*env.chi+i]-new[8*env.chi+i]).norm() > diff):
+                diff = (old[8*env.chi+i]-new[8*env.chi+i]).norm()
+            # print(torch.div(old[4*env.chi+i], new[4*env.chi+i]))
+            if i == 0:
+                difftograph.append((old[8*env.chi+i]-new[8*env.chi+i]).norm())
+
     else:
-        for i in range(4*env.chi):
+        for i in range(8*env.chi+4):
             history.append(new[i])
     history.append(diff)
     print("diff={0:<50}".format(diff), end="\r")
+    # print("diff={0:<50}".format(diff))
     # print(ctm_args.ctm_conv_tol)
-    if (len(history[4*env.chi:]) > 1 and diff < ctm_args.ctm_conv_tol)\
-            or len(history[4*env.chi:]) >= ctm_args.ctm_max_iter:
+    if (len(history[8*env.chi+4:]) > 1 and diff < ctm_args.ctm_conv_tol)\
+            or len(history[8*env.chi+4:]) >= ctm_args.ctm_max_iter:
         log.info({"history_length": len(
-            history[4*env.chi:]), "history": history[4*env.chi:]})
+            history[8*env.chi+4:]), "history": history[8*env.chi+4:]})
         print("")
-        print("CTMRG length: "+str(len(history[4*env.chi:])))
+        print("modified CTMRG length: "+str(len(history[8*env.chi+4:])))
+        # import matplotlib.pyplot as plt
+        # plt.plot(difftograph)
+        # plt.show()
         return True, history
     return False, history
+
+
+# def ctmrg_conv_energy(state2, env, history, ctm_args=cfg.ctm_args):
+#     if not history:
+#         history = []
+#     old = []
+#     if (len(history) > 0):
+#         old = history[:4*env.chi+4]
+#     new = []
+#     u, s, v = torch.svd(env.C[((0, 0), (-1, -1))])
+#     for i in range(env.chi):
+#         new.append(s[i].item())
+#     u, s, v = torch.svd(env.C[((0, 0), (1, -1))])
+#     for i in range(env.chi):
+#         new.append(s[i].item())
+#     u, s, v = torch.svd(env.C[((0, 0), (1, -1))])
+#     for i in range(env.chi):
+#         new.append(s[i].item())
+#     u, s, v = torch.svd(env.C[((0, 0), (1, 1))])
+#     for i in range(env.chi):
+#         new.append(s[i].item())
+
+#     new.append(env.T[((0, 0), (0, -1))])
+#     new.append(env.T[((0, 0), (0, 1))])
+#     new.append(env.T[((0, 0), (-1, 0))])
+#     new.append(env.T[((0, 0), (1, 0))])
+#     # new.append(env.C[((0, 0), (-1, -1))])
+#     # new.append(env.C[((0, 0), (-1, 1))])
+#     # new.append(env.C[((0, 0), (1, -1))])
+#     # new.append(env.C[((0, 0), (1, 1))])
+
+#     diff = 0.
+#     if (len(history) > 0):
+#         for i in range(4*env.chi):
+#             history[i] = new[i]
+#             if (abs(old[i]-new[i]) > diff):
+#                 diff = abs(old[i]-new[i])
+#         for i in range(4):
+#             history[4*env.chi+i] = new[4*env.chi+i]
+#             if ((old[4*env.chi+i]-new[4*env.chi+i]).norm() > diff):
+#                 diff = (old[4*env.chi+i]-new[4*env.chi+i]).norm()
+#             # print(torch.div(old[4*env.chi+i], new[4*env.chi+i]))
+#             if i == 0:
+#                 difftograph.append((old[4*env.chi+i]-new[4*env.chi+i]).norm())
+
+#     else:
+#         for i in range(4*env.chi+4):
+#             history.append(new[i])
+#     history.append(diff)
+#     # print("diff={0:<50}".format(diff), end="\r")
+#     print("diff={0:<50}".format(diff))
+#     # print(ctm_args.ctm_conv_tol)
+#     if (len(history[4*env.chi+4:]) > 1 and diff < ctm_args.ctm_conv_tol)\
+#             or len(history[4*env.chi+4:]) >= ctm_args.ctm_max_iter:
+#         log.info({"history_length": len(
+#             history[4*env.chi+4:]), "history": history[4*env.chi+4:]})
+#         print("")
+#         print("modified CTMRG length: "+str(len(history[4*env.chi+4:])))
+#         # import matplotlib.pyplot as plt
+#         # plt.plot(difftograph)
+#         # plt.show()
+#         return True, history
+#     return False, history
+
+
+# def ctmrg_conv_energy(state2, env, history, ctm_args=cfg.ctm_args):
+#     if not history:
+#         history = []
+#     old = []
+#     if (len(history) > 0):
+#         old = history[:4*env.chi]
+#     new = []
+#     u, s, v = torch.svd(env.C[((0, 0), (-1, -1))])
+#     for i in range(env.chi):
+#         new.append(s[i].item())
+#     u, s, v = torch.svd(env.C[((0, 0), (1, -1))])
+#     for i in range(env.chi):
+#         new.append(s[i].item())
+#     u, s, v = torch.svd(env.C[((0, 0), (1, -1))])
+#     for i in range(env.chi):
+#         new.append(s[i].item())
+#     u, s, v = torch.svd(env.C[((0, 0), (1, 1))])
+#     for i in range(env.chi):
+#         new.append(s[i].item())
+
+#     diff = 0.
+#     if (len(history) > 0):
+#         for i in range(4*env.chi):
+#             history[i] = new[i]
+#             if (abs(old[i]-new[i]) > diff):
+#                 diff = abs(old[i]-new[i])
+#     else:
+#         for i in range(4*env.chi):
+#             history.append(new[i])
+#     history.append(diff)
+#     print("diff={0:<50}".format(diff), end="\r")
+#     # print(ctm_args.ctm_conv_tol)
+#     if (len(history[4*env.chi:]) > 1 and diff < ctm_args.ctm_conv_tol)\
+#             or len(history[4*env.chi:]) >= ctm_args.ctm_max_iter:
+#         log.info({"history_length": len(
+#             history[4*env.chi:]), "history": history[4*env.chi:]})
+#         print("")
+#         print("CTMRG length: "+str(len(history[4*env.chi:])))
+#         return True, history
+#     return False, history
 
 
 env = ENV(args.chi, state)
@@ -227,6 +442,62 @@ if args.reuseCTMRGenv and (os.path.exists(ENVfilenameC) and os.path.exists(ENVfi
     for k, t in env.T.items():
         env.T[k] = t.to(cfg.global_args.device)
 else:
+    env, _, *ctm_log = ctmrg.run(state, env, conv_check=ctmrg_conv_energy)
+
+if args.UseVUMPSansazAC:
+    import sys
+    sys.path.append('Fixpoints')
+    from Fixpoints import vumpsfixedpoints
+    _verbose = True
+    _steps = 1000
+    _tol = 1e-6
+    dimsA = state.site((0, 0)).shape
+    site = torch.randn((env.chi, dimsA[1]**2, env.chi), dtype=cfg.global_args.torch_dtype,
+                       device=cfg.global_args.device).cpu()
+    siteDL = stateDL.site((0, 0)).to(cfg.global_args.device).cpu()
+    lambd, AL, C, AR, FL, FR = vumpsfixedpoints.vumpsfixedpts(
+        site.numpy(), siteDL.numpy(), verbose=_verbose, steps=_steps, tol=_tol)
+    _l, _g = vumpsfixedpoints.toLambdaGamma(AL)
+    ACUP = vumpsfixedpoints.contractLambdaGamma(_l, _g)
+    ACUP = torch.from_numpy(ACUP).to(
+        cfg.global_args.device).to(cfg.global_args.torch_dtype)
+    # turn site counter clockwise
+    siteDL = stateDL.site((0, 0)).cpu()
+    siteDL = contiguous(permute(siteDL, (3, 0, 1, 2)))
+    lambd, AL, C, AR, FL, FR = vumpsfixedpoints.vumpsfixedpts(
+        site.numpy(), siteDL.numpy(), verbose=_verbose, steps=_steps, tol=_tol)
+    ACRIGHT = vumpsfixedpoints.contractLambdaGamma(_l, _g)
+    ACRIGHT = torch.from_numpy(ACRIGHT).to(
+        cfg.global_args.device).to(cfg.global_args.torch_dtype)
+    # ACRIGHT = contiguous(permute(ACRIGHT, (0, 2, 1)))
+    # ACLEFT = torch.einsum('ijk,kl->ilj', AL, C)
+
+    siteDL = stateDL.site((0, 0)).cpu()
+    siteDL = contiguous(permute(siteDL, (3, 0, 1, 2)))
+    lambd, AL, C, AR, FL, FR = vumpsfixedpoints.vumpsfixedpts(
+        site.numpy(), siteDL.numpy(), verbose=_verbose, steps=_steps, tol=_tol)
+    ACDOWN = vumpsfixedpoints.contractLambdaGamma(_l, _g)
+    ACDOWN = torch.from_numpy(ACDOWN).to(
+        cfg.global_args.device).to(cfg.global_args.torch_dtype)
+    ACDOWN = contiguous(permute(ACDOWN, (1, 0, 2)))
+    # ACDOWN = torch.einsum('ijk,kl->jil', AL, C)
+
+    siteDL = stateDL.site((0, 0)).cpu()
+    siteDL = contiguous(permute(siteDL, (3, 0, 1, 2)))
+    lambd, AL, C, AR, FL, FR = vumpsfixedpoints.vumpsfixedpts(
+        site.numpy(), siteDL.numpy(), verbose=_verbose, steps=_steps, tol=_tol)
+    ACLEFT = vumpsfixedpoints.contractLambdaGamma(_l, _g)
+    ACLEFT = torch.from_numpy(ACLEFT).to(
+        cfg.global_args.device).to(cfg.global_args.torch_dtype)
+    ACLEFT = contiguous(permute(ACLEFT, (0, 2, 1)))
+    # ACRIGHT = contiguous(permute(ACRIGHT, (0, 1, 2)))
+    # ACRIGHT = torch.einsum('ijk,kl->ijl', AL, C)
+    print("Calculated VUMPS")
+    env.T[((0, 0), (0, -1))] = ACUP
+    env.T[((0, 0), (-1, 0))] = ACLEFT
+    env.T[((0, 0), (0, 1))] = ACDOWN
+    env.T[((0, 0), (1, 0))] = ACRIGHT
+    print("Use VUMPS env as initial ENV.T")
     env, _, *ctm_log = ctmrg.run(state, env, conv_check=ctmrg_conv_energy)
 if args.reuseCTMRGenv and not (os.path.exists(ENVfilenameC) or os.path.exists(ENVfilenameT)):
     print("Saving CTMRG ENV: "+ENVfilenameC+" "+ENVfilenameT)
@@ -314,18 +585,18 @@ IIII = torch.einsum('ij,ab,cd,ef->iacejbdf', Id,
 # rdm2x1= rdm2x1((0,0),state,env)
 # energy_per_site= torch.einsum('ijkl,ijkl',rdm2x1,args.Jy*IYYI + args.hx*(IX+XI)/4)
 energy_per_site = 0
-if args.statefile == "KitaevLG.json":
-    print("KitaevLG shortcut energy_per_site")
-    energy_per_site = torch.tensor(-0.16346756553739336,
-                                   dtype=cfg.global_args.torch_dtype, device=cfg.global_args.device)
-elif args.statefile == "KitaevLGDG.json":
-    print("KitaevLGDG shortcut energy_per_site")
-    energy_per_site = torch.tensor(-0.19628756414493875,
-                                   dtype=cfg.global_args.torch_dtype, device=cfg.global_args.device)
-else:
-    energy_per_site = energy_f(
-        state, env)
-print("E_per_bond=", energy_per_site.item().real)
+# if args.statefile == "KitaevLG.json":
+#     print("KitaevLG shortcut energy_per_site")
+#     energy_per_site = torch.tensor(-0.16346756553739336,
+#                                    dtype=cfg.global_args.torch_dtype, device=cfg.global_args.device)
+# elif args.statefile == "KitaevLGDG.json":
+#     print("KitaevLGDG shortcut energy_per_site")
+#     energy_per_site = torch.tensor(-0.19628756414493875,
+#                                    dtype=cfg.global_args.torch_dtype, device=cfg.global_args.device)
+# else:
+energy_per_site = energy_f(
+    state, env)
+print("E_per_bond=", energy_per_site.item())
 # IIII = torch.einsum('ij,ab->iajb', II, II).reshape(4,4,4,4)
 # XX = torch.einsum('ij,ab->iajb', Sx, Sx).reshape(4,4)
 # YYII = torch.einsum('ij,ab,cd,ef->iacejbdf', Id, Sy, Sy, Id).reshape(4,4,4,4)
@@ -400,12 +671,17 @@ if len(state.sites) == 1:
             state, stateDL, B_grad, env, P, Pt, lam, kx, ky, args)
         Norm = Create_Norm(state, env, C_up, T_up, C_left,
                            T_left, C_down, T_down, C_right, T_right, args)
+        # make_dot(Norm[(0, 0)], params={"B": B_grad}).render(
+        #     args.datadir+"Norm_B.png", format="png")
         norm_factor = contract(Norm[(0, 0)].detach(), conj(
             state.site((0, 0))), ([0, 1, 2, 3, 4], [0, 1, 2, 3, 4])).detach()
         print("norm_factor=", norm_factor)
         # norm_factor = torch.norm(norm_factor)
         # print("norm_factor after norm=", norm_factor)
-        Norm[(0, 0)] = (Norm[(0, 0)])/norm_factor
+
+        # Norm[(0, 0)] = (Norm[(0, 0)])/norm_factor
+        # print("divided norm_factor")
+
         shp = list(Norm[(0, 0)].size())
         newshp = shp.copy()
         for ii in shp:
@@ -420,7 +696,7 @@ if len(state.sites) == 1:
             accu[len(shp)-1-ii] = accu[len(shp)-1-ii+1]*shp[len(shp)-1-ii+1]
         print("Start caclulating NormMat...")
         t1 = time.time()
-        streams = [torch.cuda.Stream() for i in range(elemsize)]
+        # streams = [torch.cuda.Stream() for i in range(elemsize)]
         # @torch.compile
         # def innergrad(ii):
         #     loc = [0 for jj in range(len(shp))]
@@ -433,21 +709,21 @@ if len(state.sites) == 1:
         #         NormMat[(...,)+tuple(loc)] = conj(torch.autograd.grad(Norm[(0,0)][tuple(loc)].real, conj(B_grad), create_graph=False, retain_graph=True)[0])
         #         NormMat[(...,)+tuple(loc)] += conj(torch.autograd.grad(Norm[(0,0)][tuple(loc)].imag, conj(B_grad), create_graph=False, retain_graph=True)[0])
         #         # print("end", ii)
-        for ii in range(elemsize):
-            streams[ii].wait_stream(torch.cuda.current_stream())
+        # for ii in range(elemsize):
+        #     streams[ii].wait_stream(torch.cuda.current_stream())
         for ii in range(elemsize):
             loc = [0 for jj in range(len(shp))]
             n = ii
             for jj in range(len(shp)):
                 loc[jj] = n//accu[jj]
                 n = n % accu[jj]
-            with torch.cuda.stream(streams[ii]):
-                # print(ii)
-                NormMat[(...,)+tuple(loc)] = 0.5*conj(torch.autograd.grad(Norm[(0, 0)]
-                                                                          [tuple(loc)].real, B_grad, create_graph=False, retain_graph=True)[0])
-                NormMat[(...,)+tuple(loc)] += 0.5*1j*conj(torch.autograd.grad(Norm[(0, 0)]
-                                                                              [tuple(loc)].imag, B_grad, create_graph=False, retain_graph=True)[0])
-                # print("end", ii)
+            # with torch.cuda.stream(streams[ii]):
+            # print(ii)
+            NormMat[(...,)+tuple(loc)] = 0.5*conj(torch.autograd.grad(Norm[(0, 0)]
+                                                                      [tuple(loc)].real, B_grad, create_graph=False, retain_graph=True)[0])
+            NormMat[(...,)+tuple(loc)] += 0.5*1j*conj(torch.autograd.grad(Norm[(0, 0)]
+                                                                          [tuple(loc)].imag, B_grad, create_graph=False, retain_graph=True)[0])
+            # print("end", ii)
             # innergrad(ii)
         t2 = time.time()
         print("NormMat caclulated, time=", t2-t1)
@@ -484,10 +760,17 @@ if len(state.sites) == 1:
     # Hy = IIII + mu * (args.Jy*YIIY + args.Jx*(IIXX+XXII) /
     #                   4 - args.h*(HHII+IIHH)/4)
 
-    Hx = IIII + mu * (args.Jz*IZZI_permute + args.Jx*(IIXX_permute+XXII_permute) /
-                      4 - args.h*(HHII_permute+IIHH_permute)/4)
-    Hy = IIII + mu * (args.Jy*YIIY_permute + args.Jx*(IIXX_permute+XXII_permute) /
-                      4 - args.h*(HHII_permute+IIHH_permute)/4)
+    # Hx = IIII + mu * (args.Jz*IZZI_permute + args.Jx*(IIXX_permute+XXII_permute) /
+    #                   4 - args.h*(HHII_permute+IIHH_permute)/4)
+    # Hy = IIII + mu * (args.Jy*YIIY_permute + args.Jx*(IIXX_permute+XXII_permute) /
+    #                   4 - args.h*(HHII_permute+IIHH_permute)/4)
+    # print("mu=", mu)
+    Hx = IIII + mu * (args.Jz*IZZI + args.Jx*(IIXX+XXII) /
+                      4 - args.h*(HHII+IIHH)/4)
+    Hy = IIII + mu * (args.Jy*YIIY + args.Jx*(IIXX+XXII) /
+                      4 - args.h*(HHII+IIHH)/4)
+    # print("Hx=", Hx)
+    # print("Hy=", Hy)
 
     # Hx = IIII + mu * (args.Jz*IZZI + args.Jx*(IIXX+XXII) /
     #                   4)
@@ -538,21 +821,24 @@ if len(state.sites) == 1:
         # This is the use of original Wei-Lin way, with projectors calc on the fly
         isOnsiteWorking = False
         # with torch.autograd.graph.save_on_cpu(True):
-        # C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right = Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam,
-        #                                                                                          Hx, Hy, Honsite, II, kx, ky, C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right, args, True, True, P, Pt, isOnsiteWorking=isOnsiteWorking, MultiGPU=args.MultiGPU)
-        C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right = Create_Hami_Env(
-            state, stateDL, B_grad, env, P, Pt, lam, Hx, Hy, kx, ky, args)
+        C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right = Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam,
+                                                                                                 Hx, Hy, Honsite, IIII, kx, ky, C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right, args, True, True, P, Pt, isOnsiteWorking=isOnsiteWorking, MultiGPU=args.MultiGPU)
+        # C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right = Create_Hami_Env(
+        #     state, stateDL, B_grad, env, P, Pt, lam, Hx, Hy, kx, ky, args)
         # C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right = checkpoint(Create_Localsite_Hami_Env, state, stateDL, B_grad, env, lam,
         #                                                                           Hx, Hy, Honsite, II, kx, ky, C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right, args, True, True, P, Pt, isOnsiteWorking, use_reentrant=False)
-        Hami = Create_Hami(state, env, C_up, T_up, C_left, T_left,
-                           C_down, T_down, C_right, T_right, Hx, Hy, args)
-        # Hami = Create_Localsite_Hami(state, env, C_up, T_up, C_left, T_left, C_down,
-        #                              T_down, C_right, T_right, Hx, Hy, Honsite, II, args, isOnsiteWorking=isOnsiteWorking)
+        # Hami = Create_Hami(state, env, C_up, T_up, C_left, T_left,
+        #                    C_down, T_down, C_right, T_right, Hx, Hy, args)
+        Hami = Create_Localsite_Hami(state, env, C_up, T_up, C_left, T_left, C_down,
+                                     T_down, C_right, T_right, Hx, Hy, Honsite, IIII, args, isOnsiteWorking=isOnsiteWorking)
         # Hami = checkpoint(Create_Localsite_Hami, state, env, C_up, T_up, C_left, T_left, C_down,
         #                   T_down, C_right, T_right, Hx, Hy, Honsite, II, args, isOnsiteWorking, use_reentrant=False)
-        Hami[(0, 0)] = Hami[(0, 0)]/norm_factor
+
+        # Hami[(0, 0)] = Hami[(0, 0)]/norm_factor
+        # print("norm_factor divided")
+
         print("G(H)_dot_state=", contract(Hami[(0, 0)], conj(
-            state.site((0, 0))), ([0, 1, 2, 3, 4], [0, 1, 2, 3, 4])).item().real)
+            state.site((0, 0))), ([0, 1, 2, 3, 4], [0, 1, 2, 3, 4])).item())
         shp = list(Hami[(0, 0)].size())
         newshp = shp.copy()
         for ii in shp:
@@ -570,7 +856,7 @@ if len(state.sites) == 1:
                 shp[len(shp)-1-ii+1]
         print("Start caclulating HamiMat...")
         t1 = time.time()
-        streams = [torch.cuda.Stream() for i in range(elemsize)]
+        # streams = [torch.cuda.Stream() for i in range(elemsize)]
         # @torch.compile
         # def innergrad(ii):
         #     loc = [0 for jj in range(len(shp))]
@@ -585,30 +871,31 @@ if len(state.sites) == 1:
         #         HamiMat[(...,)+tuple(loc)] = conj(torch.autograd.grad(HamiMat0[tuple(loc)].real, B_grad, create_graph=False, retain_graph=True)[0])
         #         HamiMat[(...,)+tuple(loc)] += conj(torch.autograd.grad(HamiMat0[tuple(loc)].imag, B_grad, create_graph=False, retain_graph=True)[0])
         #         HamiMat0.detach_()
-        for ii in range(elemsize):
-            streams[ii].wait_stream(torch.cuda.current_stream())
+
+        # for ii in range(elemsize):
+        #     streams[ii].wait_stream(torch.cuda.current_stream())
         for ii in range(elemsize):
             loc = [0 for jj in range(len(shp))]
             n = ii
             for jj in range(len(shp)):
                 loc[jj] = n//accu[jj]
                 n = n % accu[jj]
-            with torch.cuda.stream(streams[ii]):
-                # print(loc)
-                HamiMat0[tuple(loc)] = 0.5*conj(torch.autograd.grad(
-                    Hami[(0, 0)][tuple(loc)].real, mu, create_graph=True, retain_graph=True)[0])
-                HamiMat0[tuple(loc)] += 0.5*1j*conj(torch.autograd.grad(Hami[(0, 0)]
-                                                                        [tuple(loc)].imag, mu, create_graph=True, retain_graph=True)[0])
-                HamiMat[(...,)+tuple(loc)] = 0.5*conj(torch.autograd.grad(HamiMat0[tuple(loc)
-                                                                                   ].real, B_grad, create_graph=False, retain_graph=True)[0])
-                HamiMat[(...,)+tuple(loc)] += 0.5*1j*conj(torch.autograd.grad(
-                    HamiMat0[tuple(loc)].imag, B_grad, create_graph=False, retain_graph=True)[0])
-                # HamiMat0.detach_()
-                # HamiMat.detach_()
+            # with torch.cuda.stream(streams[ii]):
+            # print(loc)
+            HamiMat0[tuple(loc)] = 0.5*conj(torch.autograd.grad(
+                Hami[(0, 0)][tuple(loc)].real, mu, create_graph=True, retain_graph=True)[0])
+            HamiMat0[tuple(loc)] += 0.5*1j*conj(torch.autograd.grad(Hami[(0, 0)]
+                                                                    [tuple(loc)].imag, mu, create_graph=True, retain_graph=True)[0])
+            HamiMat[(...,)+tuple(loc)] = 0.5*conj(torch.autograd.grad(HamiMat0[tuple(loc)
+                                                                               ].real, B_grad, create_graph=False, retain_graph=True)[0])
+            HamiMat[(...,)+tuple(loc)] += 0.5*1j*conj(torch.autograd.grad(
+                HamiMat0[tuple(loc)].imag, B_grad, create_graph=False, retain_graph=True)[0])
+            # HamiMat0.detach_()
+            # HamiMat.detach_()
 
-                HamiMat0.detach_()
-                HamiMat.detach_()
-                # innergrad(ii)
+            HamiMat0.detach_()
+            HamiMat.detach_()
+            # innergrad(ii)
         t2 = time.time()
         print("HamiMat caclulated, time=", t2-t1)
 

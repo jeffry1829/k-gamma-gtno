@@ -7,10 +7,14 @@ do
     chi=8
     _size=1
     _step=4
-    _device="cuda:1"
-    # _dtype="complex128"
-    _dtype="float64"
-    statefile="floatD=2TFIM_output_state.json"
+    # _device="cuda:1"
+    _device="cpu"
+    _dtype="complex128"
+    # _dtype="float64"
+    # statefile="floatD=2TFIM_output_state.json"
+    # statefile="TFIMcomplex128.json"
+    statefile="TFIMcomplex128_YY.json"
+    # statefile="KitaevLG.json"
     datadir="data/withP_floatTFIM_hx${hx}chi${chi}/"
     extra_flags="--CTMARGS_ctm_force_dl True --MultiGPU True --CTMARGS_projector_eps_multiplet 1e-4 --CTMARGS_ctm_conv_tol 1e-8"
     extra_flags=${extra_flags}" --CTMARGS_projector_svd_reltol 1e-8"
@@ -26,7 +30,8 @@ do
     runDraw="True"
 
     OnlyOnePoint="True"
-    max_iter=100000000
+    # max_iter=100000000
+    max_iter=1000
 
     # mkdir -p ${datadir}
 

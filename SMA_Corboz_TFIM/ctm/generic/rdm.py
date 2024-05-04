@@ -42,6 +42,7 @@ def _sym_pos_def_matrix(rdm, sym_pos_def=False, verbosity=0, who="unknown", **kw
     if verbosity > 0:
         log.info(
             f"{who} norm(rdm_sym) {rdm.norm()} norm(rdm_asym) {rdm_asym.norm()}")
+    # print("sym_pos_def:", sym_pos_def)
     if sym_pos_def:
         with torch.no_grad():
             if _torch_version_check("1.8.1"):
