@@ -1,13 +1,13 @@
 #!/bin/bash
 Kz=1.5
-for h in 0.00
-# for h in 0.00 0.05 0.10 0.15
+# for h in 0.00
+for h in 0.00 0.05 0.10 0.15
 do
     Jx=1.0
     Jy=1.0
     Jz=${Kz}
     # h=0.0
-    chi=64
+    chi=16
     bond_dim=4
     _size=3
     _step=4
@@ -19,9 +19,12 @@ do
     cp ${datadir}../${statefile} ${datadir}
     reuseCTMRGenv="True"
     removeCTMRGenv="False"
-    extra_flags="--CTMARGS_ctm_force_dl True --MultiGPU True --CTMARGS_projector_eps_multiplet 1e-4 --CTMARGS_ctm_conv_tol 1e-8"
-    # --CTMARGS_fpcm_freq 3 --CTMARGS_fpcm_fpt_tol 2e-6 --CTMARGS_fpcm_isogauge_tol 2e-6"
-    SMAMethod="SMA_Kitaev_withP_Correct_Model.py"
+    extra_flags="--CTMARGS_ctm_force_dl True --MultiGPU False --CTMARGS_projector_eps_multiplet 1e-4 --CTMARGS_ctm_conv_tol 1e-8"
+    extra_flags=${extra_flags}" --NormMat True --HamiMat True --CTMARGS_projector_svd_reltol 1e-8"
+    extra_flags=${extra_flags}" --CTMARGS_projector_method 4X4 --CTMARGS_projector_svd_method GESDD_CPU"
+    extra_flags=${extra_flags}" --CTMARGS_ctm_env_init_type CTMRG --UseVUMPSansazAC False"
+    extra_flags=${extra_flags}" --CTMARGS_ctm_absorb_normalization inf"
+    SMAMethod="SMA_Kitaev_withP_Correct_Model_gpugraph_divide.py"
     StoredMatMethod="SMA_stored_mat_Kitaev_Correct_Model.py"
     runSMA="True"
     runStoredMat="True"
@@ -29,7 +32,7 @@ do
     runGUPTRI="False"
     runDrawGUPTRI="False"
 
-    OnlyOnePoint="True"
+    OnlyOnePoint="False"
     max_iter=100000000
 
     # mkdir -p ${datadir}

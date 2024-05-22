@@ -146,44 +146,137 @@ print("kx=", kx/torch.pi*(2*args.size+2))
 print("ky=", ky/torch.pi*(2*args.size+2))
 
 
+# def ctmrg_conv_energy(state2, env, history, ctm_args=cfg.ctm_args):
+#     if not history:
+#         history = []
+#     old = []
+#     if (len(history) > 0):
+#         old = history[:4*env.chi]
+#     new = []
+#     u, s, v = torch.svd(env.C[((0, 0), (-1, -1))])
+#     for i in range(env.chi):
+#         new.append(s[i].item())
+#     u, s, v = torch.svd(env.C[((0, 0), (1, -1))])
+#     for i in range(env.chi):
+#         new.append(s[i].item())
+#     u, s, v = torch.svd(env.C[((0, 0), (1, -1))])
+#     for i in range(env.chi):
+#         new.append(s[i].item())
+#     u, s, v = torch.svd(env.C[((0, 0), (1, 1))])
+#     for i in range(env.chi):
+#         new.append(s[i].item())
+
+#     diff = 0.
+#     if (len(history) > 0):
+#         for i in range(4*env.chi):
+#             history[i] = new[i]
+#             if (abs(old[i]-new[i]) > diff):
+#                 diff = abs(old[i]-new[i])
+#     else:
+#         for i in range(4*env.chi):
+#             history.append(new[i])
+#     history.append(diff)
+#     print("diff=", diff)
+
+#     if (len(history[4*env.chi:]) > 1 and diff < ctm_args.ctm_conv_tol)\
+#             or len(history[4*env.chi:]) >= ctm_args.ctm_max_iter:
+#         log.info({"history_length": len(
+#             history[4*env.chi:]), "history": history[4*env.chi:]})
+#         print("")
+#         print("CTMRG length: "+str(len(history[4*env.chi:])))
+#         return True, history
+#     return False, history
 def ctmrg_conv_energy(state2, env, history, ctm_args=cfg.ctm_args):
+    torch.set_printoptions(profile="full")
+    torch.set_printoptions(linewidth=200)
+    torch.set_printoptions(precision=8)
     if not history:
         history = []
     old = []
     if (len(history) > 0):
-        old = history[:4*env.chi]
+        old = history[:8*env.chi+8]
     new = []
-    u, s, v = torch.svd(env.C[((0, 0), (-1, -1))])
+    u, s, v = torch.linalg.svd(env.C[((0, 0), (-1, -1))])
+    # print("C singular matrix:", s)
     for i in range(env.chi):
         new.append(s[i].item())
-    u, s, v = torch.svd(env.C[((0, 0), (1, -1))])
+    u, s, v = torch.linalg.svd(env.C[((0, 0), (1, -1))])
     for i in range(env.chi):
         new.append(s[i].item())
-    u, s, v = torch.svd(env.C[((0, 0), (1, -1))])
+    u, s, v = torch.linalg.svd(env.C[((0, 0), (1, -1))])
     for i in range(env.chi):
         new.append(s[i].item())
-    u, s, v = torch.svd(env.C[((0, 0), (1, 1))])
+    u, s, v = torch.linalg.svd(env.C[((0, 0), (1, 1))])
     for i in range(env.chi):
         new.append(s[i].item())
+
+    u, s, v = torch.linalg.svd(
+        env.T[((0, 0), (0, -1))].reshape(env.chi, env.chi*args.bond_dim**2))
+    for i in range(env.chi):
+        new.append(s[i].item())
+    u, s, v = torch.linalg.svd(
+        env.T[((0, 0), (0, 1))].permute(1, 0, 2).reshape(env.chi, env.chi*args.bond_dim**2))
+    for i in range(env.chi):
+        new.append(s[i].item())
+    u, s, v = torch.linalg.svd(
+        env.T[((0, 0), (-1, 0))].permute(0, 2, 1).reshape(env.chi, env.chi*args.bond_dim**2))
+    for i in range(env.chi):
+        new.append(s[i].item())
+    u, s, v = torch.linalg.svd(
+        env.T[((0, 0), (1, 0))].reshape(env.chi, env.chi*args.bond_dim**2))
+    for i in range(env.chi):
+        new.append(s[i].item())
+    # from hosvd import sthosvd as hosvd
+    # core, _, _ = hosvd(env.T[((0, 0), (0, -1))], [env.chi]*3)
+    # new.append(core)
+    # core, _, _ = hosvd(env.T[((0, 0), (0, 1))], [env.chi]*3)
+    # new.append(core)
+    # core, _, _ = hosvd(env.T[((0, 0), (-1, 0))], [env.chi]*3)
+    # new.append(core)
+    # core, _, _ = hosvd(env.T[((0, 0), (1, 0))], [env.chi]*3)
+    # new.append(core)
+    # print("core.shape: ", core.shape)
+    # print("core: ", core)
+
+    new.append(env.T[((0, 0), (0, -1))])
+    new.append(env.T[((0, 0), (0, 1))])
+    new.append(env.T[((0, 0), (-1, 0))])
+    new.append(env.T[((0, 0), (1, 0))])
+    new.append(env.C[((0, 0), (-1, -1))])
+    new.append(env.C[((0, 0), (-1, 1))])
+    new.append(env.C[((0, 0), (1, -1))])
+    new.append(env.C[((0, 0), (1, 1))])
 
     diff = 0.
     if (len(history) > 0):
-        for i in range(4*env.chi):
+        for i in range(8*env.chi):
             history[i] = new[i]
             if (abs(old[i]-new[i]) > diff):
                 diff = abs(old[i]-new[i])
+        for i in range(8):
+            history[8*env.chi+i] = new[8*env.chi+i]
+            if ((old[8*env.chi+i]-new[8*env.chi+i]).abs().max() > diff):
+                diff = (old[8*env.chi+i]-new[8*env.chi+i]).abs().max()
+            # print(torch.div(old[4*env.chi+i], new[4*env.chi+i]))
+            # if i == 0:
+            #     difftograph.append((old[4*env.chi+i]-new[4*env.chi+i]).norm())
+
     else:
-        for i in range(4*env.chi):
+        for i in range(8*env.chi+8):
             history.append(new[i])
     history.append(diff)
-    print("diff=", diff)
-
-    if (len(history[4*env.chi:]) > 1 and diff < ctm_args.ctm_conv_tol)\
-            or len(history[4*env.chi:]) >= ctm_args.ctm_max_iter:
+    print("diff={0:<50}".format(diff), end="\r")
+    # print("diff={0:<50}".format(diff))
+    # print(ctm_args.ctm_conv_tol)
+    if (len(history[8*env.chi+8:]) > 1 and diff < ctm_args.ctm_conv_tol)\
+            or len(history[8*env.chi+8:]) >= ctm_args.ctm_max_iter:
         log.info({"history_length": len(
-            history[4*env.chi:]), "history": history[4*env.chi:]})
+            history[8*env.chi+8:]), "history": history[8*env.chi+8:]})
         print("")
-        print("CTMRG length: "+str(len(history[4*env.chi:])))
+        print("modified CTMRG length: "+str(len(history[8*env.chi+8:])))
+        # import matplotlib.pyplot as plt
+        # plt.plot(difftograph)
+        # plt.show()
         return True, history
     return False, history
 
@@ -259,9 +352,9 @@ norm_factor____ = contract(temp, state_t,
 print("norm_factor____=", norm_factor____)
 print("<Norm>=", contract(temp, state_t,
       ([0], [0])).item())
-NormMat = NormMat/norm_factor____
-HamiMat = HamiMat/norm_factor____
-print("norm_factor____ divided")
+# NormMat = NormMat/norm_factor____
+# HamiMat = HamiMat/norm_factor____
+# print("norm_factor____ divided")
 
 state_t = view(state.site((0, 0)), (HamiMat.shape[0]))
 temp = contract(torch.from_numpy(HamiMat).to(
@@ -278,9 +371,10 @@ print("<Hami>=", contract(temp, state_t, ([0], [0])).item(
 # NormMat = NormMat - norm_factor____/2
 # HamiMat = HamiMat - norm_factor____*((2*args.size+2))*((2*args.size+1))/2
 
-# NormMat = NormMat
-# HamiMat = HamiMat/((2*args.size+2))/((2*args.size+1))
-# HamiMat = HamiMat
+# NormMat = NormMat/(2*args.size+2)**2
+# HamiMat = HamiMat/4/(2*args.size+2)**3/(2*args.size+1)/2
+HamiMat = HamiMat/4/(2*args.size+2)/(2*args.size+1)/2
+
 np.set_printoptions(threshold=np.inf)
 # print("NormMat", NormMat)
 # print("HamiMat", HamiMat)
@@ -335,15 +429,18 @@ idx = np.argsort(-np.abs(e))
 e = e[idx]
 v = v[:, idx]
 ################ Projector###############
-eig_size = 20
-vt = np.zeros((NormMat.shape[0], eig_size), dtype=cfg.global_args.dtype)
+eig_size = 60
+eig_truncate_up = 0
+vt = np.zeros((NormMat.shape[0], eig_size -
+              eig_truncate_up), dtype=cfg.global_args.dtype)
 with open(args.datadir+"eigN.txt", "a") as f:
     f.write("#kx={}, ky={}, Jx={}, Jy={}, Jz={}, h={}\n".format(
         args.kx, args.ky, args.Jx, args.Jy, args.Jz, args.h))
     f.write(" ".join(str(np.abs(_)) for _ in e))
     f.write("\n")
 for i in range(eig_size):
-    vt[:, i] = v[:, i]
+    if i >= eig_truncate_up:
+        vt[:, i-eig_truncate_up] = v[:, i]
 Proj = vt
 # ProjDag = np.conj(np.transpose(vt))
 ProjDag = scipy.linalg.pinv(vt, rtol=1e-25, atol=1e-25, check_finite=True)
@@ -357,8 +454,10 @@ NormMat_Ori = NormMat
 HamiMat = ProjDag@HamiMat@Proj
 NormMat = ProjDag@NormMat@Proj
 
-NormMat_inv = linalg.pinvh(NormMat)  # , cond=0.000001, rcond=0.000001)
-Es, Bs = np.linalg.eig(np.matmul(NormMat_inv, HamiMat))
+# , cond=0.000001, rcond=0.000001)
+# NormMat_inv = linalg.pinv(NormMat, check_finite=True)
+# Es, Bs = np.linalg.eig(np.matmul(NormMat_inv, HamiMat))
+Es, Bs = scipy.linalg.eig(HamiMat, NormMat)
 idx = np.argsort(Es)
 Es = Es[idx]
 Bs = Bs[:, idx]
@@ -372,14 +471,11 @@ Bs_Ori = Proj@Bs
 # print("ALL_E_lowest_ex=", (2*args.size+2) *
 #       (2*args.size+1)*(Es-4*energy_per_site.item().real))
 
-# print("E_lowest_ex=", (Es[0].real))
-# print("ALL_E_lowest_ex=", (Es.real))
+# print("E_lowest_ex=", (Es[0]-energy_per_site.item()))
+# print("ALL_E_lowest_ex=", (Es-energy_per_site.item()))
 
-print("E_lowest_ex=", (Es[0].real/4/(2*args.size+2) /
-      (2*args.size+1)/2-energy_per_site.item().real))
-print("ALL_E_lowest_ex=", (Es.real/4/(2*args.size+2) /
-      (2*args.size+1)/2-energy_per_site.item().real))
-
+print("E_lowest_ex=", Es[0])
+print("ALL_E_lowest_ex=", Es)
 
 # print("HamiMat.shape: ", HamiMat.shape)
 # print("NormMat.shape: ", NormMat.shape)
@@ -425,34 +521,50 @@ OpZZ = ZZ
 A_Ori = state.site((0, 0)).flatten().detach().cpu().numpy()
 cA_Ori = conj(state.site((0, 0))).resolve_conj(
 ).flatten().detach().cpu().numpy()
-SxA = torch.einsum('ij,jabcd->iabcd', OpX, conj(state.site((0, 0)))
+SxA = torch.einsum('ij,jabcd->iabcd', OpX, state.site((0, 0))
                    ).reshape(state.site((0, 0)).shape).flatten().detach().cpu().numpy()
-SyA = torch.einsum('ij,jabcd->iabcd', OpY, conj(state.site((0, 0)))
+SyA = torch.einsum('ij,jabcd->iabcd', OpY, state.site((0, 0))
                    ).reshape(state.site((0, 0)).shape).flatten().detach().cpu().numpy()
-SzA = torch.einsum('ij,jabcd->iabcd', OpZ, conj(state.site((0, 0)))
+SzA = torch.einsum('ij,jabcd->iabcd', OpZ, state.site((0, 0))
                    ).reshape(state.site((0, 0)).shape).flatten().detach().cpu().numpy()
-KxxA = torch.einsum('ij,jabcd->iabcd', OpXX, conj(state.site((0, 0)))
+SxAconj = torch.einsum('ij,jabcd->iabcd', OpX, conj(state.site((0, 0)))
+                       ).reshape(state.site((0, 0)).shape).flatten().detach().cpu().numpy()
+SyAconj = torch.einsum('ij,jabcd->iabcd', OpY, conj(state.site((0, 0)))
+                       ).reshape(state.site((0, 0)).shape).flatten().detach().cpu().numpy()
+SzAconj = torch.einsum('ij,jabcd->iabcd', OpZ, conj(state.site((0, 0)))
+                       ).reshape(state.site((0, 0)).shape).flatten().detach().cpu().numpy()
+KxxA = torch.einsum('ij,jabcd->iabcd', OpXX, state.site((0, 0))
                     ).reshape(state.site((0, 0)).shape).flatten().detach().cpu().numpy()
-KzzA = torch.einsum('ij,jabcd->iabcd', OpZZ, conj(state.site((0, 0)))
+KxxAconj = torch.einsum('ij,jabcd->iabcd', OpXX, conj(state.site((0, 0)))
+                        ).reshape(state.site((0, 0)).shape).flatten().detach().cpu().numpy()
+KzzA = torch.einsum('ij,jabcd->iabcd', OpZZ, state.site((0, 0))
                     ).reshape(state.site((0, 0)).shape).flatten().detach().cpu().numpy()
+KzzAconj = torch.einsum('ij,jabcd->iabcd', OpZZ, conj(state.site((0, 0)))
+                        ).reshape(state.site((0, 0)).shape).flatten().detach().cpu().numpy()
 # Project SxA, SyA, SzA to the subspace
 SxA_Ori = SxA
 SyA_Ori = SyA
 SzA_Ori = SzA
+SxAconj_Ori = SxAconj
+SyAconj_Ori = SyAconj
+SzAconj_Ori = SzAconj
 SxA = ProjDag@SxA
 SyA = ProjDag@SyA
 SzA = ProjDag@SzA
+SxAconj = ProjDag@SxAconj
+SyAconj = ProjDag@SyAconj
+SzAconj = ProjDag@SzAconj
 # KxxA = ProjDag@KxxA
 KzzA = ProjDag@KzzA
-
+KzzAconj = ProjDag@KzzAconj
 
 # Plot spectral weight
 
 # Es = Es.real
-# Es = (2*args.size+2)*(2*args.size+1)*(Es.real-4*energy_per_site.item().real)
+Es = (Es.real-energy_per_site.item().real)
 # Es = (((2*args.size+2))*((2*args.size+1))
 #       * Es.real-energy_per_site.item().real)
-Es = Es.real/4/(2*args.size+2)**3/(2*args.size+1)/2-energy_per_site.item().real
+# Es = Es.real-energy_per_site.item().real
 with open(args.datadir+"excitedE.txt", "a") as f:
     f.write("#kx={}, ky={}, Jx={}, Jy={}, Jz={}, h={}\n".format(
         args.kx, args.ky, args.Jx, args.Jy, args.Jz, args.h))
@@ -469,20 +581,30 @@ values = []
 # Spectral weight
 SW = []
 for i in range(Es.shape[0]):
+    # Bs_Ori_reshape = torch.from_numpy(Bs_Ori[:, i]).to(cfg.global_args.device).reshape((4,-1))
+    # SxBs_Ori_reshape = torch.einsum('ij,jk->ik', OpX, Bs_Ori_reshape)
+    # SxBs_Ori = SxBs_Ori_reshape.flatten().detach().cpu().numpy()
+    # SyBs_Ori_reshape = torch.einsum('ij,jk->ik', OpY, Bs_Ori_reshape)
+    # SyBs_Ori = SyBs_Ori_reshape.flatten().detach().cpu().numpy()
+    # SzBs_Ori_reshape = torch.einsum('ij,jk->ik', OpZ, Bs_Ori_reshape)
+    # SzBs_Ori = SzBs_Ori_reshape.flatten().detach().cpu().numpy()
+
     # ans = np.linalg.norm(((Bs[:, i]))@NormMat@np.transpose(SxA))**2 +\
     #     np.linalg.norm(((Bs[:, i]))@NormMat@np.transpose(SyA))**2 +\
     #     np.linalg.norm(((Bs[:, i]))@NormMat@np.transpose(SzA))**2
-    ans = np.linalg.norm(((Bs_Ori[:, i]))@NormMat_Ori@(SxA_Ori))**2 +\
-        np.linalg.norm(((Bs_Ori[:, i]))@NormMat_Ori@(SyA_Ori))**2 +\
-        np.linalg.norm(
-            ((Bs_Ori[:, i]))@NormMat_Ori@(SzA_Ori))**2
+    ans = np.linalg.norm(((Bs_Ori[:, i]))@NormMat_Ori@(SxAconj_Ori))**2 +\
+        np.linalg.norm(((Bs_Ori[:, i]))@NormMat_Ori@(SyAconj_Ori))**2 +\
+        np.linalg.norm(((Bs_Ori[:, i]))@NormMat_Ori@(SzAconj_Ori))**2
+    # ans = np.linalg.norm((SxBs_Ori)@NormMat_Ori@cA_Ori)**2 +\
+    #     np.linalg.norm((SyBs_Ori)@NormMat_Ori@cA_Ori)**2 +\
+    #     np.linalg.norm((SzBs_Ori)@NormMat_Ori@cA_Ori)**2
     SW.append((i, Es[i], ans))
     points.append((0, Es[i]))
     values.append(ans)
     # points.append((1, Es[i]))
     # values.append(ans)
     # print(Es[i])
-    # print(ans)
+    # print("spectral weight:", ans)
 
 with open(args.datadir+"SW.txt", "a") as f:
     f.write("#kx={}, ky={}, Jx={}, Jy={}, Jz={}, h={}\n".format(
@@ -501,7 +623,7 @@ with open(args.datadir+"SW.txt", "a") as f:
 # 2 vison
 TV = []
 for i in range(Es.shape[0]):
-    ans = np.linalg.norm(np.conj(np.transpose(Bs[:, i]))@NormMat@KzzA)**2
+    ans = np.linalg.norm(((Bs[:, i]))@NormMat@KzzAconj)**2
     TV.append((i, Es[i], ans))
 
 with open(args.datadir+"TV.txt", "a") as f:
@@ -513,11 +635,11 @@ with open(args.datadir+"TV.txt", "a") as f:
 # XX*A energy
 XXA = []
 for i in range(Es.shape[0]):
-    ans = ((KxxA))@HamiMat_Ori@KxxA
+    ans = ((KxxA))@HamiMat_Ori@KxxAconj
     ans = ans.real
     XXA.append((i, Es[i], ans))
 
-print("XXA: ", np.conj(np.transpose(KxxA))@HamiMat_Ori@KxxA)
+print("XXA: ", ((KxxA))@HamiMat_Ori@KxxAconj)
 with open(args.datadir+"XXA.txt", "a") as f:
     f.write("#kx={}, ky={}, Jx={}, Jy={}, Jz={}, h={}\n".format(
         args.kx, args.ky, args.Jx, args.Jy, args.Jz, args.h))
@@ -527,7 +649,7 @@ with open(args.datadir+"XXA.txt", "a") as f:
 # (IX+XI)*A energy
 XIIXA = []
 for i in range(Es.shape[0]):
-    ans = ((SxA_Ori))@HamiMat_Ori@SxA_Ori
+    ans = ((SxA_Ori))@HamiMat_Ori@SxAconj_Ori
     ans = ans.real
     XIIXA.append((i, Es[i], ans))
 
@@ -549,7 +671,9 @@ print("cA_Ori Norm: ", np.linalg.norm(cA_Ori))
 ans = ((A_Ori))@HamiMat_Ori@cA_Ori
 # print("GS Energy: ", ans/4/((2*args.size+2))/((2*args.size+1)))
 # below vv       sigma_x = 2*Sz and 4*3*2 bonds, 4*4 normMats
-print("GS Energy: ", ans/4/(2*args.size+2)/(2*args.size+1)/2)
+# print("GS Energy: ", ans/4/(2*args.size+2)/(2*args.size+1)/2)
+# print("GS Energy: ", ans/4/(2*args.size+2)/(2*args.size+1)/2)
+print("GS Energy: ", ans)
 rdm2x2 = rdm.rdm2x2((0, 0), state, env)
 # Anorm = torch.einsum('abcdabcd', rdm2x2)
 # print("ANorm: ", Anorm.item())

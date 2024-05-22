@@ -14,6 +14,10 @@ from ctm.generic.ctm_projectors import *
 
 def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite, Id, kx, ky,
                               C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right, args, firsttime, lasttime, P, Pt, isOnsiteWorking, MultiGPU=False):
+    torch.set_printoptions(profile="full")
+    torch.set_printoptions(linewidth=200)
+    torch.set_printoptions(precision=8)
+
     # if cfg.ctm_args.projector_method=='4X4':
     #     ctm_get_projectors=ctm_get_projectors_4x4
     # elif cfg.ctm_args.projector_method=='4X2':
@@ -67,11 +71,19 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                     (coord[0]+vec_coord[0], coord[1]+vec_coord[1]))
                 # if "left" not in C_up:
                 C_up["left"] = env.C[(new_coord, (-1, -1))].clone()
+                _, s, _ = torch.linalg.svd(
+                    C_up["left"])
+                print("C_up[\"left\"] direction:",
+                      direction, "original s:", s)
                 vec_coord = (args.size+1, -args.size)
                 new_coord = state.vertexToSite(
                     (coord[0]+vec_coord[0], coord[1]+vec_coord[1]))
                 # if "right" not in C_up:
                 C_up["right"] = env.C[(new_coord, (1, -1))].clone()
+                _, s, _ = torch.linalg.svd(
+                    C_up["right"])
+                print("C_up[\"right\"] direction:",
+                      direction, "original s:", s)
                 for j in range(2*args.size+2):
                     vec_coord = (-args.size+j, -args.size)
                     new_coord = state.vertexToSite(
@@ -101,8 +113,12 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                     nC2 = contract(C_up["left"], env.T[(
                         new_coord_l, (-1, 0))], ([0], [0]))
                     nC2 = contract(nC2, P2, ([0, 2], [0, 1]))
-                    print(nC2.abs().max())
+                    # print(nC2.abs().max())
                     C_up["left"] = nC2/nC2.abs().max()
+                    _, s, _ = torch.linalg.svd(
+                        C_up["left"])
+                    print("C_up[\"left\"] direction:",
+                          direction, "modified s:", s)
                     # env.C[(new_coord_l,(-1,-1))] = C_up["left"]
 
                     vec_coord_r = (args.size+1, -args.size+i)
@@ -123,8 +139,12 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                     nC1 = contract(C_up["right"], env.T[(
                         new_coord_r, (1, 0))], ([1], [0]))
                     nC1 = contract(Pt1, nC1, ([0, 1], [0, 1]))
-                    print(nC1.abs().max())
+                    # print(nC1.abs().max())
                     C_up["right"] = nC1/nC1.abs().max()
+                    _, s, _ = torch.linalg.svd(
+                        C_up["right"])
+                    print("C_up[\"right\"] direction:",
+                          direction, "modified s:", s)
                     # env.C[(new_coord_r,(1,-1))] = C_up["right"]
 
                     for j in range(2*args.size+2):
@@ -151,187 +171,105 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                             new_coord).size()[3], env.chi))
                         Pt1 = view(Pt[(i, coord_shift_right, direction)], (env.chi, stateDL.site(
                             coord_shift_right).size()[1], env.chi))
-                        if j % 2 == 0:
-                            if i == args.size and j == args.size and lasttime:
+                        # if j % 2 == 0:
+                        if i == args.size and j == args.size and lasttime:
+                            nT = contract(Pt2, T_up[(j)], ([0], [0]))
+                            dimsA = state.site(new_coord).size()
+                            nT = view(
+                                nT, (dimsA[2], dimsA[2], env.chi, phys_dim, phys_dim, dimsA[1], dimsA[1], env.chi))
+                            Aket = state.site(
+                                new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
+                            nT = contract(nT, Aket, ([0, 5], [2, 1]))
+                            nT = contract(
+                                nT, view(P1, (env.chi, dimsA[4], dimsA[4], env.chi)), ([5, 8], [0, 1]))
+                            # now nT=
+                            #        |------T-----|        phy_in_T 2,3
+                            # chi 1-Pt2     4     P1-8 chi phy_in_A 5
+                            #        |---0  A  7--|
+                            #               6
+                            # if i % 2 == 1:
+                            nT = contract(nT,
+                                          HyAndOnsiteLst, ([2, 3, 5], [0, 2, 1]))
+                            tempT = contiguous(
+                                permute(nT, (1, 6, 2, 0, 3, 4, 5)))
+                            # else:
+                            #     nT = contract(
+                            #         nT, HyAndOnsiteFst, ([2, 3], [0, 2]))
+                            #     tempT = contiguous(
+                            #         permute(nT, (1, 3, 7, 8, 2, 0, 4, 5, 6)))
+
+                            norm = tempT.detach()
+                            # if i%2==1:
+                            # tempT=
+                            #        |------T-----|
+                            # chi 0-Pt2     2     P1-6 chi phy_in_A 1
+                            #        |---3  A  5--|
+                            #               4
+                            # else:
+                            # tempT=
+                            #        |------T-----|        phy_in_T 2,3
+                            # chi 0-Pt2     4     P1-8 chi phy_in_A 1
+                            #        |---5  A  7--|
+                            #               6
+                            # print(norm.abs().max())
+                            T_up[(j)] = tempT/norm.abs().max()
+                        else:
+                            if i == 0 and firsttime:
+                                # Guess nT=
+                                #           |------------T3
+                                #  1 chi---Pt2           2
+                                #           |---0
                                 nT = contract(Pt2, T_up[(j)], ([0], [0]))
                                 dimsA = state.site(new_coord).size()
-                                nT = view(
-                                    nT, (dimsA[2], dimsA[2], env.chi, phys_dim, phys_dim, dimsA[1], dimsA[1], env.chi))
                                 Aket = state.site(
                                     new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
-                                nT = contract(nT, Aket, ([0, 5], [2, 1]))
-                                nT = contract(
-                                    nT, view(P1, (env.chi, dimsA[4], dimsA[4], env.chi)), ([5, 8], [0, 1]))
-                                # now nT=
-                                #        |------T-----|        phy_in_T 2,3
-                                # chi 1-Pt2     4     P1-8 chi phy_in_A 5
-                                #        |---0  A  7--|
-                                #               6
-                                if i % 2 == 1:
-                                    nT = contract(nT, permute(
-                                        HyAndOnsiteLst, (1, 0, 3, 2)), ([2, 3, 5], [0, 2, 1]))
-                                    tempT = contiguous(
-                                        permute(nT, (1, 6, 2, 0, 3, 4, 5)))
-                                else:
-                                    nT = contract(
-                                        nT, HyAndOnsiteFst, ([2, 3], [0, 2]))
-                                    tempT = contiguous(
-                                        permute(nT, (1, 3, 7, 8, 2, 0, 4, 5, 6)))
+                                # Guess DL=
+                                #           2
+                                #   3   A conj(A)  5         phy 0,1
+                                #           4
+                                DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
+                                          (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
+                                nT = contract(nT, DL, ([0, 2], [3, 2]))
+                                # Guess now
+                                #           |-----T1
+                                #  0 chi---Pt2    |               phy_in_DL 2,3
+                                #           |-----DL5
+                                #                 4
+                                nT = contract(nT, P1, ([1, 5], [0, 1]))
+                                # Guess now
+                                #           |-----T-----|
+                                #  0 chi---Pt2    |     P1---chi 4          phy_in_DL 1,2
+                                #           |-----DL----|
+                                #                 3
+
+                                tempT = contiguous(nT)
 
                                 norm = tempT.detach()
-                                # if i%2==1:
-                                # tempT=
-                                #        |------T-----|
-                                # chi 0-Pt2     2     P1-6 chi phy_in_A 1
-                                #        |---3  A  5--|
-                                #               4
-                                # else:
-                                # tempT=
-                                #        |------T-----|        phy_in_T 2,3
-                                # chi 0-Pt2     4     P1-8 chi phy_in_A 1
-                                #        |---5  A  7--|
-                                #               6
-                                print(norm.abs().max())
+                                # print(norm.abs().max())
                                 T_up[(j)] = tempT/norm.abs().max()
+                                # Guess now
+                                #    0---T--4
+                                #        3      phy 1,2
+
+                                # print("Hermitian test begin!")
+                                # _H = contiguous(einsum(
+                                #     'aabcde,fcg,hei->fbhgdi', DL, Pt2, P1).reshape([env.chi**2*args.bond_dim**2]*2))
+                                # _H = _H.resolve_conj().detach().cpu().numpy()
+                                # # Check Hermitian
+                                # import numpy as np
+                                # if not np.allclose(_H, np.conj(np.transpose(_H)), atol=1e-3):
+                                #     print("_H is not Hermitian")
+                                # else:
+                                #     print("_H is Hermitian")
+
+                                # newT = torch.einsum('abbcd', T_up[(j)])
+                                # newT = newT/newT.abs().max()
+                                # _, s, _ = torch.svd(
+                                #     newT.reshape(env.chi, env.chi*args.bond_dim**2))
+                                # print("direction:", direction,
+                                #       "modified s:", s)
+
                             else:
-                                if i == 0 and firsttime:
-                                    # Guess nT=
-                                    #           |------------T3
-                                    #  1 chi---Pt2           2
-                                    #           |---0
-                                    nT = contract(Pt2, T_up[(j)], ([0], [0]))
-                                    dimsA = state.site(new_coord).size()
-                                    Aket = state.site(
-                                        new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
-                                    # Guess DL=
-                                    #           2
-                                    #   3   A conj(A)  5         phy 0,1
-                                    #           4
-                                    DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
-                                              (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
-                                    nT = contract(nT, DL, ([0, 2], [3, 2]))
-                                    # Guess now
-                                    #           |-----T1
-                                    #  0 chi---Pt2    |               phy_in_DL 2,3
-                                    #           |-----DL5
-                                    #                 4
-                                    nT = contract(nT, P1, ([1, 5], [0, 1]))
-                                    # Guess now
-                                    #           |-----T-----|
-                                    #  0 chi---Pt2    |     P1---chi 4          phy_in_DL 1,2
-                                    #           |-----DL----|
-                                    #                 3
-
-                                    tempT = contiguous(nT)
-
-                                    norm = tempT.detach()
-                                    print(norm.abs().max())
-                                    T_up[(j)] = tempT/norm.abs().max()
-                                    # Guess now
-                                    #    0---T--4
-                                    #        3      phy 1,2
-                                    print("Hermitian test begin!")
-                                    _H = contiguous(einsum(
-                                        'aabcde,fcg,hei->fbhgdi', DL, Pt2, P1).reshape([env.chi**2*args.bond_dim**2]*2))
-                                    _H = _H.resolve_conj().detach().cpu().numpy()
-                                    # Check Hermitian
-                                    import numpy as np
-                                    if not np.allclose(_H, np.conj(np.transpose(_H)), atol=1e-3):
-                                        print("_H is not Hermitian")
-                                    else:
-                                        print("_H is Hermitian")
-
-                                    # newT = torch.einsum('abbcd', T_up[(j)])
-                                    # newT = newT/newT.abs().max()
-                                    # _, s, _ = torch.svd(
-                                    #     newT.reshape(env.chi, env.chi*args.bond_dim**2))
-                                    # print("direction:", direction,
-                                    #       "modified s:", s)
-
-                                else:
-                                    # Guess now
-                                    #    0--T--4          phy 1,2
-                                    #       3
-                                    nT = contract(Pt2, T_up[(j)], ([0], [0]))
-                                    # Guess now nT=
-                                    #           |-----T5
-                                    #  1 chi---Pt2    4    phy 2,3
-                                    #           |---0
-                                    dimsA = state.site(new_coord).size()
-                                    Aket = state.site(
-                                        new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
-                                    DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
-                                              (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
-                                    # Guess now DL=
-                                    #           2
-                                    #   3   A conj(A)  5         phy 0,1
-                                    #           4
-                                    nT = contract(nT, DL, ([0, 4], [3, 2]))
-                                    # Guess now
-                                    #           |-----T3
-                                    #  0 chi---Pt2    |               phy_in_T 1,2
-                                    #           |-----DL7             phy_in_DL 4,5
-                                    #                 6
-                                    nT = contract(nT, P1, ([3, 7], [0, 1]))
-                                    # Guess now
-                                    #           |-----T-----|
-                                    #  0 chi---Pt2    |     P1---chi 6    phy_in_T 1,2
-                                    #           |-----DL----|             phy_in_DL 3,4
-                                    #                 5
-
-                                    # Guess now H=
-                                    #         0  1
-                                    #         h1 h2
-                                    #         2  3
-                                    # now HyAndOnsite=
-                                    #         0  1
-                                    #         h1 h2
-                                    #         2  3
-                                    if i % 2 == 1:
-                                        nT = contract(nT, permute(
-                                            HyAndOnsiteLst, (1, 0, 3, 2)), ([1, 2, 3], [0, 2, 1]))
-                                        # Guess now
-                                        #           |-----T-----|
-                                        #  0 chi---Pt2    |     P1---chi 3
-                                        #           |-----DL----|             phy_in_DL 4,1
-                                        #                 2
-                                        print("here")
-                                        tempT = contiguous(
-                                            permute(nT, (0, 4, 1, 2, 3)))
-                                        # Guess now
-                                        #           |-----T-----|
-                                        #  0 chi---Pt2    |     P1---chi 4
-                                        #           |-----DL----|             phy_in_DL 1,2
-                                        #                 3
-                                    else:
-                                        nT = contract(
-                                            nT, HyAndOnsiteFst, ([1, 2, 4], [0, 2, 3]))
-                                        # Guess now
-                                        #           |-----T-----|
-                                        #  0 chi---Pt2    |     P1---chi 3
-                                        #           |-----DL----|             phy_in_DL 1,4
-                                        #                 2
-                                        tempT = contiguous(
-                                            permute(nT, (0, 1, 4, 2, 3)))
-                                        # Guess now
-                                        #           |-----T-----|
-                                        #  0 chi---Pt2    |     P1---chi 4
-                                        #           |-----DL----|             phy_in_DL 1,2
-                                        #                 3
-
-                                    norm = tempT.detach()
-                                    print(norm.abs().max())
-                                    T_up[(j)] = tempT/norm.abs().max()
-
-                                    newT = torch.einsum('abbcd', T_up[(j)])
-                                    newT = newT/newT.abs().max()
-                                    _, s, _ = torch.svd(
-                                        newT.reshape(env.chi, env.chi*args.bond_dim**2))
-                                    print("direction:", direction,
-                                          "modified s:", s)
-
-                        else:
-                            if i == args.size and j == args.size and lasttime:
                                 # Guess now
                                 #    0--T--4          phy 1,2
                                 #       3
@@ -341,108 +279,190 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                                 #  1 chi---Pt2    4    phy 2,3
                                 #           |---0
                                 dimsA = state.site(new_coord).size()
-                                nT = view(
-                                    nT, (dimsA[2], dimsA[2], env.chi, phys_dim, phys_dim, dimsA[1], dimsA[1], env.chi))
-                                # Guess now nT=
-                                #           |-----T---7 chi
-                                #  2 chi---Pt2    5,6    phy 3,4
-                                #           |---0,1
                                 Aket = state.site(
                                     new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
-                                # Guess now Aket=
-                                #      1
-                                #   2  A  4    phy 0
-                                #      3
-                                nT = contract(nT, Aket, ([0, 5], [2, 1]))
-                                # Guess now nT=
-                                #           |--------T---5 chi
-                                #  1 chi---Pt2       4           phy_in_T 2,3
-                                #           |---0   Aket-8       phy_in_Aket 6
-                                #                    7
-                                nT = contract(
-                                    nT, view(P1, (env.chi, dimsA[4], dimsA[4], env.chi)), ([5, 8], [0, 1]))
-                                # Guess now nT=
-                                #           |--------T--------|
-                                #  1 chi---Pt2       4       P1-8 chi    phy_in_T 2,3
-                                #           |---0   Aket  7---|          phy_in_Aket 5
-                                #                    6
-                                if i % 2 == 1:
-                                    nT = contract(
-                                        nT, HyAndOnsiteFst, ([2, 3, 5], [0, 2, 1]))
-                                    tempT = contiguous(
-                                        permute(nT, (1, 6, 2, 0, 3, 4, 5)))
-                                else:
-                                    nT = contract(nT, permute(
-                                        HyAndOnsiteLst, (1, 0, 3, 2)), ([2, 3], [0, 2]))
-                                    tempT = contiguous(
-                                        permute(nT, (1, 3, 7, 8, 2, 0, 4, 5, 6)))
+                                DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
+                                          (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
+                                # Guess now DL=
+                                #           2
+                                #   3   A conj(A)  5         phy 0,1
+                                #           4
+                                nT = contract(nT, DL, ([0, 4], [3, 2]))
+                                # Guess now
+                                #           |-----T3
+                                #  0 chi---Pt2    |               phy_in_T 1,2
+                                #           |-----DL7             phy_in_DL 4,5
+                                #                 6
+                                nT = contract(nT, P1, ([3, 7], [0, 1]))
+                                # Guess now
+                                #           |-----T-----|
+                                #  0 chi---Pt2    |     P1---chi 6    phy_in_T 1,2
+                                #           |-----DL----|             phy_in_DL 3,4
+                                #                 5
+
+                                # Guess now H=
+                                #         0  1
+                                #         h1 h2
+                                #         2  3
+                                # now HyAndOnsite=
+                                #         0  1
+                                #         h1 h2
+                                #         2  3
+                                # if i % 2 == 1:
+                                nT = contract(nT, HyAndOnsiteLst,
+                                              ([1, 2, 3], [0, 2, 1]))
+                                # Guess now
+                                #           |-----T-----|
+                                #  0 chi---Pt2    |     P1---chi 3
+                                #           |-----DL----|             phy_in_DL 4,1
+                                #                 2
+                                tempT = contiguous(
+                                    permute(nT, (0, 4, 1, 2, 3)))
+                                # Guess now
+                                #           |-----T-----|
+                                #  0 chi---Pt2    |     P1---chi 4
+                                #           |-----DL----|             phy_in_DL 1,2
+                                #                 3
+                                # else:
+                                #     nT = contract(
+                                #         nT, HyAndOnsiteFst, ([1, 2, 4], [0, 2, 3]))
+                                #     # Guess now
+                                #     #           |-----T-----|
+                                #     #  0 chi---Pt2    |     P1---chi 3
+                                #     #           |-----DL----|             phy_in_DL 1,4
+                                #     #                 2
+                                #     tempT = contiguous(
+                                #         permute(nT, (0, 1, 4, 2, 3)))
+                                #     # Guess now
+                                #     #           |-----T-----|
+                                #     #  0 chi---Pt2    |     P1---chi 4
+                                #     #           |-----DL----|             phy_in_DL 1,2
+                                #     #                 3
 
                                 norm = tempT.detach()
-                                print(norm.abs().max())
+                                # print(norm.abs().max())
                                 T_up[(j)] = tempT/norm.abs().max()
-                            else:
-                                if i == 0 and firsttime:
-                                    # Guess now
-                                    #    0---T--2
-                                    #        1
-                                    nT = contract(Pt2, T_up[(j)], ([0], [0]))
-                                    # Guess nT=
-                                    #           |-----T3
-                                    #  1 chi---Pt2    2
-                                    #           |---0
-                                    dimsA = state.site(new_coord).size()
-                                    Aket = state.site(
-                                        new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
-                                    DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
-                                              (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
-                                    # Guess now
-                                    #           2
-                                    #   3   A conj(A)  5         phy 0,1
-                                    #           4
-                                    nT = contract(nT, DL, ([0, 2], [3, 2]))
-                                    # Guess now
-                                    #           |-----T1
-                                    #  0 chi---Pt2    |               phy_in_DL 2,3
-                                    #           |-----DL5
-                                    #                 4
-                                    nT = contract(nT, P1, ([1, 5], [0, 1]))
-                                    # Guess now
-                                    #           |-----T-----|
-                                    #  0 chi---Pt2    |     P1---chi 4          phy_in_DL 1,2
-                                    #           |-----DL----|
-                                    #                 3
-                                    tempT = contiguous(nT)
 
-                                    norm = tempT.detach()
-                                    print(norm.abs().max())
-                                    T_up[(j)] = tempT/norm.abs().max()
-                                    # Guess now
-                                    #    0--T--4          phy 1,2
-                                    #       3
+                                newT = torch.einsum('abbcd', T_up[(j)])
+                                newT = newT/newT.abs().max()
+                                _, s, _ = torch.svd(
+                                    newT.reshape(env.chi, env.chi*args.bond_dim**2))
+                                print("direction:", direction,
+                                      "modified s:", s)
 
-                                else:
-                                    nT = contract(Pt2, T_up[(j)], ([0], [0]))
-                                    dimsA = state.site(new_coord).size()
-                                    Aket = state.site(
-                                        new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
-                                    DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
-                                              (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
-                                    nT = contract(nT, DL, ([0, 4], [3, 2]))
-                                    nT = contract(nT, P1, ([3, 7], [0, 1]))
-                                    if i % 2 == 1:
-                                        nT = contract(
-                                            nT, HyAndOnsiteFst, ([1, 2, 3], [0, 2, 1]))
-                                        tempT = contiguous(
-                                            permute(nT, (0, 4, 1, 2, 3)))
-                                    else:
-                                        nT = contract(nT, permute(
-                                            HyAndOnsiteLst, (1, 0, 3, 2)), ([1, 2, 4], [0, 2, 3]))
-                                        tempT = contiguous(
-                                            permute(nT, (0, 1, 4, 2, 3)))
+                        # else:
+                        #     if i == args.size and j == args.size and lasttime:
+                        #         # Guess now
+                        #         #    0--T--4          phy 1,2
+                        #         #       3
+                        #         nT = contract(Pt2, T_up[(j)], ([0], [0]))
+                        #         # Guess now nT=
+                        #         #           |-----T5
+                        #         #  1 chi---Pt2    4    phy 2,3
+                        #         #           |---0
+                        #         dimsA = state.site(new_coord).size()
+                        #         nT = view(
+                        #             nT, (dimsA[2], dimsA[2], env.chi, phys_dim, phys_dim, dimsA[1], dimsA[1], env.chi))
+                        #         # Guess now nT=
+                        #         #           |-----T---7 chi
+                        #         #  2 chi---Pt2    5,6    phy 3,4
+                        #         #           |---0,1
+                        #         Aket = state.site(
+                        #             new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
+                        #         # Guess now Aket=
+                        #         #      1
+                        #         #   2  A  4    phy 0
+                        #         #      3
+                        #         nT = contract(nT, Aket, ([0, 5], [2, 1]))
+                        #         # Guess now nT=
+                        #         #           |--------T---5 chi
+                        #         #  1 chi---Pt2       4           phy_in_T 2,3
+                        #         #           |---0   Aket-8       phy_in_Aket 6
+                        #         #                    7
+                        #         nT = contract(
+                        #             nT, view(P1, (env.chi, dimsA[4], dimsA[4], env.chi)), ([5, 8], [0, 1]))
+                        #         # Guess now nT=
+                        #         #           |--------T--------|
+                        #         #  1 chi---Pt2       4       P1-8 chi    phy_in_T 2,3
+                        #         #           |---0   Aket  7---|          phy_in_Aket 5
+                        #         #                    6
+                        #         if i % 2 == 1:
+                        #             nT = contract(
+                        #                 nT, HyAndOnsiteFst, ([2, 3, 5], [0, 2, 1]))
+                        #             tempT = contiguous(
+                        #                 permute(nT, (1, 6, 2, 0, 3, 4, 5)))
+                        #         else:
+                        #             nT = contract(nT, permute(
+                        #                 HyAndOnsiteLst, (1, 0, 3, 2)), ([2, 3], [0, 2]))
+                        #             tempT = contiguous(
+                        #                 permute(nT, (1, 3, 7, 8, 2, 0, 4, 5, 6)))
 
-                                    norm = tempT.detach()
-                                    print(norm.abs().max())
-                                    T_up[(j)] = tempT/norm.abs().max()
+                        #         norm = tempT.detach()
+                        #         # print(norm.abs().max())
+                        #         T_up[(j)] = tempT/norm.abs().max()
+                        #     else:
+                        #         if i == 0 and firsttime:
+                        #             # Guess now
+                        #             #    0---T--2
+                        #             #        1
+                        #             nT = contract(Pt2, T_up[(j)], ([0], [0]))
+                        #             # Guess nT=
+                        #             #           |-----T3
+                        #             #  1 chi---Pt2    2
+                        #             #           |---0
+                        #             dimsA = state.site(new_coord).size()
+                        #             Aket = state.site(
+                        #                 new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
+                        #             DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
+                        #                       (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
+                        #             # Guess now
+                        #             #           2
+                        #             #   3   A conj(A)  5         phy 0,1
+                        #             #           4
+                        #             nT = contract(nT, DL, ([0, 2], [3, 2]))
+                        #             # Guess now
+                        #             #           |-----T1
+                        #             #  0 chi---Pt2    |               phy_in_DL 2,3
+                        #             #           |-----DL5
+                        #             #                 4
+                        #             nT = contract(nT, P1, ([1, 5], [0, 1]))
+                        #             # Guess now
+                        #             #           |-----T-----|
+                        #             #  0 chi---Pt2    |     P1---chi 4          phy_in_DL 1,2
+                        #             #           |-----DL----|
+                        #             #                 3
+                        #             tempT = contiguous(nT)
+
+                        #             norm = tempT.detach()
+                        #             # print(norm.abs().max())
+                        #             T_up[(j)] = tempT/norm.abs().max()
+                        #             # Guess now
+                        #             #    0--T--4          phy 1,2
+                        #             #       3
+
+                        #         else:
+                        #             nT = contract(Pt2, T_up[(j)], ([0], [0]))
+                        #             dimsA = state.site(new_coord).size()
+                        #             Aket = state.site(
+                        #                 new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
+                        #             DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
+                        #                       (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
+                        #             nT = contract(nT, DL, ([0, 4], [3, 2]))
+                        #             nT = contract(nT, P1, ([3, 7], [0, 1]))
+                        #             if i % 2 == 1:
+                        #                 nT = contract(
+                        #                     nT, HyAndOnsiteFst, ([1, 2, 3], [0, 2, 1]))
+                        #                 tempT = contiguous(
+                        #                     permute(nT, (0, 4, 1, 2, 3)))
+                        #             else:
+                        #                 nT = contract(nT, permute(
+                        #                     HyAndOnsiteLst, (1, 0, 3, 2)), ([1, 2, 4], [0, 2, 3]))
+                        #                 tempT = contiguous(
+                        #                     permute(nT, (0, 1, 4, 2, 3)))
+
+                        #             norm = tempT.detach()
+                        #             # print(norm.abs().max())
+                        #             T_up[(j)] = tempT/norm.abs().max()
 
             elif direction == (0, 1):
                 local_device = cfg.global_args.device
@@ -510,7 +530,7 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                     nC1 = contract(C_down["left"], env.T[(
                         new_coord_l, (-1, 0))], ([0], [1]))
                     nC1 = contract(nC1, Pt1, ([0, 2], [0, 1]))
-                    print(nC1.abs().max())
+                    # print(nC1.abs().max())
                     C_down["left"] = nC1/nC1.abs().max()
                     # env.C[(new_coord_l,(-1,1))] = C_down["left"]
 
@@ -532,7 +552,7 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                     nC2 = contract(C_down["right"], env.T[(
                         new_coord_r, (1, 0))], ([0], [2]))
                     nC2 = contract(nC2, P2, ([0, 2], [0, 1]))
-                    print(nC2.abs().max())
+                    # print(nC2.abs().max())
                     C_down["right"] = nC2/nC2.abs().max()
                     # env.C[(new_coord_r,(1,1))] = C_down["right"]
 
@@ -552,92 +572,92 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                             new_coord).size()[1], env.chi))
                         Pt1 = view(Pt[(i, coord_shift_left, direction)], (env.chi, stateDL.site(
                             coord_shift_left).size()[3], env.chi))
-                        if j % 2 == 0:
-                            if i == 0 and firsttime:
-                                nT = contract(P1, T_down[(j)], ([0], [1]))
-                                dimsA = state.site(new_coord).size()
-                                Aket = state.site(
-                                    new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
-                                DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
-                                          (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
-                                nT = contract(nT, DL, ([0, 2], [3, 4]))
-                                nT = contract(nT, Pt2, ([1, 5], [0, 1]))
-                                # contiguous(permute(nT, (1,0,2)))
-                                tempT = contiguous(nT)
+                        # if j % 2 == 0:
+                        if i == 0 and firsttime:
+                            nT = contract(P1, T_down[(j)], ([0], [1]))
+                            dimsA = state.site(new_coord).size()
+                            Aket = state.site(
+                                new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
+                            DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
+                                      (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
+                            nT = contract(nT, DL, ([0, 2], [3, 4]))
+                            nT = contract(nT, Pt2, ([1, 5], [0, 1]))
+                            # contiguous(permute(nT, (1,0,2)))
+                            tempT = contiguous(nT)
 
-                                norm = tempT.detach()
-                                print(norm.abs().max())
-                                T_down[(j)] = tempT/norm.abs().max()
-
-                                newT = torch.einsum(
-                                    'abbcd', T_down[(j)])
-                                newT = newT/newT.abs().max()
-                                _, s, _ = torch.svd(
-                                    newT.reshape(env.chi, env.chi*args.bond_dim**2))
-                                print("direction:", direction,
-                                      "modified s:", s)
-                            else:
-                                nT = contract(P1, T_down[(j)], ([0], [0]))
-                                dimsA = state.site(new_coord).size()
-                                Aket = state.site(
-                                    new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
-                                DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
-                                          (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
-                                nT = contract(nT, DL, ([0, 4], [3, 4]))
-                                nT = contract(nT, Pt2, ([3, 7], [0, 1]))
-                                if i % 2 == 1:
-                                    nT = contract(
-                                        nT, HyAndOnsiteFst, ([1, 2, 3], [0, 2, 1]))
-                                    tempT = contiguous(
-                                        permute(nT, (0, 4, 1, 2, 3)))
-                                else:
-                                    nT = contract(nT, permute(
-                                        HyAndOnsiteLst, (1, 0, 3, 2)), ([1, 2, 4], [0, 2, 3]))
-                                    tempT = contiguous(
-                                        permute(nT, (0, 1, 4, 2, 3)))
-
-                                norm = tempT.detach()
-                                print(norm.abs().max())
-                                T_down[(j)] = tempT/norm.abs().max()
+                            norm = tempT.detach()
+                            # print(norm.abs().max())
+                            T_down[(j)] = tempT/norm.abs().max()
                         else:
-                            if i == 0 and firsttime:
-                                nT = contract(P1, T_down[(j)], ([0], [1]))
-                                dimsA = state.site(new_coord).size()
-                                Aket = state.site(
-                                    new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
-                                DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
-                                          (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
-                                nT = contract(nT, DL, ([0, 2], [3, 4]))
-                                nT = contract(nT, Pt2, ([1, 5], [0, 1]))
-                                # contiguous(permute(nT, (1,0,2)))
-                                tempT = contiguous(nT)
+                            nT = contract(P1, T_down[(j)], ([0], [0]))
+                            dimsA = state.site(new_coord).size()
+                            Aket = state.site(
+                                new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
+                            DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
+                                      (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
+                            nT = contract(nT, DL, ([0, 4], [3, 4]))
+                            nT = contract(nT, Pt2, ([3, 7], [0, 1]))
+                            # if i % 2 == 1:
+                            nT = contract(
+                                nT, permute(
+                                    Hy, (1, 0, 3, 2)), ([1, 2, 3], [0, 2, 1]))
+                            tempT = contiguous(
+                                permute(nT, (0, 4, 1, 2, 3)))
+                            # else:
+                            #     nT = contract(nT, permute(
+                            #         HyAndOnsiteLst, (1, 0, 3, 2)), ([1, 2, 4], [0, 2, 3]))
+                            #     tempT = contiguous(
+                            #         permute(nT, (0, 1, 4, 2, 3)))
 
-                                norm = tempT.detach()
-                                print(norm.abs().max())
-                                T_down[(j)] = tempT/norm.abs().max()
-                            else:
-                                nT = contract(P1, T_down[(j)], ([0], [0]))
-                                dimsA = state.site(new_coord).size()
-                                Aket = state.site(
-                                    new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
-                                DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
-                                          (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
-                                nT = contract(nT, DL, ([0, 4], [3, 4]))
-                                nT = contract(nT, Pt2, ([3, 7], [0, 1]))
-                                if i % 2 == 1:
-                                    nT = contract(nT, permute(
-                                        HyAndOnsiteLst, (1, 0, 3, 2)), ([1, 2, 3], [0, 2, 1]))
-                                    tempT = contiguous(
-                                        permute(nT, (0, 4, 1, 2, 3)))
-                                else:
-                                    nT = contract(
-                                        nT, HyAndOnsiteFst, ([1, 2, 4], [0, 2, 3]))
-                                    tempT = contiguous(
-                                        permute(nT, (0, 1, 4, 2, 3)))
+                            norm = tempT.detach()
+                            # print(norm.abs().max())
+                            T_down[(j)] = tempT/norm.abs().max()
+                            newT = torch.einsum(
+                                'abbcd', T_down[(j)])
+                            newT = newT/newT.abs().max()
+                            _, s, _ = torch.svd(
+                                newT.reshape(env.chi, env.chi*args.bond_dim**2))
+                            print("direction:", direction,
+                                  "modified s:", s)
+                        # else:
+                        #     if i == 0 and firsttime:
+                        #         nT = contract(P1, T_down[(j)], ([0], [1]))
+                        #         dimsA = state.site(new_coord).size()
+                        #         Aket = state.site(
+                        #             new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
+                        #         DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
+                        #                   (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
+                        #         nT = contract(nT, DL, ([0, 2], [3, 4]))
+                        #         nT = contract(nT, Pt2, ([1, 5], [0, 1]))
+                        #         # contiguous(permute(nT, (1,0,2)))
+                        #         tempT = contiguous(nT)
 
-                                norm = tempT.detach()
-                                print(norm.abs().max())
-                                T_down[(j)] = tempT/norm.abs().max()
+                        #         norm = tempT.detach()
+                        #         # print(norm.abs().max())
+                        #         T_down[(j)] = tempT/norm.abs().max()
+                        #     else:
+                        #         nT = contract(P1, T_down[(j)], ([0], [0]))
+                        #         dimsA = state.site(new_coord).size()
+                        #         Aket = state.site(
+                        #             new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
+                        #         DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
+                        #                   (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
+                        #         nT = contract(nT, DL, ([0, 4], [3, 4]))
+                        #         nT = contract(nT, Pt2, ([3, 7], [0, 1]))
+                        #         if i % 2 == 1:
+                        #             nT = contract(nT, permute(
+                        #                 HyAndOnsiteLst, (1, 0, 3, 2)), ([1, 2, 3], [0, 2, 1]))
+                        #             tempT = contiguous(
+                        #                 permute(nT, (0, 4, 1, 2, 3)))
+                        #         else:
+                        #             nT = contract(
+                        #                 nT, HyAndOnsiteFst, ([1, 2, 4], [0, 2, 3]))
+                        #             tempT = contiguous(
+                        #                 permute(nT, (0, 1, 4, 2, 3)))
+
+                        #         norm = tempT.detach()
+                        #         # print(norm.abs().max())
+                        #         T_down[(j)] = tempT/norm.abs().max()
             elif direction == (-1, 0):
                 local_device = cfg.global_args.device
                 if (MultiGPU):
@@ -704,7 +724,7 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                     nC1 = contract(C_left["up"], env.T[(
                         new_coord_u, (0, -1))], ([1], [0]))
                     nC1 = contract(Pt1, nC1, ([0, 1], [0, 1]))
-                    print(nC1.abs().max())
+                    # print(nC1.abs().max())
                     C_left["up"] = nC1/nC1.abs().max()
                     # env.C[(new_coord_u,(-1,-1))] = C_left["up"]
 
@@ -726,7 +746,7 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                     nC2 = contract(C_left["down"], env.T[(
                         new_coord_d, (0, 1))], ([1], [1]))
                     nC2 = contract(P2, nC2, ([0, 1], [0, 1]))
-                    print(nC2.abs().max())
+                    # print(nC2.abs().max())
                     C_left["down"] = nC2/nC2.abs().max()
                     # env.C[(new_coord_d,(-1,1))] = C_left["down"]
 
@@ -746,141 +766,139 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                             new_coord).size()[0], env.chi))
                         Pt1 = view(Pt[(i, coord_shift_up, direction)], (env.chi, stateDL.site(
                             coord_shift_up).size()[2], env.chi))
-                        if j % 2 == 0:
-                            if i == args.size and j == args.size and lasttime:
-                                nT = contract(P1, T_left[(j)], ([0], [0]))
-                                dimsA = state.site(new_coord).size()
-                                nT = view(
-                                    nT, (dimsA[1], dimsA[1], env.chi, phys_dim, phys_dim, dimsA[2], dimsA[2], env.chi))
-                                Aket = state.site(
-                                    new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
-                                nT = contract(nT, Aket, ([0, 5], [1, 2]))
-                                nT = contract(
-                                    nT, view(Pt2, (env.chi, dimsA[3], dimsA[3], env.chi)), ([5, 7], [0, 1]))
-                                if i % 2 == 1:
-                                    nT = contract(nT, permute(
-                                        Hx, (1, 0, 3, 2)), ([2, 3, 5], [0, 2, 1]))
-                                    tempT = contiguous(
-                                        permute(nT, (1, 6, 0, 2, 4, 3, 5)))
-                                else:
-                                    nT = contract(nT, Hx, ([2, 3], [0, 2]))
-                                    tempT = contiguous(
-                                        permute(nT, (1, 3, 7, 8, 0, 2, 5, 4, 6)))
+                        # if j % 2 == 0:
+                        if i == args.size and j == args.size and lasttime:
+                            nT = contract(P1, T_left[(j)], ([0], [0]))
+                            dimsA = state.site(new_coord).size()
+                            nT = view(
+                                nT, (dimsA[1], dimsA[1], env.chi, phys_dim, phys_dim, dimsA[2], dimsA[2], env.chi))
+                            Aket = state.site(
+                                new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
+                            nT = contract(nT, Aket, ([0, 5], [1, 2]))
+                            nT = contract(
+                                nT, view(Pt2, (env.chi, dimsA[3], dimsA[3], env.chi)), ([5, 7], [0, 1]))
+                            # if i % 2 == 1:
+                            nT = contract(nT, Hx, ([2, 3, 5], [0, 2, 1]))
+                            tempT = contiguous(
+                                permute(nT, (1, 6, 0, 2, 4, 3, 5)))
+                            # else:
+                            #     nT = contract(nT, Hx, ([2, 3], [0, 2]))
+                            #     tempT = contiguous(
+                            #         permute(nT, (1, 3, 7, 8, 0, 2, 5, 4, 6)))
 
-                                norm = tempT.detach()
-                                print(norm.abs().max())
-                                T_left[(j)] = tempT/norm.abs().max()
-                            else:
-                                if i == 0 and firsttime:
-                                    nT = contract(P1, T_left[(j)], ([0], [0]))
-                                    dimsA = state.site(new_coord).size()
-                                    Aket = state.site(
-                                        new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
-                                    DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
-                                              (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
-                                    nT = contract(nT, DL, ([0, 3], [2, 3]))
-                                    nT = contract(nT, Pt2, ([1, 4], [0, 1]))
-                                    # contiguous(permute(nT, (0,2,1)))
-                                    tempT = contiguous(nT)
-
-                                    norm = tempT.detach()
-                                    print(norm.abs().max())
-                                    T_left[(j)] = tempT/norm.abs().max()
-
-                                    newT = torch.einsum(
-                                        'abbcd', T_left[(j)])
-                                    newT = newT/newT.abs().max()
-                                    _, s, _ = torch.svd(
-                                        newT.reshape(env.chi, env.chi*args.bond_dim**2))
-                                    print("direction:", direction,
-                                          "modified s:", s)
-                                else:
-                                    nT = contract(P1, T_left[(j)], ([0], [0]))
-                                    dimsA = state.site(new_coord).size()
-                                    Aket = state.site(
-                                        new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
-                                    DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
-                                              (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
-                                    nT = contract(nT, DL, ([0, 4], [2, 3]))
-                                    nT = contract(nT, Pt2, ([3, 6], [0, 1]))
-                                    if i % 2 == 1:
-                                        nT = contract(nT, permute(
-                                            Hx, (1, 0, 3, 2)), ([1, 2, 3], [0, 2, 1]))
-                                        tempT = contiguous(
-                                            permute(nT, (0, 4, 1, 2, 3)))
-                                    else:
-                                        nT = contract(
-                                            nT, Hx, ([1, 2, 4], [0, 2, 3]))
-                                        tempT = contiguous(
-                                            permute(nT, (0, 1, 4, 2, 3)))
-
-                                    norm = tempT.detach()
-                                    print(norm.abs().max())
-                                    T_left[(j)] = tempT/norm.abs().max()
+                            norm = tempT.detach()
+                            # print(norm.abs().max())
+                            T_left[(j)] = tempT/norm.abs().max()
                         else:
-                            if i == args.size and j == args.size and lasttime:
+                            if i == 0 and firsttime:
                                 nT = contract(P1, T_left[(j)], ([0], [0]))
                                 dimsA = state.site(new_coord).size()
-                                nT = view(
-                                    nT, (dimsA[1], dimsA[1], env.chi, phys_dim, phys_dim, dimsA[2], dimsA[2], env.chi))
                                 Aket = state.site(
                                     new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
-                                nT = contract(nT, Aket, ([0, 5], [1, 2]))
-                                nT = contract(
-                                    nT, view(Pt2, (env.chi, dimsA[3], dimsA[3], env.chi)), ([5, 7], [0, 1]))
-                                if i % 2 == 1:
-                                    nT = contract(
-                                        nT, Hx, ([2, 3, 5], [0, 2, 1]))
-                                    tempT = contiguous(
-                                        permute(nT, (1, 6, 0, 2, 4, 3, 5)))
-                                else:
-                                    nT = contract(nT, permute(
-                                        Hx, (1, 0, 3, 2)), ([2, 3], [0, 2]))
-                                    tempT = contiguous(
-                                        permute(nT, (1, 3, 7, 8, 0, 2, 5, 4, 6)))
+                                DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
+                                          (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
+                                nT = contract(nT, DL, ([0, 3], [2, 3]))
+                                nT = contract(nT, Pt2, ([1, 4], [0, 1]))
+                                # contiguous(permute(nT, (0,2,1)))
+                                tempT = contiguous(nT)
 
                                 norm = tempT.detach()
-                                print(norm.abs().max())
+                                # print(norm.abs().max())
                                 T_left[(j)] = tempT/norm.abs().max()
                             else:
-                                if i == 0 and firsttime:
-                                    nT = contract(P1, T_left[(j)], ([0], [0]))
-                                    dimsA = state.site(new_coord).size()
-                                    Aket = state.site(
-                                        new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
-                                    DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
-                                              (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
-                                    nT = contract(nT, DL, ([0, 3], [2, 3]))
-                                    nT = contract(nT, Pt2, ([1, 4], [0, 1]))
-                                    # contiguous(permute(nT, (0,2,1)))
-                                    tempT = contiguous(nT)
+                                nT = contract(P1, T_left[(j)], ([0], [0]))
+                                dimsA = state.site(new_coord).size()
+                                Aket = state.site(
+                                    new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
+                                DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
+                                          (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
+                                nT = contract(nT, DL, ([0, 4], [2, 3]))
+                                nT = contract(nT, Pt2, ([3, 6], [0, 1]))
+                                # if i % 2 == 1:
+                                nT = contract(nT, Hx, ([1, 2, 3], [0, 2, 1]))
+                                tempT = contiguous(
+                                    permute(nT, (0, 4, 1, 2, 3)))
+                                # else:
+                                #     nT = contract(
+                                #         nT, Hx, ([1, 2, 4], [0, 2, 3]))
+                                #     tempT = contiguous(
+                                #         permute(nT, (0, 1, 4, 2, 3)))
 
-                                    norm = tempT.detach()
-                                    print(norm.abs().max())
-                                    T_left[(j)] = tempT/norm.abs().max()
-                                else:
-                                    nT = contract(P1, T_left[(j)], ([0], [0]))
-                                    dimsA = state.site(new_coord).size()
-                                    Aket = state.site(
-                                        new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
-                                    DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
-                                              (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
-                                    nT = contract(nT, DL, ([0, 4], [2, 3]))
-                                    nT = contract(nT, Pt2, ([3, 6], [0, 1]))
-                                    if i % 2 == 1:
-                                        nT = contract(
-                                            nT, Hx, ([1, 2, 3], [0, 2, 1]))
-                                        tempT = contiguous(
-                                            permute(nT, (0, 4, 1, 2, 3)))
-                                    else:
-                                        nT = contract(nT, permute(
-                                            Hx, (1, 0, 3, 2)), ([1, 2, 4], [0, 2, 3]))
-                                        tempT = contiguous(
-                                            permute(nT, (0, 1, 4, 2, 3)))
+                                norm = tempT.detach()
+                                # print(norm.abs().max())
+                                T_left[(j)] = tempT/norm.abs().max()
 
-                                    norm = tempT.detach()
-                                    print(norm.abs().max())
-                                    T_left[(j)] = tempT/norm.abs().max()
+                                newT = torch.einsum(
+                                    'abbcd', T_left[(j)])
+                                newT = newT/newT.abs().max()
+                                _, s, _ = torch.svd(
+                                    newT.reshape(env.chi, env.chi*args.bond_dim**2))
+                                print("direction:", direction,
+                                      "modified s:", s)
+                        # else:
+                        #     if i == args.size and j == args.size and lasttime:
+                        #         nT = contract(P1, T_left[(j)], ([0], [0]))
+                        #         dimsA = state.site(new_coord).size()
+                        #         nT = view(
+                        #             nT, (dimsA[1], dimsA[1], env.chi, phys_dim, phys_dim, dimsA[2], dimsA[2], env.chi))
+                        #         Aket = state.site(
+                        #             new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
+                        #         nT = contract(nT, Aket, ([0, 5], [1, 2]))
+                        #         nT = contract(
+                        #             nT, view(Pt2, (env.chi, dimsA[3], dimsA[3], env.chi)), ([5, 7], [0, 1]))
+                        #         if i % 2 == 1:
+                        #             nT = contract(
+                        #                 nT, Hx, ([2, 3, 5], [0, 2, 1]))
+                        #             tempT = contiguous(
+                        #                 permute(nT, (1, 6, 0, 2, 4, 3, 5)))
+                        #         else:
+                        #             nT = contract(nT, permute(
+                        #                 Hx, (1, 0, 3, 2)), ([2, 3], [0, 2]))
+                        #             tempT = contiguous(
+                        #                 permute(nT, (1, 3, 7, 8, 0, 2, 5, 4, 6)))
+
+                        #         norm = tempT.detach()
+                        #         # print(norm.abs().max())
+                        #         T_left[(j)] = tempT/norm.abs().max()
+                        #     else:
+                        #         if i == 0 and firsttime:
+                        #             nT = contract(P1, T_left[(j)], ([0], [0]))
+                        #             dimsA = state.site(new_coord).size()
+                        #             Aket = state.site(
+                        #                 new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
+                        #             DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
+                        #                       (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
+                        #             nT = contract(nT, DL, ([0, 3], [2, 3]))
+                        #             nT = contract(nT, Pt2, ([1, 4], [0, 1]))
+                        #             # contiguous(permute(nT, (0,2,1)))
+                        #             tempT = contiguous(nT)
+
+                        #             norm = tempT.detach()
+                        #             # print(norm.abs().max())
+                        #             T_left[(j)] = tempT/norm.abs().max()
+                        #         else:
+                        #             nT = contract(P1, T_left[(j)], ([0], [0]))
+                        #             dimsA = state.site(new_coord).size()
+                        #             Aket = state.site(
+                        #                 new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
+                        #             DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
+                        #                       (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
+                        #             nT = contract(nT, DL, ([0, 4], [2, 3]))
+                        #             nT = contract(nT, Pt2, ([3, 6], [0, 1]))
+                        #             if i % 2 == 1:
+                        #                 nT = contract(
+                        #                     nT, Hx, ([1, 2, 3], [0, 2, 1]))
+                        #                 tempT = contiguous(
+                        #                     permute(nT, (0, 4, 1, 2, 3)))
+                        #             else:
+                        #                 nT = contract(nT, permute(
+                        #                     Hx, (1, 0, 3, 2)), ([1, 2, 4], [0, 2, 3]))
+                        #                 tempT = contiguous(
+                        #                     permute(nT, (0, 1, 4, 2, 3)))
+
+                        #             norm = tempT.detach()
+                        #             # print(norm.abs().max())
+                        #             T_left[(j)] = tempT/norm.abs().max()
 
             elif direction == (1, 0):
                 if (MultiGPU):
@@ -947,7 +965,7 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                     nC2 = contract(C_right["up"], env.T[(
                         new_coord_u, (0, -1))], ([0], [2]))
                     nC2 = contract(nC2, P2, ([0, 2], [0, 1]))
-                    print(nC2.abs().max())
+                    # print(nC2.abs().max())
                     C_right["up"] = nC2/nC2.abs().max()
                     # env.C[(new_coord_u,(1,-1))] = C_right["up"]
 
@@ -969,7 +987,7 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                     nC1 = contract(C_right["down"], env.T[(
                         new_coord_d, (0, 1))], ([1], [2]))
                     nC1 = contract(Pt1, nC1, ([0, 1], [0, 1]))
-                    print(nC1.abs().max())
+                    # print(nC1.abs().max())
                     C_right["down"] = nC1/nC1.abs().max()
                     # env.C[(new_coord_d,(1,1))] = C_right["down"]
                     for j in range(2*args.size+2):
@@ -993,120 +1011,121 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                             new_coord).size()[2], env.chi))
                         Pt1 = view(Pt[(i, coord_shift_down, direction)], (env.chi, stateDL.site(
                             coord_shift_down).size()[0], env.chi))
-                        if j % 2 == 0:
-                            if i == 0 and firsttime:
-                                #    0
-                                # 1--T
-                                #    2
-                                nT = contract(Pt2, T_right[(j)], ([0], [0]))
-                                # now,
-                                #       1 chi
-                                #        |
-                                #     |--Pt2--|
-                                #     0       |
-                                #          2--T
-                                #             3
-                                dimsA = state.site(new_coord).size()
-                                Aket = state.site(
-                                    new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
-                                DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
-                                          (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
-                                # now DL=
-                                #           2
-                                #   3   A conj(A)  5         phy 0,1
-                                #           4
-                                nT = contract(nT, DL, ([0, 2], [2, 5]))
-                                # now,
-                                #       0 chi
-                                #        |
-                                #     |--Pt2--|
-                                #     |       |          phy 2,3
-                                #   4-DL------T
-                                #     5       1
-                                nT = contract(nT, P1, ([1, 5], [0, 1]))
-                                # now,
-                                #       0 chi
-                                #        |
-                                #     |--Pt2--|
-                                #     |       |          phy 1,2
-                                #   3-DL------T
-                                #     |       |
-                                #     |---P1--|
-                                #         4
-                                tempT = contiguous(nT)
+                        # if j % 2 == 0:
+                        if i == 0 and firsttime:
+                            #    0
+                            # 1--T
+                            #    2
+                            nT = contract(Pt2, T_right[(j)], ([0], [0]))
+                            # now,
+                            #       1 chi
+                            #        |
+                            #     |--Pt2--|
+                            #     0       |
+                            #          2--T
+                            #             3
+                            dimsA = state.site(new_coord).size()
+                            Aket = state.site(
+                                new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
+                            DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
+                                      (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
+                            # now DL=
+                            #           2
+                            #   3   A conj(A)  5         phy 0,1
+                            #           4
+                            nT = contract(nT, DL, ([0, 2], [2, 5]))
+                            # now,
+                            #       0 chi
+                            #        |
+                            #     |--Pt2--|
+                            #     |       |          phy 2,3
+                            #   4-DL------T
+                            #     5       1
+                            nT = contract(nT, P1, ([1, 5], [0, 1]))
+                            # now,
+                            #       0 chi
+                            #        |
+                            #     |--Pt2--|
+                            #     |       |          phy 1,2
+                            #   3-DL------T
+                            #     |       |
+                            #     |---P1--|
+                            #         4
+                            tempT = contiguous(nT)
 
-                                norm = tempT.detach()
-                                print(norm.abs().max())
-                                T_right[(j)] = tempT/norm.abs().max()
-
-                                newT = torch.einsum(
-                                    'abbcd', T_right[(j)])
-                                newT = newT/newT.abs().max()
-                                _, s, _ = torch.svd(
-                                    newT.reshape(env.chi, env.chi*args.bond_dim**2))
-                                print("direction:", direction,
-                                      "modified s:", s)
-                            else:
-                                nT = contract(Pt2, T_right[(j)], ([0], [0]))
-                                dimsA = state.site(new_coord).size()
-                                Aket = state.site(
-                                    new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
-                                DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
-                                          (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
-                                nT = contract(nT, DL, ([0, 4], [2, 5]))
-                                nT = contract(nT, P1, ([3, 7], [0, 1]))
-                                if i % 2 == 1:
-                                    nT = contract(
-                                        nT, Hx, ([1, 2, 3], [0, 2, 1]))
-                                    tempT = contiguous(
-                                        permute(nT, (0, 4, 1, 2, 3)))
-                                else:
-                                    nT = contract(nT, permute(
-                                        Hx, (1, 0, 3, 2)), ([1, 2, 4], [0, 2, 3]))
-                                    tempT = contiguous(
-                                        permute(nT, (0, 1, 4, 2, 3)))
-
-                                norm = tempT.detach()
-                                print(norm.abs().max())
-                                T_right[(j)] = tempT/norm.abs().max()
+                            norm = tempT.detach()
+                            # print(norm.abs().max())
+                            T_right[(j)] = tempT/norm.abs().max()
                         else:
-                            if i == 0 and firsttime:
-                                nT = contract(Pt2, T_right[(j)], ([0], [0]))
-                                dimsA = state.site(new_coord).size()
-                                Aket = state.site(
-                                    new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
-                                DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
-                                          (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
-                                nT = contract(nT, DL, ([0, 2], [2, 5]))
-                                nT = contract(nT, P1, ([1, 5], [0, 1]))
-                                tempT = contiguous(nT)
+                            nT = contract(Pt2, T_right[(j)], ([0], [0]))
+                            dimsA = state.site(new_coord).size()
+                            Aket = state.site(
+                                new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
+                            DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
+                                      (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
+                            nT = contract(nT, DL, ([0, 4], [2, 5]))
+                            nT = contract(nT, P1, ([3, 7], [0, 1]))
+                            # if i % 2 == 1:
+                            nT = contract(
+                                nT, permute(
+                                    Hx, (1, 0, 3, 2)), ([1, 2, 3], [0, 2, 1]))
+                            tempT = contiguous(
+                                permute(nT, (0, 4, 1, 2, 3)))
+                            # else:
+                            #     nT = contract(nT, permute(
+                            #         Hx, (1, 0, 3, 2)), ([1, 2, 4], [0, 2, 3]))
+                            #     tempT = contiguous(
+                            #         permute(nT, (0, 1, 4, 2, 3)))
 
-                                norm = tempT.detach()
-                                print(norm.abs().max())
-                                T_right[(j)] = tempT/norm.abs().max()
-                            else:
-                                nT = contract(Pt2, T_right[(j)], ([0], [0]))
-                                dimsA = state.site(new_coord).size()
-                                Aket = state.site(
-                                    new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
-                                DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
-                                          (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
-                                nT = contract(nT, DL, ([0, 4], [2, 5]))
-                                nT = contract(nT, P1, ([3, 7], [0, 1]))
-                                if i % 2 == 1:
-                                    nT = contract(nT, permute(
-                                        Hx, (1, 0, 3, 2)), ([1, 2, 3], [0, 2, 1]))
-                                    tempT = contiguous(
-                                        permute(nT, (0, 4, 1, 2, 3)))
-                                else:
-                                    nT = contract(
-                                        nT, Hx, ([1, 2, 4], [0, 2, 3]))
-                                    tempT = contiguous(
-                                        permute(nT, (0, 1, 4, 2, 3)))
+                            norm = tempT.detach()
+                            # print(norm.abs().max())
+                            T_right[(j)] = tempT/norm.abs().max()
 
-                                norm = tempT.detach()
-                                print(norm.abs().max())
-                                T_right[(j)] = tempT/norm.abs().max()
+                            newT = torch.einsum(
+                                'abbcd', T_right[(j)])
+                            newT = newT/newT.abs().max()
+                            _, s, _ = torch.svd(
+                                newT.reshape(env.chi, env.chi*args.bond_dim**2))
+                            print("direction:", direction,
+                                  "modified s:", s)
+                        # else:
+                        #     if i == 0 and firsttime:
+                        #         nT = contract(Pt2, T_right[(j)], ([0], [0]))
+                        #         dimsA = state.site(new_coord).size()
+                        #         Aket = state.site(
+                        #             new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
+                        #         DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
+                        #                   (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
+                        #         nT = contract(nT, DL, ([0, 2], [2, 5]))
+                        #         nT = contract(nT, P1, ([1, 5], [0, 1]))
+                        #         tempT = contiguous(nT)
+
+                        #         norm = tempT.detach()
+                        #         # print(norm.abs().max())
+                        #         T_right[(j)] = tempT/norm.abs().max()
+                        #     else:
+                        #         nT = contract(Pt2, T_right[(j)], ([0], [0]))
+                        #         dimsA = state.site(new_coord).size()
+                        #         Aket = state.site(
+                        #             new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
+                        #         DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
+                        #                   (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
+                        #         nT = contract(nT, DL, ([0, 4], [2, 5]))
+                        #         nT = contract(nT, P1, ([3, 7], [0, 1]))
+                        #         if i % 2 == 1:
+                        #             nT = contract(nT, permute(
+                        #                 Hx, (1, 0, 3, 2)), ([1, 2, 3], [0, 2, 1]))
+                        #             tempT = contiguous(
+                        #                 permute(nT, (0, 4, 1, 2, 3)))
+                        #         else:
+                        #             nT = contract(
+                        #                 nT, Hx, ([1, 2, 4], [0, 2, 3]))
+                        #             tempT = contiguous(
+                        #                 permute(nT, (0, 1, 4, 2, 3)))
+
+                        #         norm = tempT.detach()
+                        #         # print(norm.abs().max())
+                        #         T_right[(j)] = tempT/norm.abs().max()
 
     lam = lam.to(cfg.global_args.device)
     B_grad = B_grad.to(cfg.global_args.device)
@@ -1195,53 +1214,53 @@ def Create_Localsite_Hami(state, env, C_up, T_up, C_left, T_left, C_down, T_down
             FU = FU/FU.abs().max()
 
         for i in range(args.size):
-            if i % 2 == 0:
-                temp = contract(FL, T_up[(i)], ([0], [0]))
-                temp = contract(temp, T_down[(i)], ([0, 3], [0, 3]))
-                # now
-                #   C--T--2
-                #   |  |      phy_T1 = 0,1
-                #   C--T--5   phy_T2 = 3,4
-                # This is vertical H
-                # FL = contract(temp,Hy,([0,1,3,4],[0,2,1,3]))
-                # We put on-site term now
-                # Note that in Create_Localsite_Hami_Env,
-                # We put on-site term by vertical H
-                # Thus, we need to put it now, and don't need to put
-                # it in horizontal H later
-                FL = contract(temp, HyAndOnsiteBoth,
-                              ([0, 1, 3, 4], [0, 2, 1, 3]))
+            # if i % 2 == 0:
+            temp = contract(FL, T_up[(i)], ([0], [0]))
+            temp = contract(temp, T_down[(i)], ([0, 3], [0, 3]))
+            # now
+            #   C--T--2
+            #   |  |      phy_T1 = 0,1
+            #   C--T--5   phy_T2 = 3,4
+            # This is vertical H
+            # FL = contract(temp,Hy,([0,1,3,4],[0,2,1,3]))
+            # We put on-site term now
+            # Note that in Create_Localsite_Hami_Env,
+            # We put on-site term by vertical H
+            # Thus, we need to put it now, and don't need to put
+            # it in horizontal H later
+            FL = contract(temp, HyAndOnsiteBoth,
+                          ([0, 1, 3, 4], [0, 2, 1, 3]))
 
-                FL2 = FL.detach()
-                print("CreateHami: ", FL2.abs().max())
-                FL = FL/FL2.abs().max()
+            FL2 = FL.detach()
+            print("CreateHami: ", FL2.abs().max())
+            FL = FL/FL2.abs().max()
 
-                temp = contract(FU, T_left[(i)], ([0], [0]))
-                temp = contract(temp, T_right[(i)], ([0, 3], [0, 3]))
-                FU = contract(temp, Hx, ([0, 1, 3, 4], [0, 2, 1, 3]))
+            temp = contract(FU, T_left[(i)], ([0], [0]))
+            temp = contract(temp, T_right[(i)], ([0, 3], [0, 3]))
+            FU = contract(temp, Hx, ([0, 1, 3, 4], [0, 2, 1, 3]))
 
-                FU2 = FU.detach()
-                print("CreateHami: ", FU2.abs().max())
-                FU = FU/FU2.abs().max()
+            FU2 = FU.detach()
+            print("CreateHami: ", FU2.abs().max())
+            FU = FU/FU2.abs().max()
 
-            else:
-                temp = contract(FL, T_up[(i)], ([0], [0]))
-                temp = contract(temp, T_down[(i)], ([0, 3], [0, 3]))
-                FL = contract(temp, permute(HyAndOnsiteBoth,
-                                            (1, 0, 3, 2)), ([0, 1, 3, 4], [0, 2, 1, 3]))
+            # else:
+            #     temp = contract(FL, T_up[(i)], ([0], [0]))
+            #     temp = contract(temp, T_down[(i)], ([0, 3], [0, 3]))
+            #     FL = contract(temp, permute(HyAndOnsiteBoth,
+            #                                 (1, 0, 3, 2)), ([0, 1, 3, 4], [0, 2, 1, 3]))
 
-                FL2 = FL.detach()
-                print("CreateHami: ", FL2.abs().max())
-                FL = FL/FL2.abs().max()
+            #     FL2 = FL.detach()
+            #     print("CreateHami: ", FL2.abs().max())
+            #     FL = FL/FL2.abs().max()
 
-                temp = contract(FU, T_left[(i)], ([0], [0]))
-                temp = contract(temp, T_right[(i)], ([0, 3], [0, 3]))
-                FU = contract(temp, permute(Hx, (1, 0, 3, 2)),
-                              ([0, 1, 3, 4], [0, 2, 1, 3]))
+            #     temp = contract(FU, T_left[(i)], ([0], [0]))
+            #     temp = contract(temp, T_right[(i)], ([0, 3], [0, 3]))
+            #     FU = contract(temp, permute(Hx, (1, 0, 3, 2)),
+            #                   ([0, 1, 3, 4], [0, 2, 1, 3]))
 
-                FU2 = FU.detach()
-                print("CreateHami: ", FU2.abs().max())
-                FU = FU/FU2.abs().max()
+            #     FU2 = FU.detach()
+            #     print("CreateHami: ", FU2.abs().max())
+            #     FU = FU/FU2.abs().max()
 
         with torch.no_grad():
             FR = contract(C_up["right"], C_down["right"], ([1], [0]))
@@ -1252,92 +1271,91 @@ def Create_Localsite_Hami(state, env, C_up, T_up, C_left, T_left, C_down, T_down
             FD = FD/FD.abs().max()
 
         for i in range(args.size+1):
-            if i % 2 == 0:
-                temp = contract(FR, T_up[(2*args.size+1-i)], ([0], [4]))
-                temp = contract(
-                    temp, T_down[(2*args.size+1-i)], ([0, 4], [4, 3]))
-                FR = contract(temp, permute(HyAndOnsiteBoth,
-                                            (1, 0, 3, 2)), ([1, 2, 4, 5], [0, 2, 1, 3]))
+            # if i % 2 == 0:
+            temp = contract(FR, T_up[(2*args.size+1-i)], ([0], [4]))
+            temp = contract(
+                temp, T_down[(2*args.size+1-i)], ([0, 4], [4, 3]))
+            FR = contract(temp, HyAndOnsiteBoth, ([1, 2, 4, 5], [0, 2, 1, 3]))
 
-                FR2 = FR.detach()
-                print("CreateHami: ", FR2.abs().max())
-                FR = FR/FR2.abs().max()
+            FR2 = FR.detach()
+            print("CreateHami: ", FR2.abs().max())
+            FR = FR/FR2.abs().max()
 
-                temp = contract(FD, T_left[(2*args.size+1-i)], ([0], [4]))
-                temp = contract(
-                    temp, T_right[(2*args.size+1-i)], ([0, 4], [4, 3]))
-                FD = contract(temp, permute(Hx, (1, 0, 3, 2)),
-                              ([1, 2, 4, 5], [0, 2, 1, 3]))
+            temp = contract(FD, T_left[(2*args.size+1-i)], ([0], [4]))
+            temp = contract(
+                temp, T_right[(2*args.size+1-i)], ([0, 4], [4, 3]))
+            FD = contract(temp, Hx,
+                          ([1, 2, 4, 5], [0, 2, 1, 3]))
 
-                FD2 = FD.detach()
-                print("CreateHami: ", FD2.abs().max())
-                FD = FD/FD2.abs().max()
-            else:
-                temp = contract(FR, T_up[(2*args.size+1-i)], ([0], [4]))
-                temp = contract(
-                    temp, T_down[(2*args.size+1-i)], ([0, 4], [4, 3]))
-                FR = contract(temp, HyAndOnsiteBoth,
-                              ([1, 2, 4, 5], [0, 2, 1, 3]))
+            FD2 = FD.detach()
+            print("CreateHami: ", FD2.abs().max())
+            FD = FD/FD2.abs().max()
+            # else:
+            #     temp = contract(FR, T_up[(2*args.size+1-i)], ([0], [4]))
+            #     temp = contract(
+            #         temp, T_down[(2*args.size+1-i)], ([0, 4], [4, 3]))
+            #     FR = contract(temp, HyAndOnsiteBoth,
+            #                   ([1, 2, 4, 5], [0, 2, 1, 3]))
 
-                FR2 = FR.detach()
-                print("CreateHami: ", FR2.abs().max())
-                FR = FR/FR2.abs().max()
+            #     FR2 = FR.detach()
+            #     print("CreateHami: ", FR2.abs().max())
+            #     FR = FR/FR2.abs().max()
 
-                temp = contract(FD, T_left[(2*args.size+1-i)], ([0], [4]))
-                temp = contract(
-                    temp, T_right[(2*args.size+1-i)], ([0, 4], [4, 3]))
-                FD = contract(temp, Hx, ([1, 2, 4, 5], [0, 2, 1, 3]))
+            #     temp = contract(FD, T_left[(2*args.size+1-i)], ([0], [4]))
+            #     temp = contract(
+            #         temp, T_right[(2*args.size+1-i)], ([0, 4], [4, 3]))
+            #     FD = contract(temp, Hx, ([1, 2, 4, 5], [0, 2, 1, 3]))
 
-                FD2 = FD.detach()
-                print("CreateHami: ", FD2.abs().max())
-                FD = FD/FD2.abs().max()
+            #     FD2 = FD.detach()
+            #     print("CreateHami: ", FD2.abs().max())
+            #     FD = FD/FD2.abs().max()
 
         dimsA = state.site(coord).size()
 
-        if args.size % 2 == 1:
-            H1 = contract(FL, T_up[(args.size)], ([0], [0]))
-            H1 = contract(H1, view(T_down[(
-                args.size)], (env.chi, phys_dim, phys_dim, dimsA[3], dimsA[3], env.chi)), ([0, 4], [0, 3]))
-            H1 = contract(H1, HyAndOnsiteBoth, ([0, 5, 6], [0, 1, 3]))
-            H1 = contiguous(
-                permute(contract(H1, FR, ([3, 5], [0, 1])), (4, 0, 1, 3, 2)))
+        # if args.size % 2 == 1:
+        H1 = contract(FL, T_up[(args.size)], ([0], [0]))
+        H1 = contract(H1, view(T_down[(
+            args.size)], (env.chi, phys_dim, phys_dim, dimsA[3], dimsA[3], env.chi)), ([0, 4], [0, 3]))
+        H1 = contract(H1, HyAndOnsiteBoth, ([0, 5, 6], [0, 1, 3]))
+        H1 = contiguous(
+            permute(contract(H1, FR, ([3, 5], [0, 1])), (4, 0, 1, 3, 2)))
 
-            H12 = H1.detach()
-            print("CreateHami: ", H12.abs().max())
-            H1 = H1/H12.abs().max()
+        H12 = H1.detach()
+        print("CreateHami: ", H12.abs().max())
+        H1 = H1/H12.abs().max()
 
-            H2 = contract(FU, T_left[(args.size)], ([0], [0]))
-            H2 = contract(H2, view(T_right[(
-                args.size)], (env.chi, phys_dim, phys_dim, dimsA[4], dimsA[4], env.chi)), ([0, 5], [0, 3]))
-            H2 = contract(H2, Hx, ([0, 5, 6], [0, 1, 3]))
-            H2 = contiguous(
-                permute(contract(H2, FD, ([3, 5], [0, 1])), (4, 0, 1, 2, 3)))
+        H2 = contract(FU, T_left[(args.size)], ([0], [0]))
+        H2 = contract(H2, view(T_right[(
+            args.size)], (env.chi, phys_dim, phys_dim, dimsA[4], dimsA[4], env.chi)), ([0, 5], [0, 3]))
+        H2 = contract(H2, Hx, ([0, 5, 6], [0, 1, 3]))
+        H2 = contiguous(
+            permute(contract(H2, FD, ([3, 5], [0, 1])), (4, 0, 1, 2, 3)))
 
-            H22 = H2.detach()
-            print("CreateHami: ", H22.abs().max())
-            H2 = H2/H22.abs().max()
+        H22 = H2.detach()
+        print("CreateHami: ", H22.abs().max())
+        H2 = H2/H22.abs().max()
 
-        else:
-            H1 = contract(FL, T_up[(args.size)], ([0], [0]))
-            H1 = contract(H1, view(T_down[(
-                args.size)], (env.chi, phys_dim, phys_dim, dimsA[3], dimsA[3], env.chi)), ([0, 6], [0, 3]))
-            H1 = contract(H1, HyAndOnsiteBoth, ([0, 1, 7, 8], [0, 2, 1, 3]))
-            H1 = contiguous(
-                permute(contract(H1, FR, ([4, 6], [0, 1])), (0, 1, 2, 4, 3)))
+        # else:
+        #     H1 = contract(FL, T_up[(args.size)], ([0], [0]))
+        #     H1 = contract(H1, view(T_down[(
+        #         args.size)], (env.chi, phys_dim, phys_dim, dimsA[3], dimsA[3], env.chi)), ([0, 6], [0, 3]))
+        #     H1 = contract(H1, HyAndOnsiteBoth, ([0, 1, 7, 8], [0, 2, 1, 3]))
+        #     H1 = contiguous(
+        #         permute(contract(H1, FR, ([4, 6], [0, 1])), (0, 1, 2, 4, 3)))
 
-            H12 = H1.detach()
-            print("CreateHami: ", H12.abs().max())
-            H1 = H1/H12.abs().max()
+        #     H12 = H1.detach()
+        #     print("CreateHami: ", H12.abs().max())
+        #     H1 = H1/H12.abs().max()
 
-            H2 = contract(FU, T_left[(args.size)], ([0], [0]))
-            H2 = contract(H2, view(T_right[(
-                args.size)], (env.chi, phys_dim, phys_dim, dimsA[4], dimsA[4], env.chi)), ([0, 7], [0, 3]))
-            H2 = contract(H2, Hx, ([0, 1, 7, 8], [0, 2, 1, 3]))
-            H2 = contract(H2, FD, ([4, 6], [0, 1]))
+        #     H2 = contract(FU, T_left[(args.size)], ([0], [0]))
+        #     H2 = contract(H2, view(T_right[(
+        #         args.size)], (env.chi, phys_dim, phys_dim, dimsA[4], dimsA[4], env.chi)), ([0, 7], [0, 3]))
+        #     H2 = contract(H2, Hx, ([0, 1, 7, 8], [0, 2, 1, 3]))
+        #     H2 = contract(H2, FD, ([4, 6], [0, 1]))
 
-            H22 = H2.detach()
-            print("CreateHami: ", H22.abs().max())
-            H2 = H2/H22.abs().max()
+        #     H22 = H2.detach()
+        #     print("CreateHami: ", H22.abs().max())
+        #     H2 = H2/H22.abs().max()
 
         # Hami[coord] = H1/2. + H2/2.
         Hami[coord] = H1 + H2

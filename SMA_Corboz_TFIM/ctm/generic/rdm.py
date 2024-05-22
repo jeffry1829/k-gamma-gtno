@@ -1139,6 +1139,106 @@ def rdm2x2_NNN_1n1_oe(coord, state, env, sym_pos_def=False, force_cpu=False,
     return R
 
 
+def rdm4x4(coord, state, env, open_sites=[0, 1, 2, 3],
+           unroll=[], checkpoint_unrolled=False, checkpoint_on_device=False,
+           sym_pos_def=False, force_cpu=False, verbosity=0):
+    if oe:
+        return rdm4x4_oe(coord, state, env, open_sites=open_sites, unroll=unroll,
+                         checkpoint_unrolled=checkpoint_unrolled, checkpoint_on_device=checkpoint_on_device,
+                         sym_pos_def=sym_pos_def, force_cpu=force_cpu, verbosity=verbosity)
+    else:
+        raise NotImplementedError(
+            "rdm4x4 is not implemented in legacy version")
+
+
+def rdm4x4_oe(coord, state, env, open_sites=[0, 1, 2, 3], unroll=False,
+              checkpoint_unrolled=False, checkpoint_on_device=False,
+              sym_pos_def=False, force_cpu=False, verbosity=0):
+    # C1------(1)1 1(0)----T1----(3)36 36(0)----T1_x----(3)18 18(0)----C2_x
+    # 0(0)               (1,2)                 (1,2)                   19(1)
+    # 0(0)           100  2  5             102 20 23                   19(0)
+    # |                 \ 2  5               \ |  |                    |
+    # T4-------(2)3 3-----a--|------37 37----a_x--6(1)----21 21(1)-----T2_x
+    # |                   |  |                 |  |                    |
+    # |        (3)6 6-------a*------38 38--------a*_x-----24 24(2)     |
+    # 15(1)               16 17 \101          34 35 \103               33(3)
+    # 15(0)          104  16 17           106 34 35                    33(0)
+    # |                 \ |   |              \ |  |                    |
+    # T4_y--(2)9 9--------a_y-------39 39-----a_xy--------28 28(1)-----T2_xy
+    # |                   |   |                |30|                    |
+    # |     (3)12 12---------a*_y---40 40------- a*_xy----31 31(2)     |
+    # |                   10 13 \105           29 32 \107              |
+    # 8(1)                10 13                29 32                  26(3)
+    # 8(0)                (0,1)                (0,1)                  26(0)
+    # C4_y---(1)7 7(2)-----T3_y--(3)41 41(2)----T3_xy---(3)27 27(1)----C3_xy
+    ind_os = set(sorted(open_sites))
+    assert len(ind_os) == len(open_sites), "contains repeated elements"
+    assert ind_os <= {0, 1, 2, 3}, "allowed site labels are 0,1,2, and 3"
+    I = sum([[100+2*x, 100+2*x+1] if x in ind_os else [100+2*x]
+            * 2 for x in [0, 1, 2, 3]], [])
+    I_out = [100+2*x for x in ind_os]+[100+2*x+1 for x in ind_os]
+
+    who = f"rdm4x4_oe_{ind_os}"
+    a = state.site(coord)
+    a_x = state.site((coord[0]+1, coord[1]))
+    a_y = state.site((coord[0], coord[1]+1))
+    a_xy = state.site((coord[0]+1, coord[1]+1))
+    C1, C2_x, C3_xy, C4_y = env.C[(state.vertexToSite(coord), (-1, -1))], \
+        env.C[(state.vertexToSite((coord[0]+1, coord[1])), (1, -1))], \
+        env.C[(state.vertexToSite((coord[0]+1, coord[1]+1)), (1, 1))], \
+        env.C[(state.vertexToSite((coord[0], coord[1]+1)), (-1, 1))]
+    T1, T4, T1_x, T2_x, T2_xy, T3_xy, T3_y, T4_y = \
+        env.T[(state.vertexToSite(coord), (0, -1))], \
+        env.T[(state.vertexToSite(coord), (-1, 0))], \
+        env.T[(state.vertexToSite((coord[0]+1, coord[1])), (0, -1))], \
+        env.T[(state.vertexToSite((coord[0]+1, coord[1])), (1, 0))], \
+        env.T[(state.vertexToSite((coord[0]+1, coord[1]+1)), (1, 0))], \
+        env.T[(state.vertexToSite((coord[0]+1, coord[1]+1)), (0, 1))], \
+        env.T[(state.vertexToSite((coord[0], coord[1]+1)), (0, 1))], \
+        env.T[(state.vertexToSite((coord[0], coord[1]+1)), (-1, 0))]
+    t = C1, C2_x, C3_xy, C4_y, T1, T4, T1_x, T2_x, T2_xy, T3_xy, T3_y, T4_y, a, a_x, a_y, a_xy
+    if force_cpu:
+        t = (x.cpu() for x in t)
+
+    T1 = T1.view(T1.size(0), a.size(1), a.size(1), T1.size(2))
+    T1_x = T1_x.view(T1_x.size(0), a_x.size(1), a_x.size(1), T1_x.size(2))
+    T2_xy = T2_xy.view(T2_xy.size(0), a_xy.size(4),
+                       a_xy.size(4), T2_xy.size(2))
+    T2_x = T2_x.view(T2_x.size(0), a_x.size(4), a_x.size(4), T2_x.size(2))
+    T3_xy = T3_xy.view(a_xy.size(3), a_xy.size(3),
+                       T3_xy.size(1), T3_xy.size(2))
+    T3_y = T3_y.view(a_y.size(3), a_y.size(3), T3_y.size(1), T3_y.size(2))
+    T4 = T4.view(T4.size(0), T4.size(1), a.size(2), a.size(2))
+    T4_y = T4_y.view(T4_y.size(0), T4_y.size(1), a_y.size(2), a_y.size(2))
+
+    contract_tn = C1, [0, 1], T1, [1, 2, 5, 36], T4, [0, 15, 3, 6], a, [I[0], 2, 3, 16, 37], a.conj(), [I[1], 5, 6, 17, 38], \
+        T4_y, [15, 8, 9, 12], C4_y, [8, 7], T3_y, [10, 13, 7, 41], a_y, [I[4], 16, 9, 10, 39], a_y.conj(), [I[5], 17, 12, 13, 40], \
+        T1_x, [36, 20, 23, 18], C2_x, [18, 19], T2_x, [19, 21, 24, 33], a_x, [I[2], 20, 37, 34, 21], a_x.conj(), [I[3], 23, 38, 35, 24], \
+        T2_xy, [33, 28, 31, 26], C3_xy, [26, 27], T3_xy, [29, 32, 41, 27], a_xy, [
+            I[6], 34, 39, 29, 28], a_xy.conj(), [I[7], 35, 40, 32, 31], I_out
+    names = tuple(x.strip() for x in ("C1, T1, T4, a, a*, T4_y, C4_y, T3_y, a_y, a_y*, T1_x, C2_x, T2_x, a_x, a_x*,"
+                                      + "T2_xy, C3_xy, T3_xy, a_xy, a_xy*").split(','))
+    #
+    # This (typical) strategy is optimal, when X >> D^2 >> phys_dim
+    #
+    # path= ((6, 7), (5, 18), (6, 17), (5, 16), (0, 2), (0, 14), (1, 13), (0, 12), (1, 2), (0, 10),\
+    #     (1, 9), (0, 8), (1, 2), (0, 6), (1, 5), (0, 4), (2, 3), (1, 2), (0, 1))
+    #
+    if type(unroll) == bool and unroll:
+        unroll = I_out
+    path, path_info = get_contraction_path(*contract_tn, unroll=unroll,
+                                           names=names, path=None, who=who)
+    R = contract_with_unroll(*contract_tn, unroll=unroll, optimize=path, backend='torch',
+                             checkpoint_unrolled=checkpoint_unrolled, checkpoint_on_device=checkpoint_on_device,
+                             who=who, verbosity=verbosity)
+
+    R = _sym_pos_def_rdm(R, sym_pos_def=sym_pos_def,
+                         verbosity=verbosity, who=who)
+    if force_cpu:
+        R = R.to(env.device)
+    return R
+
+
 def rdm2x2(coord, state, env, open_sites=[0, 1, 2, 3],
            unroll=[], checkpoint_unrolled=False, checkpoint_on_device=False,
            sym_pos_def=False, force_cpu=False, verbosity=0):

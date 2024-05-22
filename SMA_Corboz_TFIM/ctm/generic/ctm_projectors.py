@@ -263,7 +263,10 @@ def ctm_get_projectors_from_matrices(R, Rt, chi, ctm_args=cfg.ctm_args,
     S_nz = S[S/S[0] > ctm_args.projector_svd_reltol]
     # print("normalized singular values: ", S_nz)
     S_sqrt = S*0
+    # print("singular value:", S_nz)
     S_sqrt[:S_nz.size(0)] = torch.rsqrt(S_nz)
+    # print("singular value:", S_sqrt)
+    
 
     if verbosity > 0:
         log.info(f"{diagnostics}")
@@ -277,6 +280,8 @@ def ctm_get_projectors_from_matrices(R, Rt, chi, ctm_args=cfg.ctm_args,
     torch.set_printoptions(linewidth=200)
     # P = mm(R, conj(U))*S_sqrt[None, :]
     # Pt = mm(Rt, V)*S_sqrt[None, :]
+    # print("singular value:", S_sqrt[None, :])
+    
     # RRt = torch.einsum('ij,ij', R, Rt)
     # RRt_approx = torch.einsum('ij,ik,lk,lj', R, Pt, P, Rt)
     # print("RRt norm:", torch.norm(RRt))

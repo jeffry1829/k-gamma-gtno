@@ -67,6 +67,7 @@ from Norm_ori_withP import *
 # from Norm_ori_withP_divide_newfromweilin import *
 # from Hami_ori import *
 
+# from Localsite_Hami_ori import *
 from Localsite_Hami_ori_withP import *
 # from Localsite_Hami_ori_withP_divide import *
 # from Localsite_Hami_ori_withP_divide_newfromweilin import *
@@ -231,39 +232,132 @@ def ctmrg_conv_rdm2x1(state, env, history, ctm_args=cfg.ctm_args):
 difftograph = []
 
 
+# def ctmrg_conv_energy(state2, env, history, ctm_args=cfg.ctm_args):
+#     if not history:
+#         history = []
+#     old = []
+#     if (len(history) > 0):
+#         old = history[:8*env.chi+0]
+#     new = []
+#     u, s, v = torch.svd(env.C[((0, 0), (-1, -1))])
+#     for i in range(env.chi):
+#         new.append(s[i].item())
+#     u, s, v = torch.svd(env.C[((0, 0), (1, -1))])
+#     for i in range(env.chi):
+#         new.append(s[i].item())
+#     u, s, v = torch.svd(env.C[((0, 0), (1, -1))])
+#     for i in range(env.chi):
+#         new.append(s[i].item())
+#     u, s, v = torch.svd(env.C[((0, 0), (1, 1))])
+#     for i in range(env.chi):
+#         new.append(s[i].item())
+
+#     u, s, v = torch.svd(
+#         env.T[((0, 0), (0, -1))].reshape(env.chi, env.chi*args.bond_dim**2))
+#     for i in range(env.chi):
+#         new.append(s[i].item())
+#     u, s, v = torch.svd(
+#         env.T[((0, 0), (0, 1))].permute(1, 0, 2).reshape(env.chi, env.chi*args.bond_dim**2))
+#     for i in range(env.chi):
+#         new.append(s[i].item())
+#     u, s, v = torch.svd(
+#         env.T[((0, 0), (-1, 0))].permute(0, 2, 1).reshape(env.chi, env.chi*args.bond_dim**2))
+#     for i in range(env.chi):
+#         new.append(s[i].item())
+#     u, s, v = torch.svd(
+#         env.T[((0, 0), (1, 0))].reshape(env.chi, env.chi*args.bond_dim**2))
+#     for i in range(env.chi):
+#         new.append(s[i].item())
+#     # from hosvd import sthosvd as hosvd
+#     # core, _, _ = hosvd(env.T[((0, 0), (0, -1))], [env.chi]*3)
+#     # new.append(core)
+#     # core, _, _ = hosvd(env.T[((0, 0), (0, 1))], [env.chi]*3)
+#     # new.append(core)
+#     # core, _, _ = hosvd(env.T[((0, 0), (-1, 0))], [env.chi]*3)
+#     # new.append(core)
+#     # core, _, _ = hosvd(env.T[((0, 0), (1, 0))], [env.chi]*3)
+#     # new.append(core)
+#     # print("core.shape: ", core.shape)
+#     # print("core: ", core)
+
+#     # new.append(env.T[((0, 0), (0, -1))])
+#     # new.append(env.T[((0, 0), (0, 1))])
+#     # new.append(env.T[((0, 0), (-1, 0))])
+#     # new.append(env.T[((0, 0), (1, 0))])
+#     # new.append(env.C[((0, 0), (-1, -1))])
+#     # new.append(env.C[((0, 0), (-1, 1))])
+#     # new.append(env.C[((0, 0), (1, -1))])
+#     # new.append(env.C[((0, 0), (1, 1))])
+
+#     diff = 0.
+#     if (len(history) > 0):
+#         for i in range(8*env.chi):
+#             history[i] = new[i]
+#             if (abs(old[i]-new[i]) > diff):
+#                 diff = abs(old[i]-new[i])
+#         # for i in range(4):
+#         #     history[4*env.chi+i] = new[4*env.chi+i]
+#         #     if ((old[4*env.chi+i]-new[4*env.chi+i]).norm() > diff):
+#         #         diff = (old[4*env.chi+i]-new[4*env.chi+i]).norm()
+#         #     # print(torch.div(old[4*env.chi+i], new[4*env.chi+i]))
+#         #     if i == 0:
+#         #         difftograph.append((old[4*env.chi+i]-new[4*env.chi+i]).norm())
+
+#     else:
+#         for i in range(8*env.chi+0):
+#             history.append(new[i])
+#     history.append(diff)
+#     print("diff={0:<50}".format(diff), end="\r")
+#     # print("diff={0:<50}".format(diff))
+#     # print(ctm_args.ctm_conv_tol)
+#     if (len(history[8*env.chi+0:]) > 1 and diff < ctm_args.ctm_conv_tol)\
+#             or len(history[8*env.chi+0:]) >= ctm_args.ctm_max_iter:
+#         log.info({"history_length": len(
+#             history[8*env.chi+0:]), "history": history[8*env.chi+0:]})
+#         print("")
+#         print("modified CTMRG length: "+str(len(history[8*env.chi+0:])))
+#         # import matplotlib.pyplot as plt
+#         # plt.plot(difftograph)
+#         # plt.show()
+#         return True, history
+#     return False, history
 def ctmrg_conv_energy(state2, env, history, ctm_args=cfg.ctm_args):
+    torch.set_printoptions(profile="full")
+    torch.set_printoptions(linewidth=200)
+    torch.set_printoptions(precision=8)
     if not history:
         history = []
     old = []
     if (len(history) > 0):
-        old = history[:8*env.chi+4]
+        old = history[:8*env.chi+8]
     new = []
-    u, s, v = torch.svd(env.C[((0, 0), (-1, -1))])
+    u, s, v = torch.linalg.svd(env.C[((0, 0), (-1, -1))])
+    # print("C singular matrix:", s)
     for i in range(env.chi):
         new.append(s[i].item())
-    u, s, v = torch.svd(env.C[((0, 0), (1, -1))])
+    u, s, v = torch.linalg.svd(env.C[((0, 0), (1, -1))])
     for i in range(env.chi):
         new.append(s[i].item())
-    u, s, v = torch.svd(env.C[((0, 0), (1, -1))])
+    u, s, v = torch.linalg.svd(env.C[((0, 0), (1, -1))])
     for i in range(env.chi):
         new.append(s[i].item())
-    u, s, v = torch.svd(env.C[((0, 0), (1, 1))])
+    u, s, v = torch.linalg.svd(env.C[((0, 0), (1, 1))])
     for i in range(env.chi):
         new.append(s[i].item())
 
-    u, s, v = torch.svd(
+    u, s, v = torch.linalg.svd(
         env.T[((0, 0), (0, -1))].reshape(env.chi, env.chi*args.bond_dim**2))
     for i in range(env.chi):
         new.append(s[i].item())
-    u, s, v = torch.svd(
+    u, s, v = torch.linalg.svd(
         env.T[((0, 0), (0, 1))].permute(1, 0, 2).reshape(env.chi, env.chi*args.bond_dim**2))
     for i in range(env.chi):
         new.append(s[i].item())
-    u, s, v = torch.svd(
+    u, s, v = torch.linalg.svd(
         env.T[((0, 0), (-1, 0))].permute(0, 2, 1).reshape(env.chi, env.chi*args.bond_dim**2))
     for i in range(env.chi):
         new.append(s[i].item())
-    u, s, v = torch.svd(
+    u, s, v = torch.linalg.svd(
         env.T[((0, 0), (1, 0))].reshape(env.chi, env.chi*args.bond_dim**2))
     for i in range(env.chi):
         new.append(s[i].item())
@@ -283,10 +377,10 @@ def ctmrg_conv_energy(state2, env, history, ctm_args=cfg.ctm_args):
     new.append(env.T[((0, 0), (0, 1))])
     new.append(env.T[((0, 0), (-1, 0))])
     new.append(env.T[((0, 0), (1, 0))])
-    # new.append(env.C[((0, 0), (-1, -1))])
-    # new.append(env.C[((0, 0), (-1, 1))])
-    # new.append(env.C[((0, 0), (1, -1))])
-    # new.append(env.C[((0, 0), (1, 1))])
+    new.append(env.C[((0, 0), (-1, -1))])
+    new.append(env.C[((0, 0), (-1, 1))])
+    new.append(env.C[((0, 0), (1, -1))])
+    new.append(env.C[((0, 0), (1, 1))])
 
     diff = 0.
     if (len(history) > 0):
@@ -294,137 +388,32 @@ def ctmrg_conv_energy(state2, env, history, ctm_args=cfg.ctm_args):
             history[i] = new[i]
             if (abs(old[i]-new[i]) > diff):
                 diff = abs(old[i]-new[i])
-        for i in range(4):
+        for i in range(8):
             history[8*env.chi+i] = new[8*env.chi+i]
-            if ((old[8*env.chi+i]-new[8*env.chi+i]).norm() > diff):
-                diff = (old[8*env.chi+i]-new[8*env.chi+i]).norm()
+            if ((old[8*env.chi+i]-new[8*env.chi+i]).abs().max() > diff):
+                diff = (old[8*env.chi+i]-new[8*env.chi+i]).abs().max()
             # print(torch.div(old[4*env.chi+i], new[4*env.chi+i]))
-            if i == 0:
-                difftograph.append((old[8*env.chi+i]-new[8*env.chi+i]).norm())
+            # if i == 0:
+            #     difftograph.append((old[4*env.chi+i]-new[4*env.chi+i]).norm())
 
     else:
-        for i in range(8*env.chi+4):
+        for i in range(8*env.chi+8):
             history.append(new[i])
     history.append(diff)
     print("diff={0:<50}".format(diff), end="\r")
     # print("diff={0:<50}".format(diff))
     # print(ctm_args.ctm_conv_tol)
-    if (len(history[8*env.chi+4:]) > 1 and diff < ctm_args.ctm_conv_tol)\
-            or len(history[8*env.chi+4:]) >= ctm_args.ctm_max_iter:
+    if (len(history[8*env.chi+8:]) > 1 and diff < ctm_args.ctm_conv_tol)\
+            or len(history[8*env.chi+8:]) >= ctm_args.ctm_max_iter:
         log.info({"history_length": len(
-            history[8*env.chi+4:]), "history": history[8*env.chi+4:]})
+            history[8*env.chi+8:]), "history": history[8*env.chi+8:]})
         print("")
-        print("modified CTMRG length: "+str(len(history[8*env.chi+4:])))
+        print("modified CTMRG length: "+str(len(history[8*env.chi+8:])))
         # import matplotlib.pyplot as plt
         # plt.plot(difftograph)
         # plt.show()
         return True, history
     return False, history
-
-
-# def ctmrg_conv_energy(state2, env, history, ctm_args=cfg.ctm_args):
-#     if not history:
-#         history = []
-#     old = []
-#     if (len(history) > 0):
-#         old = history[:4*env.chi+4]
-#     new = []
-#     u, s, v = torch.svd(env.C[((0, 0), (-1, -1))])
-#     for i in range(env.chi):
-#         new.append(s[i].item())
-#     u, s, v = torch.svd(env.C[((0, 0), (1, -1))])
-#     for i in range(env.chi):
-#         new.append(s[i].item())
-#     u, s, v = torch.svd(env.C[((0, 0), (1, -1))])
-#     for i in range(env.chi):
-#         new.append(s[i].item())
-#     u, s, v = torch.svd(env.C[((0, 0), (1, 1))])
-#     for i in range(env.chi):
-#         new.append(s[i].item())
-
-#     new.append(env.T[((0, 0), (0, -1))])
-#     new.append(env.T[((0, 0), (0, 1))])
-#     new.append(env.T[((0, 0), (-1, 0))])
-#     new.append(env.T[((0, 0), (1, 0))])
-#     # new.append(env.C[((0, 0), (-1, -1))])
-#     # new.append(env.C[((0, 0), (-1, 1))])
-#     # new.append(env.C[((0, 0), (1, -1))])
-#     # new.append(env.C[((0, 0), (1, 1))])
-
-#     diff = 0.
-#     if (len(history) > 0):
-#         for i in range(4*env.chi):
-#             history[i] = new[i]
-#             if (abs(old[i]-new[i]) > diff):
-#                 diff = abs(old[i]-new[i])
-#         for i in range(4):
-#             history[4*env.chi+i] = new[4*env.chi+i]
-#             if ((old[4*env.chi+i]-new[4*env.chi+i]).norm() > diff):
-#                 diff = (old[4*env.chi+i]-new[4*env.chi+i]).norm()
-#             # print(torch.div(old[4*env.chi+i], new[4*env.chi+i]))
-#             if i == 0:
-#                 difftograph.append((old[4*env.chi+i]-new[4*env.chi+i]).norm())
-
-#     else:
-#         for i in range(4*env.chi+4):
-#             history.append(new[i])
-#     history.append(diff)
-#     # print("diff={0:<50}".format(diff), end="\r")
-#     print("diff={0:<50}".format(diff))
-#     # print(ctm_args.ctm_conv_tol)
-#     if (len(history[4*env.chi+4:]) > 1 and diff < ctm_args.ctm_conv_tol)\
-#             or len(history[4*env.chi+4:]) >= ctm_args.ctm_max_iter:
-#         log.info({"history_length": len(
-#             history[4*env.chi+4:]), "history": history[4*env.chi+4:]})
-#         print("")
-#         print("modified CTMRG length: "+str(len(history[4*env.chi+4:])))
-#         # import matplotlib.pyplot as plt
-#         # plt.plot(difftograph)
-#         # plt.show()
-#         return True, history
-#     return False, history
-
-
-# def ctmrg_conv_energy(state2, env, history, ctm_args=cfg.ctm_args):
-#     if not history:
-#         history = []
-#     old = []
-#     if (len(history) > 0):
-#         old = history[:4*env.chi]
-#     new = []
-#     u, s, v = torch.svd(env.C[((0, 0), (-1, -1))])
-#     for i in range(env.chi):
-#         new.append(s[i].item())
-#     u, s, v = torch.svd(env.C[((0, 0), (1, -1))])
-#     for i in range(env.chi):
-#         new.append(s[i].item())
-#     u, s, v = torch.svd(env.C[((0, 0), (1, -1))])
-#     for i in range(env.chi):
-#         new.append(s[i].item())
-#     u, s, v = torch.svd(env.C[((0, 0), (1, 1))])
-#     for i in range(env.chi):
-#         new.append(s[i].item())
-
-#     diff = 0.
-#     if (len(history) > 0):
-#         for i in range(4*env.chi):
-#             history[i] = new[i]
-#             if (abs(old[i]-new[i]) > diff):
-#                 diff = abs(old[i]-new[i])
-#     else:
-#         for i in range(4*env.chi):
-#             history.append(new[i])
-#     history.append(diff)
-#     print("diff={0:<50}".format(diff), end="\r")
-#     # print(ctm_args.ctm_conv_tol)
-#     if (len(history[4*env.chi:]) > 1 and diff < ctm_args.ctm_conv_tol)\
-#             or len(history[4*env.chi:]) >= ctm_args.ctm_max_iter:
-#         log.info({"history_length": len(
-#             history[4*env.chi:]), "history": history[4*env.chi:]})
-#         print("")
-#         print("CTMRG length: "+str(len(history[4*env.chi:])))
-#         return True, history
-#     return False, history
 
 
 env = ENV(args.chi, state)
@@ -441,6 +430,7 @@ if args.reuseCTMRGenv and (os.path.exists(ENVfilenameC) and os.path.exists(ENVfi
         env.C[k] = c.to(cfg.global_args.device)
     for k, t in env.T.items():
         env.T[k] = t.to(cfg.global_args.device)
+    env, _, *ctm_log = ctmrg.run(state, env, conv_check=ctmrg_conv_energy)
 else:
     env, _, *ctm_log = ctmrg.run(state, env, conv_check=ctmrg_conv_energy)
 
@@ -499,7 +489,8 @@ if args.UseVUMPSansazAC:
     env.T[((0, 0), (1, 0))] = ACRIGHT
     print("Use VUMPS env as initial ENV.T")
     env, _, *ctm_log = ctmrg.run(state, env, conv_check=ctmrg_conv_energy)
-if args.reuseCTMRGenv and not (os.path.exists(ENVfilenameC) or os.path.exists(ENVfilenameT)):
+
+if args.reuseCTMRGenv:
     print("Saving CTMRG ENV: "+ENVfilenameC+" "+ENVfilenameT)
     # new_env.C= { k: c.clone() for k,c in self.C.items() }
     # new_env.T= { k: t.clone() for k,t in self.T.items() }
@@ -679,8 +670,8 @@ if len(state.sites) == 1:
         # norm_factor = torch.norm(norm_factor)
         # print("norm_factor after norm=", norm_factor)
 
-        # Norm[(0, 0)] = (Norm[(0, 0)])/norm_factor
-        # print("divided norm_factor")
+        Norm[(0, 0)] = (Norm[(0, 0)])/norm_factor
+        print("divided norm_factor")
 
         shp = list(Norm[(0, 0)].size())
         newshp = shp.copy()
@@ -823,6 +814,8 @@ if len(state.sites) == 1:
         # with torch.autograd.graph.save_on_cpu(True):
         C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right = Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam,
                                                                                                  Hx, Hy, Honsite, IIII, kx, ky, C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right, args, True, True, P, Pt, isOnsiteWorking=isOnsiteWorking, MultiGPU=args.MultiGPU)
+        # C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right = Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam,
+        #                                                                                          Hx, Hy, Honsite, IIII, kx, ky, C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right, args, True, True, isOnsiteWorking=isOnsiteWorking, ACstate=stateDL, MultiGPU=args.MultiGPU)
         # C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right = Create_Hami_Env(
         #     state, stateDL, B_grad, env, P, Pt, lam, Hx, Hy, kx, ky, args)
         # C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right = checkpoint(Create_Localsite_Hami_Env, state, stateDL, B_grad, env, lam,
@@ -834,8 +827,8 @@ if len(state.sites) == 1:
         # Hami = checkpoint(Create_Localsite_Hami, state, env, C_up, T_up, C_left, T_left, C_down,
         #                   T_down, C_right, T_right, Hx, Hy, Honsite, II, args, isOnsiteWorking, use_reentrant=False)
 
-        # Hami[(0, 0)] = Hami[(0, 0)]/norm_factor
-        # print("norm_factor divided")
+        Hami[(0, 0)] = Hami[(0, 0)]/norm_factor
+        print("norm_factor divided")
 
         print("G(H)_dot_state=", contract(Hami[(0, 0)], conj(
             state.site((0, 0))), ([0, 1, 2, 3, 4], [0, 1, 2, 3, 4])).item())
@@ -856,7 +849,7 @@ if len(state.sites) == 1:
                 shp[len(shp)-1-ii+1]
         print("Start caclulating HamiMat...")
         t1 = time.time()
-        # streams = [torch.cuda.Stream() for i in range(elemsize)]
+        streams = [torch.cuda.Stream() for i in range(elemsize)]
         # @torch.compile
         # def innergrad(ii):
         #     loc = [0 for jj in range(len(shp))]
@@ -872,31 +865,33 @@ if len(state.sites) == 1:
         #         HamiMat[(...,)+tuple(loc)] += conj(torch.autograd.grad(HamiMat0[tuple(loc)].imag, B_grad, create_graph=False, retain_graph=True)[0])
         #         HamiMat0.detach_()
 
-        # for ii in range(elemsize):
-        #     streams[ii].wait_stream(torch.cuda.current_stream())
+        for ii in range(elemsize):
+            streams[ii].wait_stream(torch.cuda.current_stream())
         for ii in range(elemsize):
             loc = [0 for jj in range(len(shp))]
             n = ii
             for jj in range(len(shp)):
                 loc[jj] = n//accu[jj]
                 n = n % accu[jj]
-            # with torch.cuda.stream(streams[ii]):
-            # print(loc)
-            HamiMat0[tuple(loc)] = 0.5*conj(torch.autograd.grad(
-                Hami[(0, 0)][tuple(loc)].real, mu, create_graph=True, retain_graph=True)[0])
-            HamiMat0[tuple(loc)] += 0.5*1j*conj(torch.autograd.grad(Hami[(0, 0)]
-                                                                    [tuple(loc)].imag, mu, create_graph=True, retain_graph=True)[0])
-            HamiMat[(...,)+tuple(loc)] = 0.5*conj(torch.autograd.grad(HamiMat0[tuple(loc)
-                                                                               ].real, B_grad, create_graph=False, retain_graph=True)[0])
-            HamiMat[(...,)+tuple(loc)] += 0.5*1j*conj(torch.autograd.grad(
-                HamiMat0[tuple(loc)].imag, B_grad, create_graph=False, retain_graph=True)[0])
-            # HamiMat0.detach_()
-            # HamiMat.detach_()
+            with torch.cuda.stream(streams[ii]):
+                # print(loc)
+                HamiMat0[tuple(loc)] = 0.5*conj(torch.autograd.grad(
+                    Hami[(0, 0)][tuple(loc)].real, mu, create_graph=True, retain_graph=True)[0])
+                HamiMat0[tuple(loc)] += 0.5*1j*conj(torch.autograd.grad(Hami[(0, 0)]
+                                                                        [tuple(loc)].imag, mu, create_graph=True, retain_graph=True)[0])
+                HamiMat[(...,)+tuple(loc)] = 0.5*conj(torch.autograd.grad(HamiMat0[tuple(loc)
+                                                                                   ].real, B_grad, create_graph=False, retain_graph=True)[0])
+                HamiMat[(...,)+tuple(loc)] += 0.5*1j*conj(torch.autograd.grad(
+                    HamiMat0[tuple(loc)].imag, B_grad, create_graph=False, retain_graph=True)[0])
+                # HamiMat0.detach_()
+                # HamiMat.detach_()
 
-            HamiMat0.detach_()
-            HamiMat.detach_()
-            # innergrad(ii)
+                HamiMat0.detach_()
+                HamiMat.detach_()
+                # innergrad(ii)
         t2 = time.time()
+        for ii in range(elemsize):
+            streams[ii].synchronize()
         print("HamiMat caclulated, time=", t2-t1)
 
         # HamiMat2 = view(HamiMat, (1024, 1024))

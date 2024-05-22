@@ -7,35 +7,37 @@ do
     Jy=1.0
     Jz=${Kz}
     # h=0.0
-    chi=8
-    # bond_dim=4
-    bond_dim=2
-    # _size=3
-    _size=1
+    chi=32
+    bond_dim=4
+    # bond_dim=2
+    _size=3
+    # _size=1
     _step=4
     # _device="cuda:3"
     _device="cpu"
     _dtype="complex128"
     # statefile="LGDG_correct2_chi16ok.json"
-    statefile="KitaevLG.json"
+    # statefile="KitaevLG.json"
+    statefile="Kitaevh0Kz0.json"
     datadir="data/KitaevLGDG_Correct_Model_withP_Jx${Jx}Jy${Jy}Jz${Jz}h${h}chi${chi}size${_size}bonddim${bond_dim}dtype${_dtype}/"
     mkdir -p ${datadir}
     cp ${datadir}../${statefile} ${datadir}
     reuseCTMRGenv="True"
     removeCTMRGenv="False"
-    extra_flags="--CTMARGS_ctm_force_dl True --MultiGPU False --CTMARGS_projector_eps_multiplet 1e-4 --CTMARGS_ctm_conv_tol 1e-8"
+    extra_flags="--CTMARGS_ctm_force_dl True --MultiGPU True --CTMARGS_projector_eps_multiplet 1e-4 --CTMARGS_ctm_conv_tol 6e-8"
     extra_flags=${extra_flags}" --NormMat True --HamiMat True --CTMARGS_projector_svd_reltol 1e-8"
     extra_flags=${extra_flags}" --CTMARGS_projector_method 4X4 --CTMARGS_projector_svd_method GESDD_CPU"
     extra_flags=${extra_flags}" --CTMARGS_ctm_env_init_type CTMRG --UseVUMPSansazAC False"
+    extra_flags=${extra_flags}" --CTMARGS_ctm_absorb_normalization inf"
     SMAMethod="SMA_Kitaev_withP_Correct_Model_gpugraph_divide.py"
     StoredMatMethod="SMA_stored_mat_Kitaev_Correct_Model.py"
-    runSMA="True"
+    runSMA="False"
     runStoredMat="True"
     runDraw="True"
     runGUPTRI="False"
     runDrawGUPTRI="False"
 
-    OnlyOnePoint="True"
+    OnlyOnePoint="False"
     max_iter=100000000
     # max_iter=1000
 

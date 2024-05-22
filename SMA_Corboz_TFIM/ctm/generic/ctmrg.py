@@ -261,6 +261,102 @@ def ctm_MOVE(direction, state, env, ctm_args=cfg.ctm_args, global_args=cfg.globa
         nT = dict()
         for coord in state_loc.sites.keys():
             if direction == (0, -1):
+                # torch.set_printoptions(profile="full")
+                # torch.set_printoptions(linewidth=200)
+                # # solve AX=XB C is zero
+                # # assume A,B square
+                # def sylvester(A, B, C):
+                #     if not torch.allclose(C, torch.zeros_like(C)):
+                #         raise ValueError("C must be zero")
+                #     Ichi = torch.eye(
+                #         A.shape[0], device=A.device, dtype=A.dtype)
+                #     A = A.contiguous()
+                #     B = B.contiguous()
+                #     AI = torch.kron(A, Ichi)
+                #     IBt = torch.kron(Ichi, B.permute(1, 0).contiguous())
+                #     AI = AI.cpu().numpy()
+                #     IBt = IBt.cpu().numpy()
+                #     import scipy
+                #     Xvec = scipy.linalg.null_space(AI-IBt, rcond=1e-6)
+                #     print("Xvec shape: ", Xvec.shape)
+                #     # return torch.from_numpy(Xvec[:, 0].reshape(A.shape[0], A.shape[1])).to(A.device).to(A.dtype)
+                #     return torch.from_numpy(Xvec).to(A.device).to(A.dtype)
+
+                # def chk_distinct_eigs(A, B):
+                #     eo, _ = torch.linalg.eig(A)
+                #     ep, _ = torch.linalg.eig(B)
+                #     # print("eigenvalues of ToM: ", eo)
+                #     # print("eigenvalues of TpM: ", ep)
+                #     for i in range(len(eo)):
+                #         for j in range(len(ep)):
+                #             if torch.allclose(eo[i], ep[j], atol=1e-3):
+                #                 print(
+                #                     "Warning: eigenvalues of ToM and TpM are not distinct")
+                #                 return False
+                #     return True
+
+                # def _get_gauge_T(To, Tp, D2idx=0, check=True, direction=None):
+                #     if direction == (-1, 0):
+                #         # To.shape = Tp.shape = (chi,chi,D^2)
+                #         ToM = To[:, :, D2idx]  # (chi,chi)
+                #         TpM = Tp[:, :, D2idx]  # (chi,chi)
+                #         ToM, TpM = TpM, ToM
+                #     elif direction == (1, 0):
+                #         # To.shape = Tp.shape = (chi,D^2,chi)
+                #         ToM = To[:, D2idx, :]  # (chi,chi)
+                #         TpM = Tp[:, D2idx, :]  # (chi,chi)
+                #     elif direction == (0, 1):
+                #         # To.shape = Tp.shape = (D^2,chi,chi)
+                #         ToM = To[D2idx, :, :]  # (chi,chi)
+                #         TpM = Tp[D2idx, :, :]  # (chi,chi)
+                #         ToM, TpM = TpM, ToM
+                #     elif direction == (0, -1):
+                #         # To.shape = Tp.shape = (chi,D^2,chi)
+                #         ToM = To[:, D2idx, :]  # (chi,chi)
+                #         TpM = Tp[:, D2idx, :]  # (chi,chi)
+                #     else:
+                #         raise ValueError(
+                #             "Invalid direction in _get_gauge_T: "+str(direction))
+                #     # if check:
+                #     #     chk_distinct_eigs(ToM, TpM)
+                #     return sylvester(TpM, ToM, torch.zeros_like(ToM))
+                # # find the subspace intersection of matrices, where each matrix are column vectors to span subspace
+                # def _zassenhaus(*Matrixs):
+                #     # Matrixs = [A,B,C,D,E,...]
+                #     if len(Matrixs) < 2:
+                #         raise ValueError("_zassenhaus: At least two matrices are needed")
+                #     At = Matrixs[0].t()
+                #     print("At shape: ", At.shape)
+                #     for i in range(1,len(Matrixs)):
+                #         Bt = Matrixs[i].t()
+                #         print("Bt shape: ", Bt.shape)
+                #         H = torch.cat((At,At), 1)
+                #         _tmp = torch.cat((Bt, torch.zeros_like(Bt)), 1)
+                #         H = torch.cat((H, _tmp), 0)
+                #         u = torch.linalg.lu(H).U
+                #         firstAllzero = At.shape[0]+Bt.shape[0]
+                #         for j in range(firstAllzero-1, 0, -1):
+                #             if torch.allclose(u[j,:At.shape[1]], torch.zeros_like(u[j,:At.shape[1]])):
+                #                 firstAllzero = j
+                #         print("firstAllzero:", firstAllzero)
+                #         if firstAllzero == At.shape[0]+Bt.shape[0]:
+                #             raise ValueError("firstAllzero == At.shape[0]+Bt.shape[0], no common subspace found in _zassenhaus")
+                #         At = u[firstAllzero:,At.shape[1]:]
+                #         print("u shape: ", At.shape)
+                #         # return u[firstAllzero:,At.shape[1]:]
+                #     return At
+                # # print("Start checking ctmrg absorb T gauge symmetry")
+                # nC1p, nC2p, nTp = absorb_truncate_CTM_MOVE_UP(
+                #     coord, state_loc, env_loc, P, Pt, ctm_args)
+                # nC1p, nC2p, nTp = move_normalize_c(nC1p, nC2p, nTp)
+                # nTo = env_loc.T[(coord, (0, -1))]
+                # # print("Check all T[:,fixed,:] has same gauge transform to Tp[:,fixed,:]")
+                # gauges = []
+                # for _i in range(nTo.shape[1]):
+                #     gauges.append(_get_gauge_T(nTo, nTp, _i, check=True, direction=(0, -1)))
+                # common_gauge = _zassenhaus(*gauges)
+                # print("common_gauge shape: ", common_gauge.shape)
+
                 nC1[coord], nC2[coord], nT[coord] = absorb_truncate_CTM_MOVE_UP(
                     coord, state_loc, env_loc, P, Pt, ctm_args)
             elif direction == (-1, 0):
