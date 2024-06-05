@@ -13,7 +13,7 @@ from math import sqrt
 # from ctm.generic.ctmrg import *
 from ctm.generic import ctmrg
 
-bond_dim = 4
+bond_dim = 2
 
 
 def ctmrg_conv_energy(state2, env, history, ctm_args=cfg.ctm_args):

@@ -78,7 +78,7 @@ def halves_of_4x4_CTM_MOVE_UP_c(*tensors, applyHami=False):
     # C_2, T1_2, T2_2, A_2= tensors[4:8]
     # C_3, T1_3, T2_3, A_3= tensors[8:12]
     # C_4, T1_4, T2_4, A_4= tensors[12:16]
-
+    
     if applyHami:
         # Hz might not be used
         Hx, Hy, Hz, conjA, mode = tensors[-5:]
@@ -88,31 +88,8 @@ def halves_of_4x4_CTM_MOVE_UP_c(*tensors, applyHami=False):
             RD = c2x2_RD_sl_c(*(tensors[4:8]+(conjA,)), applyHami=applyHami)
             LU = c2x2_LU_sl_c(*(tensors[8:12]+(conjA,)), applyHami=applyHami)
             LD = c2x2_LD_sl_c(*(tensors[12:16]+(conjA,)), applyHami=applyHami)
-            retR = torch.einsum('abcd,bfgh,cgij->afijdh', RU, RD, Hy)
-            # now, ret1
-            # af are chi legs
-            # ij are upper physical legs
-            # dh are lower physical legs
-            retL = torch.einsum('abcd,afgh,cgij->bfijdh', LU, LD, Hy)
-            # bf are chi legs
-            # ij are upper physical legs
-            # dh are lower physical legs
-            ret = torch.einsum(
-                'abcdef,ghijkl,ciek,djfl->abgh', retR, retL, Hx, Hx)
-            # ab are retR chi legs
-            # gh are retL chi legs
-            # ret = contiguous(permute(ret, (2,3,0,1)))
-            retsize = ret.size()
-            ret = torch.einsum('abbc->ac', ret)
-            # ret = view(ret, (ret.size(0)*ret.size(1), ret.size(2)*ret.size(3)))
-            # u, s, v = torch.svd(ret)
-            reg = torch.as_tensor(1.0e-12, dtype=ret.real.dtype if ret.is_complex() else ret.dtype,
-                                  device=ret.device)
-            u, s, v = SVDGESDD.apply(ret, reg, None)
-            R = torch.mm(u, torch.diag(s.type_as(u)))
-            Rt = v.t()
-            R = view(R, (retsize[0], retsize[1]))
-            Rt = view(Rt, (retsize[2], retsize[3]))
+            R = torch.einsum('abcd,bfgh,cgdh->af', RU, RD, Hy)
+            Rt = torch.einsum('abcd,afgh,cgdh->bf', LU, LD, Hy)
             return R, Rt
             # return contract(c2x2_RU_sl_c(*tensors[0:4]+(conjA,),applyHami=applyHami),
             #                 c2x2_RD_sl_c(*(tensors[4:8]+(conjA,)),applyHami=applyHami),([1],[0])), \
@@ -200,29 +177,8 @@ def halves_of_4x4_CTM_MOVE_LEFT_c(*tensors, applyHami=False):
             RU = c2x2_RU_sl_c(*(tensors[4:8]+(conjA,)), applyHami=applyHami)
             LD = c2x2_LD_sl_c(*(tensors[8:12]+(conjA,)), applyHami=applyHami)
             RD = c2x2_RD_sl_c(*(tensors[12:16]+(conjA,)), applyHami=applyHami)
-            retU = torch.einsum('abcd,bfgh,cgij->afijdh', LU, RU, Hx)
-            # now, ret1
-            # af are chi legs
-            # ij are upper physical legs
-            # dh are lower physical legs
-            retD = torch.einsum('abcd,ebgh,cgij->aeijdh', LD, RD, Hx)
-            # ae are chi legs
-            # ij are upper physical legs
-            # dh are lower physical legs
-            ret = torch.einsum(
-                'abcdef,ghijkl,ciek,djfl->abgh', retU, retD, Hy, Hy)
-            # ab are retU chi legs
-            # gh are retD chi legs
-
-            # ret = contiguous(permute(ret, (2,3,0,1)))
-            ret = torch.einsum('abbc->ac', ret)
-            # ret = view(ret, (ret.size(0)*ret.size(1), ret.size(2)*ret.size(3)))
-            # u, s, v = torch.svd(ret)
-            reg = torch.as_tensor(1.0e-12, dtype=ret.real.dtype if ret.is_complex() else ret.dtype,
-                                  device=ret.device)
-            u, s, v = SVDGESDD.apply(ret, reg, None)
-            R = torch.mm(u, torch.diag(s.type_as(u)))
-            Rt = v.t()
+            R = torch.einsum('abcd,bfgh,cgdh->af', LU, RU, Hx)
+            Rt = torch.einsum('abcd,ebgh,cgdh->ae', LD, RD, Hx)
             return R, Rt
             # return contract(c2x2_LU_sl_c(*tensors[0:4]),c2x2_RU_sl_c(*tensors[4:8]),([1],[0])), \
             #     contract(c2x2_LD_sl_c(*tensors[8:12]),c2x2_RD_sl_c(*tensors[12:16]),([1],[1]))
@@ -300,33 +256,12 @@ def halves_of_4x4_CTM_MOVE_DOWN_c(*tensors, applyHami=False):
         Hx, Hy, Hz, conjA, mode = tensors[-5:]
     if tensors[-1]:  # mode
         if applyHami:
-            LD = c2x2_LD_sl_c(*tensors[0:4]+(conjA,), applyHami=applyHami)
+            LD = c2x2_LD_sl_c(*(tensors[0:4]+(conjA,)), applyHami=applyHami)
             LU = c2x2_LU_sl_c(*(tensors[4:8]+(conjA,)), applyHami=applyHami)
             RD = c2x2_RD_sl_c(*(tensors[8:12]+(conjA,)), applyHami=applyHami)
             RU = c2x2_RU_sl_c(*(tensors[12:16]+(conjA,)), applyHami=applyHami)
-            retL = torch.einsum('abcd,afgh,cgij->bfijdh', LD, LU, Hy)
-            # now, ret1
-            # bf are chi legs
-            # ij are upper physical legs
-            # dh are lower physical legs
-            retR = torch.einsum('abcd,ebgh,cgij->aeijdh', RD, RU, Hy)
-            # ae are chi legs
-            # ij are upper physical legs
-            # dh are lower physical legs
-            ret = torch.einsum(
-                'abcdef,ghijkl,ciek,djfl->abgh', retL, retR, Hx, Hx)
-            # ab are retL chi legs
-            # gh are retR chi legs
-
-            # ret = contiguous(permute(ret, (2,3,0,1)))
-            ret = torch.einsum('abbc->ac', ret)
-            # ret = view(ret, (ret.size(0)*ret.size(1), ret.size(2)*ret.size(3)))
-            # u, s, v = torch.svd(ret)
-            reg = torch.as_tensor(1.0e-12, dtype=ret.real.dtype if ret.is_complex() else ret.dtype,
-                                  device=ret.device)
-            u, s, v = SVDGESDD.apply(ret, reg, None)
-            R = torch.mm(u, torch.diag(s.type_as(u)))
-            Rt = v.t()
+            R = torch.einsum('abcd,afgh,gchd->bf', LD, LU, Hy)
+            Rt = torch.einsum('abcd,eagh,gchd->be', RD, RU, Hy)
             return R, Rt
             # return contract(c2x2_LD_sl_c(*tensors[0:4]),c2x2_LU_sl_c(*tensors[4:8]),([0],[0])), \
             #     contract(c2x2_RD_sl_c(*tensors[8:12]),c2x2_RU_sl_c(*tensors[12:16]),([0],[1]))
@@ -406,33 +341,12 @@ def halves_of_4x4_CTM_MOVE_RIGHT_c(*tensors, applyHami=False):
         Hx, Hy, Hz, conjA, mode = tensors[-5:]
     if tensors[-1]:  # mode
         if applyHami:
-            RD = c2x2_RD_sl_c(*tensors[0:4]+(conjA,), applyHami=applyHami)
+            RD = c2x2_RD_sl_c(*(tensors[0:4]+(conjA,)), applyHami=applyHami)
             LD = c2x2_LD_sl_c(*(tensors[4:8]+(conjA,)), applyHami=applyHami)
             RU = c2x2_RU_sl_c(*(tensors[8:12]+(conjA,)), applyHami=applyHami)
             LU = c2x2_LU_sl_c(*(tensors[12:16]+(conjA,)), applyHami=applyHami)
-            retD = torch.einsum('abcd,ebgh,cgij->aeijdh', RD, LD, Hx)
-            # now, ret1
-            # ae are chi legs
-            # ij are upper physical legs
-            # dh are lower physical legs
-            retU = torch.einsum('abcd,afgh,cgij->bfijdh', RU, LU, Hx)
-            # bf are chi legs
-            # ij are upper physical legs
-            # dh are lower physical legs
-            ret = torch.einsum(
-                'abcdef,ghijkl,ciek,djfl->abgh', retD, retU, Hy, Hy)
-            # ab are retL chi legs
-            # gh are retR chi legs
-
-            # ret = contiguous(permute(ret, (2,3,0,1)))
-            ret = torch.einsum('abbc->ac', ret)
-            # ret = view(ret, (ret.size(0)*ret.size(1), ret.size(2)*ret.size(3)))
-            # u, s, v = torch.svd(ret)
-            reg = torch.as_tensor(1.0e-12, dtype=ret.real.dtype if ret.is_complex() else ret.dtype,
-                                  device=ret.device)
-            u, s, v = SVDGESDD.apply(ret, reg, None)
-            R = torch.mm(u, torch.diag(s.type_as(u)))
-            Rt = v.t()
+            R = torch.einsum('abcd,ebgh,gchd->ae', RD, LD, Hx)
+            Rt = torch.einsum('abcd,eagh,gchd->be', RU, LU, Hx)
             return R, Rt
             # return contract(c2x2_RD_sl_c(*tensors[0:4]),c2x2_LD_sl_c(*tensors[4:8]),([1],[1])), \
             #     contract(c2x2_RU_sl_c(*tensors[8:12]),c2x2_LU_sl_c(*tensors[12:16]),([0],[1]))
@@ -493,11 +407,12 @@ def c2x2_LU(coord, state, env, mode='dl', verbosity=0):
 
 
 def c2x2_LU_t(coord, state, env, sameenv=False):
+    coordenv = coord
     if sameenv:
-        coord = (0, 0)
-    tensors = env.C[(state.vertexToSite(coord), (-1, -1))], \
-        env.T[(state.vertexToSite(coord), (0, -1))], \
-        env.T[(state.vertexToSite(coord), (-1, 0))], \
+        coordenv = (0, 0)
+    tensors = env.C[(state.vertexToSite(coordenv), (-1, -1))], \
+        env.T[(state.vertexToSite(coordenv), (0, -1))], \
+        env.T[(state.vertexToSite(coordenv), (-1, 0))], \
         state.site(coord)
     return tensors
 
@@ -701,11 +616,12 @@ def c2x2_RU(coord, state, env, mode='dl', verbosity=0):
 
 
 def c2x2_RU_t(coord, state, env, sameenv=False):
+    coordenv = coord
     if sameenv:
-        coord = (0, 0)
-    tensors = env.C[(state.vertexToSite(coord), (1, -1))], \
-        env.T[(state.vertexToSite(coord), (1, 0))], \
-        env.T[(state.vertexToSite(coord), (0, -1))], \
+        coordenv = (0, 0)
+    tensors = env.C[(state.vertexToSite(coordenv), (1, -1))], \
+        env.T[(state.vertexToSite(coordenv), (1, 0))], \
+        env.T[(state.vertexToSite(coordenv), (0, -1))], \
         state.site(coord)
     return tensors
 
@@ -908,11 +824,12 @@ def c2x2_RD(coord, state, env, mode='dl', verbosity=0):
 
 
 def c2x2_RD_t(coord, state, env, sameenv=False):
+    coordenv = coord
     if sameenv:
-        coord = (0, 0)
-    tensors = env.C[(state.vertexToSite(coord), (1, 1))], \
-        env.T[(state.vertexToSite(coord), (0, 1))], \
-        env.T[(state.vertexToSite(coord), (1, 0))], \
+        coordenv = (0, 0)
+    tensors = env.C[(state.vertexToSite(coordenv), (1, 1))], \
+        env.T[(state.vertexToSite(coordenv), (0, 1))], \
+        env.T[(state.vertexToSite(coordenv), (1, 0))], \
         state.site(coord)
     return tensors
 
@@ -1094,11 +1011,12 @@ def c2x2_LD(coord, state, env, mode='dl', verbosity=0):
 
 
 def c2x2_LD_t(coord, state, env, sameenv=False):
+    coordenv = coord
     if sameenv:
-        coord = (0, 0)
-    tensors = env.C[(state.vertexToSite(coord), (-1, 1))], \
-        env.T[(state.vertexToSite(coord), (-1, 0))], \
-        env.T[(state.vertexToSite(coord), (0, 1))], \
+        coordenv = (0, 0)
+    tensors = env.C[(state.vertexToSite(coordenv), (-1, 1))], \
+        env.T[(state.vertexToSite(coordenv), (-1, 0))], \
+        env.T[(state.vertexToSite(coordenv), (0, 1))], \
         state.site(coord)
     return tensors
 

@@ -430,6 +430,8 @@ e = e[idx]
 v = v[:, idx]
 ################ Projector###############
 eig_size = 60
+if kx == 0 and ky == 0:
+    eig_size = eig_size + 1
 eig_truncate_up = 0
 vt = np.zeros((NormMat.shape[0], eig_size -
               eig_truncate_up), dtype=cfg.global_args.dtype)
@@ -473,7 +475,6 @@ Bs_Ori = Proj@Bs
 
 # print("E_lowest_ex=", (Es[0]-energy_per_site.item()))
 # print("ALL_E_lowest_ex=", (Es-energy_per_site.item()))
-
 print("E_lowest_ex=", Es[0])
 print("ALL_E_lowest_ex=", Es)
 
@@ -559,9 +560,8 @@ KzzA = ProjDag@KzzA
 KzzAconj = ProjDag@KzzAconj
 
 # Plot spectral weight
-
 # Es = Es.real
-Es = (Es.real-energy_per_site.item().real)
+Es = (2*args.size+2)*(2*args.size+1)*(Es.real-energy_per_site.item().real)
 # Es = (((2*args.size+2))*((2*args.size+1))
 #       * Es.real-energy_per_site.item().real)
 # Es = Es.real-energy_per_site.item().real

@@ -11,7 +11,8 @@ do
     bond_dim=4
     _size=3
     _step=4
-    _device="cuda:0"
+    # _device="cuda:0"
+    _device="cpu"
     _dtype="complex128"
     statefile="${h}_state.json"
     datadir="data/HsuKe/h_00_to_015_kz_25_free/KitaevAnyon_withP_Jx${Jx}Jy${Jy}Jz${Jz}h${h}chi${chi}size${_size}bonddim${bond_dim}dtype${_dtype}/"
@@ -27,7 +28,7 @@ do
     SMAMethod="SMA_Kitaev_withP_Correct_Model_gpugraph_divide.py"
     StoredMatMethod="SMA_stored_mat_Kitaev_Correct_Model.py"
     runSMA="False"
-    runStoredMat="True"
+    runStoredMat="False"
     runDraw="True"
     runGUPTRI="False"
     runDrawGUPTRI="False"
@@ -152,7 +153,7 @@ do
 
     if [[ "$runDraw" == "True" ]]; then
         #Draw the figure
-        python -u graph.py ${datadir} True "h=${h} Kz=${Kz}" "[0, 4, 8, 16], [r'\$M(\pi,0)\$', r'\$\Gamma(0,0)\$',r'\$K(\pi,\frac{\pi}{2})\$', r'\$M(\pi,0)\$']"
+        python -u graph.py ${datadir} True "h=${h} Kz=${Kz}" "[0, 2, 4, 8], [r'\$M(\pi,0)\$', r'\$\Gamma(0,0)\$',r'\$K(\pi,\frac{\pi}{2})\$', r'\$M(\pi,0)\$']"
     fi
 
 

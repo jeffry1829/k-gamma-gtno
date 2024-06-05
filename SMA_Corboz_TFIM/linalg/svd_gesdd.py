@@ -111,7 +111,7 @@ class SVDGESDD(torch.autograd.Function):
         # TORCH_CHECK(compute_uv,
         #    "svd_backward: Setting compute_uv to false in torch.svd doesn't compute singular matrices, ",
         #    "and hence we cannot compute backward. Please use torch.svd(compute_uv=True)");
-
+        print("v1_10_Fonly_backward")
         diagnostics = self.diagnostics
         u, sigma, v, eps = self.saved_tensors
         m = u.size(-2)  # first dim of original tensor A = u sigma v^\dag
@@ -236,7 +236,6 @@ class SVDGESDD(torch.autograd.Function):
         # TORCH_CHECK(compute_uv,
         #    "svd_backward: Setting compute_uv to false in torch.svd doesn't compute singular matrices, ",
         #    "and hence we cannot compute backward. Please use torch.svd(compute_uv=True)");
-
         diagnostics = self.diagnostics
         u, sigma, v, eps = self.saved_tensors
         m = u.size(0)  # first dim of original tensor A = u sigma v^\dag
@@ -332,6 +331,7 @@ class SVDGESDD(torch.autograd.Function):
     #   at::NoTF32Guard disable_tf32;
     @staticmethod
     def v1_11_backward(self, gU, gS, gVh):
+        print*("v1_11_backward")
         U, S, Vh, ad_decomp_reg = self.saved_tensors
         diagnostics = self.diagnostics
         #   // Throughout both the real and complex case we assume A has distinct singular values.

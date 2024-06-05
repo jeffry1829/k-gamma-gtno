@@ -85,83 +85,83 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
 
                 for i in range(args.size+1):
                     vec_coord_l = (-args.size, -args.size+i)
-                    new_coord_l = state.vertexToSite(
+                    new_coord_l = ACstate.vertexToSite(
                         (coord[0]+vec_coord_l[0], coord[1]+vec_coord_l[1]))
-                    coord_shift_left = stateDL.vertexToSite(
+                    coord_shift_left = ACstate.vertexToSite(
                         (new_coord_l[0]-vec[0], new_coord_l[1]-vec[1]))
-                    coord_shift_right = stateDL.vertexToSite(
+                    coord_shift_right = ACstate.vertexToSite(
                         (new_coord_l[0]+vec[0], new_coord_l[1]+vec[1]))
                     P2, Pt2 = ctm_get_projectors(
-                        direction, new_coord_l, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Hx, Hy, Honsite, conj(state.site(new_coord_l)))
-                    P2 = view(P2, (env.chi, stateDL.site(
-                        coord_shift_left).size()[3], env.chi)).to(local_device)
-                    Pt2 = view(Pt2, (env.chi, stateDL.site(
-                        new_coord_l).size()[1], env.chi)).to(local_device)
+                        direction, new_coord_l, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Id, Id, Honsite, conj(state.site(new_coord_l)))
+                    P2 = view(P2, (env.chi, ACstate.site(
+                        coord_shift_left).size()[3]**2, env.chi)).to(local_device)
+                    Pt2 = view(Pt2, (env.chi, ACstate.site(
+                        new_coord_l).size()[1]**2, env.chi)).to(local_device)
                     P1, Pt1 = ctm_get_projectors(
-                        direction, coord_shift_right, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Hx, Hy, Honsite, conj(state.site(coord_shift_right)))
-                    P1 = view(P1, (env.chi, stateDL.site(
-                        new_coord_l).size()[3], env.chi)).to(local_device)
-                    Pt1 = view(Pt1, (env.chi, stateDL.site(
-                        coord_shift_right).size()[1], env.chi)).to(local_device)
+                        direction, coord_shift_right, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Id, Id, Honsite, conj(state.site(coord_shift_right)))
+                    P1 = view(P1, (env.chi, ACstate.site(
+                        new_coord_l).size()[3]**2, env.chi)).to(local_device)
+                    Pt1 = view(Pt1, (env.chi, ACstate.site(
+                        coord_shift_right).size()[1]**2, env.chi)).to(local_device)
                     # P2 = view(P[(i,new_coord_l,direction)], (env.chi,stateDL.site(coord_shift_left).size()[3],env.chi))
                     # Pt2 = view(Pt[(i,new_coord_l,direction)], (env.chi,stateDL.site(new_coord_l).size()[1],env.chi))
                     # P1 = view(P[(i,coord_shift_right,direction)], (env.chi,stateDL.site(new_coord_l).size()[3],env.chi))
                     # Pt1 = view(Pt[(i,coord_shift_right,direction)], (env.chi,stateDL.site(coord_shift_right).size()[1],env.chi))
                     nC2 = contract(C_up["left"], env.T[(
-                        new_coord_l, (-1, 0))], ([0], [0]))
+                        (0, 0), (-1, 0))], ([0], [0]))
                     nC2 = contract(nC2, P2, ([0, 2], [0, 1]))
                     C_up["left"] = nC2/nC2.abs().max()
                     # env.C[(new_coord_l,(-1,-1))] = C_up["left"]
 
                     vec_coord_r = (args.size+1, -args.size+i)
-                    new_coord_r = state.vertexToSite(
+                    new_coord_r = ACstate.vertexToSite(
                         (coord[0]+vec_coord_r[0], coord[1]+vec_coord_r[1]))
-                    coord_shift_left = stateDL.vertexToSite(
+                    coord_shift_left = ACstate.vertexToSite(
                         (new_coord_r[0]-vec[0], new_coord_r[1]-vec[1]))
-                    coord_shift_right = stateDL.vertexToSite(
+                    coord_shift_right = ACstate.vertexToSite(
                         (new_coord_r[0]+vec[0], new_coord_r[1]+vec[1]))
                     P2, Pt2 = ctm_get_projectors(
-                        direction, new_coord_r, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Hx, Hy, Honsite, conj(state.site(new_coord_r)))
-                    P2 = view(P2, (env.chi, stateDL.site(
-                        coord_shift_left).size()[3], env.chi)).to(local_device)
-                    Pt2 = view(Pt2, (env.chi, stateDL.site(
-                        new_coord_r).size()[1], env.chi)).to(local_device)
+                        direction, new_coord_r, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Id, Id, Honsite, conj(state.site(new_coord_r)))
+                    P2 = view(P2, (env.chi, ACstate.site(
+                        coord_shift_left).size()[3]**2, env.chi)).to(local_device)
+                    Pt2 = view(Pt2, (env.chi, ACstate.site(
+                        new_coord_r).size()[1]**2, env.chi)).to(local_device)
                     P1, Pt1 = ctm_get_projectors(
-                        direction, coord_shift_right, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Hx, Hy, Honsite, conj(state.site(coord_shift_right)))
-                    P1 = view(P1, (env.chi, stateDL.site(
-                        new_coord_r).size()[3], env.chi)).to(local_device)
-                    Pt1 = view(Pt1, (env.chi, stateDL.site(
-                        coord_shift_right).size()[1], env.chi)).to(local_device)
+                        direction, coord_shift_right, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Id, Id, Honsite, conj(state.site(coord_shift_right)))
+                    P1 = view(P1, (env.chi, ACstate.site(
+                        new_coord_r).size()[3]**2, env.chi)).to(local_device)
+                    Pt1 = view(Pt1, (env.chi, ACstate.site(
+                        coord_shift_right).size()[1]**2, env.chi)).to(local_device)
                     # P2 = view(P[(i,new_coord_r,direction)], (env.chi,stateDL.site(coord_shift_left).size()[3],env.chi))
                     # Pt2 = view(Pt[(i,new_coord_r,direction)], (env.chi,stateDL.site(new_coord_r).size()[1],env.chi))
                     # P1 = view(P[(i,coord_shift_right,direction)], (env.chi,stateDL.site(new_coord_r).size()[3],env.chi))
                     # Pt1 = view(Pt[(i,coord_shift_right,direction)], (env.chi,stateDL.site(coord_shift_right).size()[1],env.chi))
                     nC1 = contract(C_up["right"], env.T[(
-                        new_coord_r, (1, 0))], ([1], [0]))
+                        (0, 0), (1, 0))], ([1], [0]))
                     nC1 = contract(Pt1, nC1, ([0, 1], [0, 1]))
                     C_up["right"] = nC1/nC1.abs().max()
                     # env.C[(new_coord_r,(1,-1))] = C_up["right"]
 
                     for j in range(2*args.size+2):
                         vec_coord = (-args.size+j, -args.size+i)
-                        new_coord = state.vertexToSite(
+                        new_coord = ACstate.vertexToSite(
                             (coord[0]+vec_coord[0], coord[1]+vec_coord[1]))
-                        coord_shift_left = stateDL.vertexToSite(
+                        coord_shift_left = ACstate.vertexToSite(
                             (new_coord[0]-vec[0], new_coord[1]-vec[1]))
-                        coord_shift_right = stateDL.vertexToSite(
+                        coord_shift_right = ACstate.vertexToSite(
                             (new_coord[0]+vec[0], new_coord[1]+vec[1]))
                         P2, Pt2 = ctm_get_projectors(
-                            direction, new_coord, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Hx, Hy, Honsite, conj(state.site(new_coord)))
-                        P2 = view(P2, (env.chi, stateDL.site(
-                            coord_shift_left).size()[3], env.chi)).to(local_device)
-                        Pt2 = view(Pt2, (env.chi, stateDL.site(
-                            new_coord).size()[1], env.chi)).to(local_device)
+                            direction, new_coord, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Id, Id, Honsite, conj(state.site(new_coord)))
+                        P2 = view(P2, (env.chi, ACstate.site(
+                            coord_shift_left).size()[3]**2, env.chi)).to(local_device)
+                        Pt2 = view(Pt2, (env.chi, ACstate.site(
+                            new_coord).size()[1]**2, env.chi)).to(local_device)
                         P1, Pt1 = ctm_get_projectors(
-                            direction, coord_shift_right, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Hx, Hy, Honsite, conj(state.site(coord_shift_right)))
-                        P1 = view(P1, (env.chi, stateDL.site(
-                            new_coord).size()[3], env.chi)).to(local_device)
-                        Pt1 = view(Pt1, (env.chi, stateDL.site(
-                            coord_shift_right).size()[1], env.chi)).to(local_device)
+                            direction, coord_shift_right, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Id, Id, Honsite, conj(state.site(coord_shift_right)))
+                        P1 = view(P1, (env.chi, ACstate.site(
+                            new_coord).size()[3]**2, env.chi)).to(local_device)
+                        Pt1 = view(Pt1, (env.chi, ACstate.site(
+                            coord_shift_right).size()[1]**2, env.chi)).to(local_device)
                         # P2 = view(P[(i,new_coord,direction)], (env.chi,stateDL.site(coord_shift_left).size()[3],env.chi))
                         # # Guess
                         # #           |---0 chi
@@ -177,11 +177,11 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                         # if j % 2 == 0:
                         if i == args.size and j == args.size and lasttime:
                             nT = contract(Pt2, T_up[(j)], ([0], [0]))
-                            dimsA = state.site(new_coord).size()
+                            dimsA = state.site((0, 0)).size()
                             nT = view(
                                 nT, (dimsA[2], dimsA[2], env.chi, phys_dim, phys_dim, dimsA[1], dimsA[1], env.chi))
                             Aket = state.site(
-                                new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
+                                (0, 0)) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
                             nT = contract(nT, Aket, ([0, 5], [2, 1]))
                             nT = contract(
                                 nT, view(P1, (env.chi, dimsA[4], dimsA[4], env.chi)), ([5, 8], [0, 1]))
@@ -191,7 +191,8 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                             #        |---0  A  7--|
                             #               6
                             # if i % 2 == 1:
-                            nT = contract(nT, HyAndOnsiteLst, ([2, 3, 5], [0, 2, 1]))
+                            nT = contract(nT, HyAndOnsiteLst,
+                                          ([2, 3, 5], [0, 2, 1]))
                             tempT = contiguous(
                                 permute(nT, (1, 6, 2, 0, 3, 4, 5)))
                             # else:
@@ -221,15 +222,15 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                                 #  1 chi---Pt2           2
                                 #           |---0
                                 nT = contract(Pt2, T_up[(j)], ([0], [0]))
-                                dimsA = state.site(new_coord).size()
+                                dimsA = state.site((0, 0)).size()
                                 Aket = state.site(
-                                    new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
+                                    (0, 0)) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
                                 # Guess DL=
                                 #           2
                                 #   3   A conj(A)  5         phy 0,1
                                 #           4
-                                DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
-                                            (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
+                                DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site((0, 0))))),
+                                          (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
                                 nT = contract(nT, DL, ([0, 2], [3, 2]))
                                 # Guess now
                                 #           |-----T1
@@ -261,11 +262,11 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                                 #           |-----T5
                                 #  1 chi---Pt2    4    phy 2,3
                                 #           |---0
-                                dimsA = state.site(new_coord).size()
+                                dimsA = state.site((0, 0)).size()
                                 Aket = state.site(
-                                    new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
-                                DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
-                                            (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
+                                    (0, 0)) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
+                                DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site((0, 0))))),
+                                          (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
                                 # Guess now DL=
                                 #           2
                                 #   3   A conj(A)  5         phy 0,1
@@ -292,7 +293,8 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                                 #         h1 h2
                                 #         2  3
                                 # if i % 2 == 1:
-                                nT = contract(nT, HyAndOnsiteLst, ([1, 2, 3], [0, 2, 1]))
+                                nT = contract(nT, HyAndOnsiteLst,
+                                              ([1, 2, 3], [0, 2, 1]))
                                 # Guess now
                                 #           |-----T-----|
                                 #  0 chi---Pt2    |     P1---chi 3
@@ -487,83 +489,83 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
 
                 for i in range(args.size+1):
                     vec_coord_l = (-args.size, args.size-i+1)
-                    new_coord_l = state.vertexToSite(
+                    new_coord_l = ACstate.vertexToSite(
                         (coord[0]+vec_coord_l[0], coord[1]+vec_coord_l[1]))
-                    coord_shift_right = stateDL.vertexToSite(
+                    coord_shift_right = ACstate.vertexToSite(
                         (new_coord_l[0]-vec[0], new_coord_l[1]-vec[1]))
-                    coord_shift_left = stateDL.vertexToSite(
+                    coord_shift_left = ACstate.vertexToSite(
                         (new_coord_l[0]+vec[0], new_coord_l[1]+vec[1]))
                     P2, Pt2 = ctm_get_projectors(
-                        direction, new_coord_l, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Hx, Hy, Honsite, conj(state.site(new_coord_l)))
-                    P2 = view(P2, (env.chi, stateDL.site(
-                        coord_shift_right).size()[1], env.chi)).to(local_device)
-                    Pt2 = view(Pt2, (env.chi, stateDL.site(
-                        new_coord_l).size()[3], env.chi)).to(local_device)
+                        direction, new_coord_l, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Id, Id, Honsite, conj(state.site(new_coord_l)))
+                    P2 = view(P2, (env.chi, ACstate.site(
+                        coord_shift_right).size()[1]**2, env.chi)).to(local_device)
+                    Pt2 = view(Pt2, (env.chi, ACstate.site(
+                        new_coord_l).size()[3]**2, env.chi)).to(local_device)
                     P1, Pt1 = ctm_get_projectors(
-                        direction, coord_shift_left, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Hx, Hy, Honsite, conj(state.site(coord_shift_left)))
-                    P1 = view(P1, (env.chi, stateDL.site(
-                        new_coord_l).size()[1], env.chi)).to(local_device)
-                    Pt1 = view(Pt1, (env.chi, stateDL.site(
-                        coord_shift_left).size()[3], env.chi)).to(local_device)
+                        direction, coord_shift_left, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Id, Id, Honsite, conj(state.site(coord_shift_left)))
+                    P1 = view(P1, (env.chi, ACstate.site(
+                        new_coord_l).size()[1]**2, env.chi)).to(local_device)
+                    Pt1 = view(Pt1, (env.chi, ACstate.site(
+                        coord_shift_left).size()[3]**2, env.chi)).to(local_device)
                     # P2 = view(P[(i,new_coord_l,direction)], (env.chi,stateDL.site(coord_shift_right).size()[1],env.chi))
                     # Pt2 = view(Pt[(i,new_coord_l,direction)], (env.chi,stateDL.site(new_coord_l).size()[3],env.chi))
                     # P1 = view(P[(i,coord_shift_left,direction)], (env.chi,stateDL.site(new_coord_l).size()[1],env.chi))
                     # Pt1 = view(Pt[(i,coord_shift_left,direction)], (env.chi,stateDL.site(coord_shift_left).size()[3],env.chi))
                     nC1 = contract(C_down["left"], env.T[(
-                        new_coord_l, (-1, 0))], ([0], [1]))
+                        (0, 0), (-1, 0))], ([0], [1]))
                     nC1 = contract(nC1, Pt1, ([0, 2], [0, 1]))
                     C_down["left"] = nC1/nC1.abs().max()
                     # env.C[(new_coord_l,(-1,1))] = C_down["left"]
 
                     vec_coord_r = (args.size+1, args.size-i+1)
-                    new_coord_r = state.vertexToSite(
+                    new_coord_r = ACstate.vertexToSite(
                         (coord[0]+vec_coord_r[0], coord[1]+vec_coord_r[1]))
-                    coord_shift_right = stateDL.vertexToSite(
+                    coord_shift_right = ACstate.vertexToSite(
                         (new_coord_r[0]-vec[0], new_coord_r[1]-vec[1]))
-                    coord_shift_left = stateDL.vertexToSite(
+                    coord_shift_left = ACstate.vertexToSite(
                         (new_coord_r[0]+vec[0], new_coord_r[1]+vec[1]))
                     P2, Pt2 = ctm_get_projectors(
-                        direction, new_coord_r, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Hx, Hy, Honsite, conj(state.site(new_coord_r)))
-                    P2 = view(P2, (env.chi, stateDL.site(
-                        coord_shift_right).size()[1], env.chi)).to(local_device)
-                    Pt2 = view(Pt2, (env.chi, stateDL.site(
-                        new_coord_r).size()[3], env.chi)).to(local_device)
+                        direction, new_coord_r, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Id, Id, Honsite, conj(state.site(new_coord_r)))
+                    P2 = view(P2, (env.chi, ACstate.site(
+                        coord_shift_right).size()[1]**2, env.chi)).to(local_device)
+                    Pt2 = view(Pt2, (env.chi, ACstate.site(
+                        new_coord_r).size()[3]**2, env.chi)).to(local_device)
                     P1, Pt1 = ctm_get_projectors(
-                        direction, coord_shift_left, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Hx, Hy, Honsite, conj(state.site(coord_shift_left)))
-                    P1 = view(P1, (env.chi, stateDL.site(
-                        new_coord_r).size()[1], env.chi)).to(local_device)
-                    Pt1 = view(Pt1, (env.chi, stateDL.site(
-                        coord_shift_left).size()[3], env.chi)).to(local_device)
+                        direction, coord_shift_left, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Id, Id, Honsite, conj(state.site(coord_shift_left)))
+                    P1 = view(P1, (env.chi, ACstate.site(
+                        new_coord_r).size()[1]**2, env.chi)).to(local_device)
+                    Pt1 = view(Pt1, (env.chi, ACstate.site(
+                        coord_shift_left).size()[3]**2, env.chi)).to(local_device)
                     # P2 = view(P[(i,new_coord_r,direction)], (env.chi,stateDL.site(coord_shift_right).size()[1],env.chi))
                     # Pt2 = view(Pt[(i,new_coord_r,direction)], (env.chi,stateDL.site(new_coord_r).size()[3],env.chi))
                     # P1 = view(P[(i,coord_shift_left,direction)], (env.chi,stateDL.site(new_coord_r).size()[1],env.chi))
                     # Pt1 = view(Pt[(i,coord_shift_left,direction)], (env.chi,stateDL.site(coord_shift_left).size()[3],env.chi))
                     nC2 = contract(C_down["right"], env.T[(
-                        new_coord_r, (1, 0))], ([0], [2]))
+                        (0, 0), (1, 0))], ([0], [2]))
                     nC2 = contract(nC2, P2, ([0, 2], [0, 1]))
                     C_down["right"] = nC2/nC2.abs().max()
                     # env.C[(new_coord_r,(1,1))] = C_down["right"]
 
                     for j in range(2*args.size+2):
                         vec_coord = (-args.size+j, args.size-i+1)
-                        new_coord = state.vertexToSite(
+                        new_coord = ACstate.vertexToSite(
                             (coord[0]+vec_coord[0], coord[1]+vec_coord[1]))
-                        coord_shift_right = stateDL.vertexToSite(
+                        coord_shift_right = ACstate.vertexToSite(
                             (new_coord[0]-vec[0], new_coord[1]-vec[1]))
-                        coord_shift_left = stateDL.vertexToSite(
+                        coord_shift_left = ACstate.vertexToSite(
                             (new_coord[0]+vec[0], new_coord[1]+vec[1]))
                         P2, Pt2 = ctm_get_projectors(
-                            direction, new_coord, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Hx, Hy, Honsite, conj(state.site(new_coord)))
-                        P2 = view(P2, (env.chi, stateDL.site(
-                            coord_shift_right).size()[1], env.chi)).to(local_device)
-                        Pt2 = view(Pt2, (env.chi, stateDL.site(
-                            new_coord).size()[3], env.chi)).to(local_device)
+                            direction, new_coord, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Id, Id, Honsite, conj(state.site(new_coord)))
+                        P2 = view(P2, (env.chi, ACstate.site(
+                            coord_shift_right).size()[1]**2, env.chi)).to(local_device)
+                        Pt2 = view(Pt2, (env.chi, ACstate.site(
+                            new_coord).size()[3]**2, env.chi)).to(local_device)
                         P1, Pt1 = ctm_get_projectors(
-                            direction, coord_shift_left, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Hx, Hy, Honsite, conj(state.site(coord_shift_left)))
-                        P1 = view(P1, (env.chi, stateDL.site(
-                            new_coord).size()[1], env.chi)).to(local_device)
-                        Pt1 = view(Pt1, (env.chi, stateDL.site(
-                            coord_shift_left).size()[3], env.chi)).to(local_device)
+                            direction, coord_shift_left, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Id, Id, Honsite, conj(state.site(coord_shift_left)))
+                        P1 = view(P1, (env.chi, ACstate.site(
+                            new_coord).size()[1]**2, env.chi)).to(local_device)
+                        Pt1 = view(Pt1, (env.chi, ACstate.site(
+                            coord_shift_left).size()[3]**2, env.chi)).to(local_device)
                         # P2 = view(P[(i,new_coord,direction)], (env.chi,stateDL.site(coord_shift_right).size()[1],env.chi))
                         # Pt2 = view(Pt[(i,new_coord,direction)], (env.chi,stateDL.site(new_coord).size()[3],env.chi))
                         # P1 = view(P[(i,coord_shift_left,direction)], (env.chi,stateDL.site(new_coord).size()[1],env.chi))
@@ -573,9 +575,9 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                             nT = contract(P1, T_down[(j)], ([0], [1]))
                             dimsA = state.site(new_coord).size()
                             Aket = state.site(
-                                new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
-                            DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
-                                        (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
+                                (0, 0)) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
+                            DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site((0, 0))))),
+                                      (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
                             nT = contract(nT, DL, ([0, 2], [3, 4]))
                             nT = contract(nT, Pt2, ([1, 5], [0, 1]))
                             # contiguous(permute(nT, (1,0,2)))
@@ -586,17 +588,17 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                             T_down[(j)] = tempT/norm.abs().max()
                         else:
                             nT = contract(P1, T_down[(j)], ([0], [0]))
-                            dimsA = state.site(new_coord).size()
+                            dimsA = state.site((0, 0)).size()
                             Aket = state.site(
-                                new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
-                            DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
-                                        (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
+                                (0, 0)) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
+                            DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site((0, 0))))),
+                                      (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
                             nT = contract(nT, DL, ([0, 4], [3, 4]))
                             nT = contract(nT, Pt2, ([3, 7], [0, 1]))
                             # if i % 2 == 1:
                             nT = contract(
                                 nT, permute(
-                                Hy, (1, 0, 3, 2)), ([1, 2, 3], [0, 2, 1]))
+                                    Hy, (1, 0, 3, 2)), ([1, 2, 3], [0, 2, 1]))
                             tempT = contiguous(
                                 permute(nT, (0, 4, 1, 2, 3)))
                             # else:
@@ -697,83 +699,83 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
 
                 for i in range(args.size+1):
                     vec_coord_u = (-args.size+i, -args.size)
-                    new_coord_u = state.vertexToSite(
+                    new_coord_u = ACstate.vertexToSite(
                         (coord[0]+vec_coord_u[0], coord[1]+vec_coord_u[1]))
-                    coord_shift_up = stateDL.vertexToSite(
+                    coord_shift_up = ACstate.vertexToSite(
                         (new_coord_u[0]+vec[0], new_coord_u[1]+vec[1]))
-                    coord_shift_down = stateDL.vertexToSite(
+                    coord_shift_down = ACstate.vertexToSite(
                         (new_coord_u[0]-vec[0], new_coord_u[1]-vec[1]))
                     P2, Pt2 = ctm_get_projectors(
-                        direction, new_coord_u, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Hx, Hy, Honsite, conj(state.site(new_coord_u)))
-                    P2 = view(P2, (env.chi, stateDL.site(
-                        coord_shift_down).size()[0], env.chi)).to(local_device)
-                    Pt2 = view(Pt2, (env.chi, stateDL.site(
-                        new_coord_u).size()[2], env.chi)).to(local_device)
+                        direction, new_coord_u, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Id, Id, Honsite, conj(state.site(new_coord_u)))
+                    P2 = view(P2, (env.chi, ACstate.site(
+                        coord_shift_down).size()[0]**2, env.chi)).to(local_device)
+                    Pt2 = view(Pt2, (env.chi, ACstate.site(
+                        new_coord_u).size()[2]**2, env.chi)).to(local_device)
                     P1, Pt1 = ctm_get_projectors(
-                        direction, coord_shift_up, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Hx, Hy, Honsite, conj(state.site(coord_shift_up)))
-                    P1 = view(P1, (env.chi, stateDL.site(
-                        new_coord_u).size()[0], env.chi)).to(local_device)
-                    Pt1 = view(Pt1, (env.chi, stateDL.site(
-                        coord_shift_up).size()[2], env.chi)).to(local_device)
+                        direction, coord_shift_up, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Id, Id, Honsite, conj(state.site(coord_shift_up)))
+                    P1 = view(P1, (env.chi, ACstate.site(
+                        new_coord_u).size()[0]**2, env.chi)).to(local_device)
+                    Pt1 = view(Pt1, (env.chi, ACstate.site(
+                        coord_shift_up).size()[2]**2, env.chi)).to(local_device)
                     # P2 = view(P[(i,new_coord_u,direction)], (env.chi,stateDL.site(coord_shift_down).size()[0],env.chi))
                     # Pt2 = view(Pt[(i,new_coord_u,direction)], (env.chi,stateDL.site(new_coord_u).size()[2],env.chi))
                     # P1 = view(P[(i,coord_shift_up,direction)], (env.chi,stateDL.site(new_coord_u).size()[0],env.chi))
                     # Pt1 = view(Pt[(i,coord_shift_up,direction)], (env.chi,stateDL.site(coord_shift_up).size()[2],env.chi))
                     nC1 = contract(C_left["up"], env.T[(
-                        new_coord_u, (0, -1))], ([1], [0]))
+                        (0, 0), (0, -1))], ([1], [0]))
                     nC1 = contract(Pt1, nC1, ([0, 1], [0, 1]))
                     C_left["up"] = nC1/nC1.abs().max()
                     # env.C[(new_coord_u,(-1,-1))] = C_left["up"]
 
                     vec_coord_d = (-args.size+i, args.size+1)
-                    new_coord_d = state.vertexToSite(
+                    new_coord_d = ACstate.vertexToSite(
                         (coord[0]+vec_coord_d[0], coord[1]+vec_coord_d[1]))
-                    coord_shift_up = stateDL.vertexToSite(
+                    coord_shift_up = ACstate.vertexToSite(
                         (new_coord_d[0]+vec[0], new_coord_d[1]+vec[1]))
-                    coord_shift_down = stateDL.vertexToSite(
+                    coord_shift_down = ACstate.vertexToSite(
                         (new_coord_d[0]-vec[0], new_coord_d[1]-vec[1]))
                     P2, Pt2 = ctm_get_projectors(
-                        direction, new_coord_d, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Hx, Hy, Honsite, conj(state.site(new_coord_d)))
-                    P2 = view(P2, (env.chi, stateDL.site(
-                        coord_shift_down).size()[0], env.chi)).to(local_device)
-                    Pt2 = view(Pt2, (env.chi, stateDL.site(
-                        new_coord_d).size()[2], env.chi)).to(local_device)
+                        direction, new_coord_d, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Id, Id, Honsite, conj(state.site(new_coord_d)))
+                    P2 = view(P2, (env.chi, ACstate.site(
+                        coord_shift_down).size()[0]**2, env.chi)).to(local_device)
+                    Pt2 = view(Pt2, (env.chi, ACstate.site(
+                        new_coord_d).size()[2]**2, env.chi)).to(local_device)
                     P1, Pt1 = ctm_get_projectors(
-                        direction, coord_shift_up, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Hx, Hy, Honsite, conj(state.site(coord_shift_up)))
-                    P1 = view(P1, (env.chi, stateDL.site(
-                        new_coord_d).size()[0], env.chi)).to(local_device)
-                    Pt1 = view(Pt1, (env.chi, stateDL.site(
-                        coord_shift_up).size()[2], env.chi)).to(local_device)
+                        direction, coord_shift_up, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Id, Id, Honsite, conj(state.site(coord_shift_up)))
+                    P1 = view(P1, (env.chi, ACstate.site(
+                        new_coord_d).size()[0]**2, env.chi)).to(local_device)
+                    Pt1 = view(Pt1, (env.chi, ACstate.site(
+                        coord_shift_up).size()[2]**2, env.chi)).to(local_device)
                     # P2 = view(P[(i,new_coord_d,direction)], (env.chi,stateDL.site(coord_shift_down).size()[0],env.chi))
                     # Pt2 = view(Pt[(i,new_coord_d,direction)], (env.chi,stateDL.site(new_coord_d).size()[2],env.chi))
                     # P1 = view(P[(i,coord_shift_up,direction)], (env.chi,stateDL.site(new_coord_d).size()[0],env.chi))
                     # Pt1 = view(Pt[(i,coord_shift_up,direction)], (env.chi,stateDL.site(coord_shift_up).size()[2],env.chi))
                     nC2 = contract(C_left["down"], env.T[(
-                        new_coord_d, (0, 1))], ([1], [1]))
+                        (0, 0), (0, 1))], ([1], [1]))
                     nC2 = contract(P2, nC2, ([0, 1], [0, 1]))
                     C_left["down"] = nC2/nC2.abs().max()
                     # env.C[(new_coord_d,(-1,1))] = C_left["down"]
 
                     for j in range(2*args.size+2):
                         vec_coord = (-args.size+i, -args.size+j)
-                        new_coord = state.vertexToSite(
+                        new_coord = ACstate.vertexToSite(
                             (coord[0]+vec_coord[0], coord[1]+vec_coord[1]))
-                        coord_shift_up = stateDL.vertexToSite(
+                        coord_shift_up = ACstate.vertexToSite(
                             (new_coord[0]+vec[0], new_coord[1]+vec[1]))
-                        coord_shift_down = stateDL.vertexToSite(
+                        coord_shift_down = ACstate.vertexToSite(
                             (new_coord[0]-vec[0], new_coord[1]-vec[1]))
                         P2, Pt2 = ctm_get_projectors(
-                            direction, new_coord, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Hx, Hy, Honsite, conj(state.site(new_coord)))
-                        P2 = view(P2, (env.chi, stateDL.site(
-                            coord_shift_down).size()[0], env.chi)).to(local_device)
-                        Pt2 = view(Pt2, (env.chi, stateDL.site(
-                            new_coord).size()[2], env.chi)).to(local_device)
+                            direction, new_coord, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Id, Id, Honsite, conj(state.site(new_coord)))
+                        P2 = view(P2, (env.chi, ACstate.site(
+                            coord_shift_down).size()[0]**2, env.chi)).to(local_device)
+                        Pt2 = view(Pt2, (env.chi, ACstate.site(
+                            new_coord).size()[2]**2, env.chi)).to(local_device)
                         P1, Pt1 = ctm_get_projectors(
-                            direction, coord_shift_up, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Hx, Hy, Honsite, conj(state.site(coord_shift_up)))
-                        P1 = view(P1, (env.chi, stateDL.site(
-                            new_coord).size()[0], env.chi)).to(local_device)
-                        Pt1 = view(Pt1, (env.chi, stateDL.site(
-                            coord_shift_up).size()[2], env.chi)).to(local_device)
+                            direction, coord_shift_up, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Id, Id, Honsite, conj(state.site(coord_shift_up)))
+                        P1 = view(P1, (env.chi, ACstate.site(
+                            new_coord).size()[0]**2, env.chi)).to(local_device)
+                        Pt1 = view(Pt1, (env.chi, ACstate.site(
+                            coord_shift_up).size()[2]**2, env.chi)).to(local_device)
                         # P2 = view(P[(i,new_coord,direction)], (env.chi,stateDL.site(coord_shift_down).size()[0],env.chi))
                         # Pt2 = view(Pt[(i,new_coord,direction)], (env.chi,stateDL.site(new_coord).size()[2],env.chi))
                         # P1 = view(P[(i,coord_shift_up,direction)], (env.chi,stateDL.site(new_coord).size()[0],env.chi))
@@ -781,11 +783,11 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                         # if j % 2 == 0:
                         if i == args.size and j == args.size and lasttime:
                             nT = contract(P1, T_left[(j)], ([0], [0]))
-                            dimsA = state.site(new_coord).size()
+                            dimsA = state.site((0, 0)).size()
                             nT = view(
                                 nT, (dimsA[1], dimsA[1], env.chi, phys_dim, phys_dim, dimsA[2], dimsA[2], env.chi))
                             Aket = state.site(
-                                new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
+                                (0, 0)) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
                             nT = contract(nT, Aket, ([0, 5], [1, 2]))
                             nT = contract(
                                 nT, view(Pt2, (env.chi, dimsA[3], dimsA[3], env.chi)), ([5, 7], [0, 1]))
@@ -804,11 +806,11 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                         else:
                             if i == 0 and firsttime:
                                 nT = contract(P1, T_left[(j)], ([0], [0]))
-                                dimsA = state.site(new_coord).size()
+                                dimsA = state.site((0, 0)).size()
                                 Aket = state.site(
-                                    new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
-                                DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
-                                            (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
+                                    (0, 0)) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
+                                DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site((0, 0))))),
+                                          (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
                                 nT = contract(nT, DL, ([0, 3], [2, 3]))
                                 nT = contract(nT, Pt2, ([1, 4], [0, 1]))
                                 # contiguous(permute(nT, (0,2,1)))
@@ -819,11 +821,11 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                                 T_left[(j)] = tempT/norm.abs().max()
                             else:
                                 nT = contract(P1, T_left[(j)], ([0], [0]))
-                                dimsA = state.site(new_coord).size()
+                                dimsA = state.site((0, 0)).size()
                                 Aket = state.site(
-                                    new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
-                                DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
-                                            (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
+                                    (0, 0)) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
+                                DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site((0, 0))))),
+                                          (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
                                 nT = contract(nT, DL, ([0, 4], [2, 3]))
                                 nT = contract(nT, Pt2, ([3, 6], [0, 1]))
                                 # if i % 2 == 1:
@@ -953,82 +955,82 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
 
                 for i in range(args.size+1):
                     vec_coord_u = (args.size-i+1, -args.size)
-                    new_coord_u = state.vertexToSite(
+                    new_coord_u = ACstate.vertexToSite(
                         (coord[0]+vec_coord_u[0], coord[1]+vec_coord_u[1]))
-                    coord_shift_down = stateDL.vertexToSite(
+                    coord_shift_down = ACstate.vertexToSite(
                         (new_coord_u[0]+vec[0], new_coord_u[1]+vec[1]))
-                    coord_shift_up = stateDL.vertexToSite(
+                    coord_shift_up = ACstate.vertexToSite(
                         (new_coord_u[0]-vec[0], new_coord_u[1]-vec[1]))
                     P2, Pt2 = ctm_get_projectors(
-                        direction, new_coord_u, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Hx, Hy, Honsite, conj(state.site(new_coord_u)))
-                    P2 = view(P2, (env.chi, stateDL.site(
-                        coord_shift_up).size()[2], env.chi)).to(local_device)
-                    Pt2 = view(Pt2, (env.chi, stateDL.site(
-                        new_coord_u).size()[0], env.chi)).to(local_device)
+                        direction, new_coord_u, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Id, Id, Honsite, conj(state.site(new_coord_u)))
+                    P2 = view(P2, (env.chi, ACstate.site(
+                        coord_shift_up).size()[2]**2, env.chi)).to(local_device)
+                    Pt2 = view(Pt2, (env.chi, ACstate.site(
+                        new_coord_u).size()[0]**2, env.chi)).to(local_device)
                     P1, Pt1 = ctm_get_projectors(
-                        direction, coord_shift_down, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Hx, Hy, Honsite, conj(state.site(coord_shift_down)))
-                    P1 = view(P1, (env.chi, stateDL.site(
-                        new_coord_u).size()[2], env.chi)).to(local_device)
-                    Pt1 = view(Pt1, (env.chi, stateDL.site(
-                        coord_shift_down).size()[0], env.chi)).to(local_device)
+                        direction, coord_shift_down, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Id, Id, Honsite, conj(state.site(coord_shift_down)))
+                    P1 = view(P1, (env.chi, ACstate.site(
+                        new_coord_u).size()[2]**2, env.chi)).to(local_device)
+                    Pt1 = view(Pt1, (env.chi, ACstate.site(
+                        coord_shift_down).size()[0]**2, env.chi)).to(local_device)
                     # P2 = view(P[(i,new_coord_u,direction)], (env.chi,stateDL.site(coord_shift_up).size()[2],env.chi))
                     # Pt2 = view(Pt[(i,new_coord_u,direction)], (env.chi,stateDL.site(new_coord_u).size()[0],env.chi))
                     # P1 = view(P[(i,coord_shift_down,direction)], (env.chi,stateDL.site(new_coord_u).size()[2],env.chi))
                     # Pt1 = view(Pt[(i,coord_shift_down,direction)], (env.chi,stateDL.site(coord_shift_down).size()[0],env.chi))
                     nC2 = contract(C_right["up"], env.T[(
-                        new_coord_u, (0, -1))], ([0], [2]))
+                        (0, 0), (0, -1))], ([0], [2]))
                     nC2 = contract(nC2, P2, ([0, 2], [0, 1]))
                     C_right["up"] = nC2/nC2.abs().max()
                     # env.C[(new_coord_u,(1,-1))] = C_right["up"]
 
                     vec_coord_d = (args.size-i+1, args.size+1)
-                    new_coord_d = state.vertexToSite(
+                    new_coord_d = ACstate.vertexToSite(
                         (coord[0]+vec_coord_d[0], coord[1]+vec_coord_d[1]))
-                    coord_shift_down = stateDL.vertexToSite(
+                    coord_shift_down = ACstate.vertexToSite(
                         (new_coord_d[0]+vec[0], new_coord_d[1]+vec[1]))
-                    coord_shift_up = stateDL.vertexToSite(
+                    coord_shift_up = ACstate.vertexToSite(
                         (new_coord_d[0]-vec[0], new_coord_d[1]-vec[1]))
                     P2, Pt2 = ctm_get_projectors(
-                        direction, new_coord_d, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Hx, Hy, Honsite, conj(state.site(new_coord_d)))
-                    P2 = view(P2, (env.chi, stateDL.site(
-                        coord_shift_up).size()[2], env.chi)).to(local_device)
-                    Pt2 = view(Pt2, (env.chi, stateDL.site(
-                        new_coord_d).size()[0], env.chi)).to(local_device)
+                        direction, new_coord_d, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Id, Id, Honsite, conj(state.site(new_coord_d)))
+                    P2 = view(P2, (env.chi, ACstate.site(
+                        coord_shift_up).size()[2]**2, env.chi)).to(local_device)
+                    Pt2 = view(Pt2, (env.chi, ACstate.site(
+                        new_coord_d).size()[0]**2, env.chi)).to(local_device)
                     P1, Pt1 = ctm_get_projectors(
-                        direction, coord_shift_down, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Hx, Hy, Honsite, conj(state.site(coord_shift_down)))
-                    P1 = view(P1, (env.chi, stateDL.site(
-                        new_coord_d).size()[2], env.chi)).to(local_device)
-                    Pt1 = view(Pt1, (env.chi, stateDL.site(
-                        coord_shift_down).size()[0], env.chi)).to(local_device)
+                        direction, coord_shift_down, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Id, Id, Honsite, conj(state.site(coord_shift_down)))
+                    P1 = view(P1, (env.chi, ACstate.site(
+                        new_coord_d).size()[2]**2, env.chi)).to(local_device)
+                    Pt1 = view(Pt1, (env.chi, ACstate.site(
+                        coord_shift_down).size()[0]**2, env.chi)).to(local_device)
                     # P2 = view(P[(i,new_coord_d,direction)], (env.chi,stateDL.site(coord_shift_up).size()[2],env.chi))
                     # Pt2 = view(Pt[(i,new_coord_d,direction)], (env.chi,stateDL.site(new_coord_d).size()[0],env.chi))
                     # P1 = view(P[(i,coord_shift_down,direction)], (env.chi,stateDL.site(new_coord_d).size()[2],env.chi))
                     # Pt1 = view(Pt[(i,coord_shift_down,direction)], (env.chi,stateDL.site(coord_shift_down).size()[0],env.chi))
                     nC1 = contract(C_right["down"], env.T[(
-                        new_coord_d, (0, 1))], ([1], [2]))
+                        (0, 0), (0, 1))], ([1], [2]))
                     nC1 = contract(Pt1, nC1, ([0, 1], [0, 1]))
                     C_right["down"] = nC1/nC1.abs().max()
                     # env.C[(new_coord_d,(1,1))] = C_right["down"]
                     for j in range(2*args.size+2):
                         vec_coord = (args.size-i+1, -args.size+j)
-                        new_coord = state.vertexToSite(
+                        new_coord = ACstate.vertexToSite(
                             (coord[0]+vec_coord[0], coord[1]+vec_coord[1]))
-                        coord_shift_down = stateDL.vertexToSite(
+                        coord_shift_down = ACstate.vertexToSite(
                             (new_coord[0]+vec[0], new_coord[1]+vec[1]))
-                        coord_shift_up = stateDL.vertexToSite(
+                        coord_shift_up = ACstate.vertexToSite(
                             (new_coord[0]-vec[0], new_coord[1]-vec[1]))
                         P2, Pt2 = ctm_get_projectors(
-                            direction, new_coord, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Hx, Hy, Honsite, conj(state.site(new_coord)))
-                        P2 = view(P2, (env.chi, stateDL.site(
-                            coord_shift_up).size()[2], env.chi)).to(local_device)
-                        Pt2 = view(Pt2, (env.chi, stateDL.site(
-                            new_coord).size()[0], env.chi)).to(local_device)
+                            direction, new_coord, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Id, Id, Honsite, conj(state.site(new_coord)))
+                        P2 = view(P2, (env.chi, ACstate.site(
+                            coord_shift_up).size()[2]**2, env.chi)).to(local_device)
+                        Pt2 = view(Pt2, (env.chi, ACstate.site(
+                            new_coord).size()[0]**2, env.chi)).to(local_device)
                         P1, Pt1 = ctm_get_projectors(
-                            direction, coord_shift_down, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Hx, Hy, Honsite, conj(state.site(coord_shift_down)))
-                        P1 = view(P1, (env.chi, stateDL.site(
-                            new_coord).size()[2], env.chi)).to(local_device)
-                        Pt1 = view(Pt1, (env.chi, stateDL.site(
-                            coord_shift_down).size()[0], env.chi)).to(local_device)
+                            direction, coord_shift_down, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Id, Id, Honsite, conj(state.site(coord_shift_down)))
+                        P1 = view(P1, (env.chi, ACstate.site(
+                            new_coord).size()[2]**2, env.chi)).to(local_device)
+                        Pt1 = view(Pt1, (env.chi, ACstate.site(
+                            coord_shift_down).size()[0]**2, env.chi)).to(local_device)
                         # P2 = view(P[(i,new_coord,direction)], (env.chi,stateDL.site(coord_shift_up).size()[2],env.chi))
                         # Pt2 = view(Pt[(i,new_coord,direction)], (env.chi,stateDL.site(new_coord).size()[0],env.chi))
                         # # Guess, Pt2=
@@ -1051,11 +1053,11 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                             #     0       |
                             #          2--T
                             #             3
-                            dimsA = state.site(new_coord).size()
+                            dimsA = state.site((0, 0)).size()
                             Aket = state.site(
-                                new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
-                            DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
-                                        (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
+                                (0, 0)) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
+                            DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site((0, 0))))),
+                                      (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
                             # now DL=
                             #           2
                             #   3   A conj(A)  5         phy 0,1
@@ -1085,11 +1087,11 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                             T_right[(j)] = tempT/norm.abs().max()
                         else:
                             nT = contract(Pt2, T_right[(j)], ([0], [0]))
-                            dimsA = state.site(new_coord).size()
+                            dimsA = state.site((0, 0)).size()
                             Aket = state.site(
-                                new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
-                            DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site(new_coord)))),
-                                        (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
+                                (0, 0)) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
+                            DL = view(contiguous(einsum('mefgh,nabcd->mneafbgchd', Aket, conj(state.site((0, 0))))),
+                                      (phys_dim, phys_dim, dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
                             nT = contract(nT, DL, ([0, 4], [2, 5]))
                             nT = contract(nT, P1, ([3, 7], [0, 1]))
                             # if i % 2 == 1:
@@ -1190,8 +1192,8 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
 def Create_Localsite_Hami(state, env, C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right, Hx, Hy, Honsite, Id, args, isOnsiteWorking):
     phys_dim = state.site((0, 0)).size()[0]
     Hami = dict()
-    OI = torch.einsum('ij,ab->iajb', Honsite, Id)
-    IO = torch.einsum('ij,ab->iajb', Id, Honsite)
+    # OI = torch.einsum('ij,ab->iajb', Honsite, Id)
+    # IO = torch.einsum('ij,ab->iajb', Id, Honsite)
 
     HyAndOnsiteFst = Hy
     HyAndOnsiteLst = Hy
@@ -1245,7 +1247,7 @@ def Create_Localsite_Hami(state, env, C_up, T_up, C_left, T_left, C_down, T_down
             # Thus, we need to put it now, and don't need to put
             # it in horizontal H later
             FL = contract(temp, HyAndOnsiteBoth,
-                            ([0, 1, 3, 4], [0, 2, 1, 3]))
+                          ([0, 1, 3, 4], [0, 2, 1, 3]))
 
             FL2 = FL.detach()
 
@@ -1299,7 +1301,7 @@ def Create_Localsite_Hami(state, env, C_up, T_up, C_left, T_left, C_down, T_down
             temp = contract(
                 temp, T_right[(2*args.size+1-i)], ([0, 4], [4, 3]))
             FD = contract(temp, Hx,
-                            ([1, 2, 4, 5], [0, 2, 1, 3]))
+                          ([1, 2, 4, 5], [0, 2, 1, 3]))
 
             FD2 = FD.detach()
 

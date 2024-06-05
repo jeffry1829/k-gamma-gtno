@@ -124,8 +124,9 @@ if os.path.isfile(datadir+"TV.txt") == True:
     plt.title('(momentum, energy) to Kzz')
     # plt.xticks([0, 8, 16, 32], [r'$M(\pi,0)$', r'$\Gamma(0,0)$',
     #                             r'$K(\pi,\frac{\pi}{2})$', r'$M(\pi,0)$'])
-    plt.xticks([0, 4, 8, 16], [r'$M(\pi,0)$', r'$\Gamma(0,0)$',
-               r'$K(\pi,\frac{\pi}{2})$', r'$M(\pi,0)$'])
+    if not DefineTitleAndTick:
+        plt.xticks([0, 4, 8, 16], [r'$M(\pi,0)$', r'$\Gamma(0,0)$',
+                                   r'$K(\pi,\frac{\pi}{2})$', r'$M(\pi,0)$'])
     # plt.xticks([0, 6, 9, 12, 18, 21], [r'$M(\pi,0)$', r'$X(\pi,\pi)$',
     #            r'$S(\frac{\pi}{2},\frac{\pi}{2})$', r'$\Gamma(0,0)$', r'$M(\pi,0)$', r'$S(\frac{\pi}{2},\frac{\pi}{2})$'])
     # plt.xticks([0,12,18,24,36,42],[r'$M(\pi,0)$',r'$X(\pi,\pi)$',r'$S(\frac{\pi}{2},\frac{\pi}{2})$',r'$\Gamma(0,0)$',r'$M(\pi,0)$',r'$S(\frac{\pi}{2},\frac{\pi}{2})$'])
@@ -167,8 +168,9 @@ if os.path.isfile(datadir+"XXA.txt") == True:
     plt.title('(momentum, energy) to XXA')
     # plt.xticks([0, 8, 16, 32], [r'$M(\pi,0)$', r'$\Gamma(0,0)$',
     #                             r'$K(\pi,\frac{\pi}{2})$', r'$M(\pi,0)$'])
-    plt.xticks([0, 4, 8, 16], [r'$M(\pi,0)$', r'$\Gamma(0,0)$',
-               r'$K(\pi,\frac{\pi}{2})$', r'$M(\pi,0)$'])
+    if not DefineTitleAndTick:
+        plt.xticks([0, 4, 8, 16], [r'$M(\pi,0)$', r'$\Gamma(0,0)$',
+                                   r'$K(\pi,\frac{\pi}{2})$', r'$M(\pi,0)$'])
     # plt.xticks([0, 6, 9, 12, 18, 21], [r'$M(\pi,0)$', r'$X(\pi,\pi)$',
     #            r'$S(\frac{\pi}{2},\frac{\pi}{2})$', r'$\Gamma(0,0)$', r'$M(\pi,0)$', r'$S(\frac{\pi}{2},\frac{\pi}{2})$'])
     # plt.xticks([0,12,18,24,36,42],[r'$M(\pi,0)$',r'$X(\pi,\pi)$',r'$S(\frac{\pi}{2},\frac{\pi}{2})$',r'$\Gamma(0,0)$',r'$M(\pi,0)$',r'$S(\frac{\pi}{2},\frac{\pi}{2})$'])
@@ -210,8 +212,9 @@ if os.path.isfile(datadir+"XIIXA.txt") == True:
     plt.title('(momentum, energy) to XIIXA')
     # plt.xticks([0, 8, 16, 32], [r'$M(\pi,0)$', r'$\Gamma(0,0)$',
     #                             r'$K(\pi,\frac{\pi}{2})$', r'$M(\pi,0)$'])
-    plt.xticks([0, 4, 8, 16], [r'$M(\pi,0)$', r'$\Gamma(0,0)$',
-               r'$K(\pi,\frac{\pi}{2})$', r'$M(\pi,0)$'])
+    if not DefineTitleAndTick:
+        plt.xticks([0, 4, 8, 16], [r'$M(\pi,0)$', r'$\Gamma(0,0)$',
+                                   r'$K(\pi,\frac{\pi}{2})$', r'$M(\pi,0)$'])
     # plt.xticks([0, 6, 9, 12, 18, 21], [r'$M(\pi,0)$', r'$X(\pi,\pi)$',
     #            r'$S(\frac{\pi}{2},\frac{\pi}{2})$', r'$\Gamma(0,0)$', r'$M(\pi,0)$', r'$S(\frac{\pi}{2},\frac{\pi}{2})$'])
     # plt.xticks([0,12,18,24,36,42],[r'$M(\pi,0)$',r'$X(\pi,\pi)$',r'$S(\frac{\pi}{2},\frac{\pi}{2})$',r'$\Gamma(0,0)$',r'$M(\pi,0)$',r'$S(\frac{\pi}{2},\frac{\pi}{2})$'])
@@ -314,8 +317,9 @@ plt.scatter(x, y, s=20, c=z, marker='o', cmap=cm.get_cmap('viridis'))
 plt.title('(momentum, energy) to spectral weight')
 # plt.xticks([0, 8, 16, 32], [r'$M(\pi,0)$', r'$\Gamma(0,0)$',
 #            r'$K(\pi,\frac{\pi}{2})$', r'$M(\pi,0)$'])
-plt.xticks([0, 4, 8, 16], [r'$M(\pi,0)$', r'$\Gamma(0,0)$',
-                           r'$K(\pi,\frac{\pi}{2})$', r'$M(\pi,0)$'])
+if not DefineTitleAndTick:
+    plt.xticks([0, 4, 8, 16], [r'$M(\pi,0)$', r'$\Gamma(0,0)$',
+                               r'$K(\pi,\frac{\pi}{2})$', r'$M(\pi,0)$'])
 # plt.xticks([0, 6, 9, 12, 18, 21], [r'$M(\pi,0)$', r'$X(\pi,\pi)$',
 #            r'$S(\frac{\pi}{2},\frac{\pi}{2})$', r'$\Gamma(0,0)$', r'$M(\pi,0)$', r'$S(\frac{\pi}{2},\frac{\pi}{2})$'])
 # plt.xticks([0,12,18,24,36,42],[r'$M(\pi,0)$',r'$X(\pi,\pi)$',r'$S(\frac{\pi}{2},\frac{\pi}{2})$',r'$\Gamma(0,0)$',r'$M(\pi,0)$',r'$S(\frac{\pi}{2},\frac{\pi}{2})$'])
@@ -349,8 +353,9 @@ plt.plot(cntlst, sumSW, 'o')
 plt.title('sum spectral weight')
 # plt.xticks([0, 8, 16, 32], [r'$M(\pi,0)$', r'$\Gamma(0,0)$',
 #            r'$K(\pi,\frac{\pi}{2})$', r'$M(\pi,0)$'])
-plt.xticks([0, 4, 8, 16], [r'$M(\pi,0)$', r'$\Gamma(0,0)$',
-                           r'$K(\pi,\frac{\pi}{2})$', r'$M(\pi,0)$'])
+if not DefineTitleAndTick:
+    plt.xticks([0, 4, 8, 16], [r'$M(\pi,0)$', r'$\Gamma(0,0)$',
+                               r'$K(\pi,\frac{\pi}{2})$', r'$M(\pi,0)$'])
 # plt.xticks([0, 6, 9, 12, 18, 21], [r'$M(\pi,0)$', r'$X(\pi,\pi)$',
 #            r'$S(\frac{\pi}{2},\frac{\pi}{2})$', r'$\Gamma(0,0)$', r'$M(\pi,0)$', r'$S(\frac{\pi}{2},\frac{\pi}{2})$'])
 # plt.xticks([0,12,18,24,36,42],[r'$M(\pi,0)$',r'$X(\pi,\pi)$',r'$S(\frac{\pi}{2},\frac{\pi}{2})$',r'$\Gamma(0,0)$',r'$M(\pi,0)$',r'$S(\frac{\pi}{2},\frac{\pi}{2})$'])
@@ -415,8 +420,9 @@ plt.plot(cntlst, SSFs, 'o')
 plt.title('static structure factor')
 # plt.xticks([0, 8, 16, 32], [r'$M(\pi,0)$', r'$\Gamma(0,0)$',
 #            r'$K(\pi,\frac{\pi}{2})$', r'$M(\pi,0)$'])
-plt.xticks([0, 4, 8, 16], [r'$M(\pi,0)$', r'$\Gamma(0,0)$',
-                           r'$K(\pi,\frac{\pi}{2})$', r'$M(\pi,0)$'])
+if not DefineTitleAndTick:
+    plt.xticks([0, 4, 8, 16], [r'$M(\pi,0)$', r'$\Gamma(0,0)$',
+                               r'$K(\pi,\frac{\pi}{2})$', r'$M(\pi,0)$'])
 # plt.xticks([0,6,12,24],[r'$M(\pi,0)$',r'$\Gamma(0,0)$',r'$K(\pi,\frac{\pi}{2})$',r'$M(\pi,0)$'])
 # plt.xticks([0, 6, 9, 12, 18, 21], [r'$M(\pi,0)$', r'$X(\pi,\pi)$',
 #            r'$S(\frac{\pi}{2},\frac{\pi}{2})$', r'$\Gamma(0,0)$', r'$M(\pi,0)$', r'$S(\frac{\pi}{2},\frac{\pi}{2})$'])

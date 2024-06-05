@@ -655,7 +655,7 @@ if len(state.sites) == 1:
         a = contiguous(einsum('mefgh,mabcd->eafbgchd', A, conj(base)))
         a = view(a, (dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
         ACsitesDL[coord] = a
-    ACstateDL = IPEPS(sitesDL, vertexToSite=lattice_to_site)
+    ACstateDL = IPEPS(ACsitesDL, vertexToSite=lattice_to_site)
     if (args.NormMat == True):
         # This is the use of original Wei-Lin way, with projectors calc on the fly
         C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right = Create_Norm_Env(state, stateDL, B_grad, env, lam, kx, ky,
@@ -794,7 +794,8 @@ if len(state.sites) == 1:
     # prepare more sites for boundary conditions
     for i in range(-args.size-3, args.size+2+3):
         for j in range(-args.size-3, args.size+2+3):
-            ACsites_[(i, j)] = base + lam * torch.exp(-1j*(kx*i+ky*j)) * B_grad
+            # ACsites_[(i, j)] = base + lam * torch.exp(-1j*(kx*i+ky*j)) * B_grad
+            ACsites_[(i, j)] = base
     ACstate = IPEPS(ACsites_, vertexToSite=lattice_to_site)
     # ACsitesDL = dict()
     # for coord, A in ACstate.sites.items():
@@ -811,101 +812,101 @@ if len(state.sites) == 1:
     if (args.HamiMat == True):
         # This is the use of original Wei-Lin way, with projectors calc on the fly
         isOnsiteWorking = False
-        with torch.autograd.graph.save_on_cpu(True):
-            C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right = Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam,
-                                                                                                    Hx, Hy, Honsite, II, kx, ky, C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right, args, firsttime=True, lasttime=True, isOnsiteWorking=isOnsiteWorking,
-                                                                                                    ACstate=ACstate, MultiGPU=args.MultiGPU)
-            # C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right = Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam,
-            #                                                                                          Hx, Hy, Honsite, IIII, kx, ky, C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right, args, True, True, isOnsiteWorking=isOnsiteWorking, ACstate=stateDL, MultiGPU=args.MultiGPU)
-            # C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right = Create_Hami_Env(
-            #     state, stateDL, B_grad, env, P, Pt, lam, Hx, Hy, kx, ky, args)
-            # C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right = checkpoint(Create_Localsite_Hami_Env, state, stateDL, B_grad, env, lam,
-            #                                                                           Hx, Hy, Honsite, II, kx, ky, C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right, args, True, True, P, Pt, isOnsiteWorking, use_reentrant=False)
-            # Hami = Create_Hami(state, env, C_up, T_up, C_left, T_left,
-            #                    C_down, T_down, C_right, T_right, Hx, Hy, args)
-            Hami = Create_Localsite_Hami(state, env, C_up, T_up, C_left, T_left, C_down,
-                                        T_down, C_right, T_right, Hx, Hy, Honsite, II, args, isOnsiteWorking=isOnsiteWorking)
-            # Hami = checkpoint(Create_Localsite_Hami, state, env, C_up, T_up, C_left, T_left, C_down,
-            #                   T_down, C_right, T_right, Hx, Hy, Honsite, II, args, isOnsiteWorking, use_reentrant=False)
+        # with torch.autograd.graph.save_on_cpu(True):
+        C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right = Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam,
+                                                                                                 Hx, Hy, Honsite, IIII, kx, ky, C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right, args, firsttime=True, lasttime=True, isOnsiteWorking=isOnsiteWorking,
+                                                                                                 ACstate=ACstate, MultiGPU=args.MultiGPU)
+        # C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right = Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam,
+        #                                                                                          Hx, Hy, Honsite, IIII, kx, ky, C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right, args, True, True, isOnsiteWorking=isOnsiteWorking, ACstate=stateDL, MultiGPU=args.MultiGPU)
+        # C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right = Create_Hami_Env(
+        #     state, stateDL, B_grad, env, P, Pt, lam, Hx, Hy, kx, ky, args)
+        # C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right = checkpoint(Create_Localsite_Hami_Env, state, stateDL, B_grad, env, lam,
+        #                                                                           Hx, Hy, Honsite, II, kx, ky, C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right, args, True, True, P, Pt, isOnsiteWorking, use_reentrant=False)
+        # Hami = Create_Hami(state, env, C_up, T_up, C_left, T_left,
+        #                    C_down, T_down, C_right, T_right, Hx, Hy, args)
+        Hami = Create_Localsite_Hami(state, env, C_up, T_up, C_left, T_left, C_down,
+                                     T_down, C_right, T_right, Hx, Hy, Honsite, IIII, args, isOnsiteWorking=isOnsiteWorking)
+        # Hami = checkpoint(Create_Localsite_Hami, state, env, C_up, T_up, C_left, T_left, C_down,
+        #                   T_down, C_right, T_right, Hx, Hy, Honsite, II, args, isOnsiteWorking, use_reentrant=False)
 
-            Hami[(0, 0)] = Hami[(0, 0)]/norm_factor
-            print("norm_factor divided")
+        Hami[(0, 0)] = Hami[(0, 0)]/norm_factor
+        print("norm_factor divided")
 
-            print("G(H)_dot_state=", contract(Hami[(0, 0)], conj(
-                state.site((0, 0))), ([0, 1, 2, 3, 4], [0, 1, 2, 3, 4])).item())
-            shp = list(Hami[(0, 0)].size())
-            newshp = shp.copy()
-            for ii in shp:
-                newshp.append(ii)
-            HamiMat0 = torch.zeros(
-                shp, dtype=cfg.global_args.torch_dtype, device=cfg.global_args.device)
-            HamiMat = torch.zeros(
-                newshp, dtype=cfg.global_args.torch_dtype, device=cfg.global_args.device)
-            elemsize = 1
-            accu = [1 for ii in range(len(shp))]
-            for ii in shp:
-                elemsize = elemsize*ii
-            for ii in range(1, len(shp)):
-                accu[len(shp)-1-ii] = accu[len(shp)-1-ii+1] * \
-                    shp[len(shp)-1-ii+1]
-            print("Start caclulating HamiMat...")
-            t1 = time.time()
-            streams = [torch.cuda.Stream() for i in range(elemsize)]
-            # @torch.compile
-            # def innergrad(ii):
-            #     loc = [0 for jj in range(len(shp))]
-            #     n = ii
-            #     for jj in range(len(shp)):
-            #         loc[jj] = n//accu[jj]
-            #         n = n%accu[jj]
-            #     with torch.cuda.stream(streams[ii]):
-            #         # print(loc)
-            #         HamiMat0[tuple(loc)] = conj(torch.autograd.grad(Hami[(0,0)][tuple(loc)].real, mu, create_graph=True, retain_graph=True)[0])
-            #         HamiMat0[tuple(loc)] += conj(torch.autograd.grad(Hami[(0,0)][tuple(loc)].imag, mu, create_graph=True, retain_graph=True)[0])
-            #         HamiMat[(...,)+tuple(loc)] = conj(torch.autograd.grad(HamiMat0[tuple(loc)].real, B_grad, create_graph=False, retain_graph=True)[0])
-            #         HamiMat[(...,)+tuple(loc)] += conj(torch.autograd.grad(HamiMat0[tuple(loc)].imag, B_grad, create_graph=False, retain_graph=True)[0])
-            #         HamiMat0.detach_()
+        print("G(H)_dot_state=", contract(Hami[(0, 0)], conj(
+            state.site((0, 0))), ([0, 1, 2, 3, 4], [0, 1, 2, 3, 4])).item())
+        shp = list(Hami[(0, 0)].size())
+        newshp = shp.copy()
+        for ii in shp:
+            newshp.append(ii)
+        HamiMat0 = torch.zeros(
+            shp, dtype=cfg.global_args.torch_dtype, device=cfg.global_args.device)
+        HamiMat = torch.zeros(
+            newshp, dtype=cfg.global_args.torch_dtype, device=cfg.global_args.device)
+        elemsize = 1
+        accu = [1 for ii in range(len(shp))]
+        for ii in shp:
+            elemsize = elemsize*ii
+        for ii in range(1, len(shp)):
+            accu[len(shp)-1-ii] = accu[len(shp)-1-ii+1] * \
+                shp[len(shp)-1-ii+1]
+        print("Start caclulating HamiMat...")
+        t1 = time.time()
+        streams = [torch.cuda.Stream() for i in range(elemsize)]
+        # @torch.compile
+        # def innergrad(ii):
+        #     loc = [0 for jj in range(len(shp))]
+        #     n = ii
+        #     for jj in range(len(shp)):
+        #         loc[jj] = n//accu[jj]
+        #         n = n%accu[jj]
+        #     with torch.cuda.stream(streams[ii]):
+        #         # print(loc)
+        #         HamiMat0[tuple(loc)] = conj(torch.autograd.grad(Hami[(0,0)][tuple(loc)].real, mu, create_graph=True, retain_graph=True)[0])
+        #         HamiMat0[tuple(loc)] += conj(torch.autograd.grad(Hami[(0,0)][tuple(loc)].imag, mu, create_graph=True, retain_graph=True)[0])
+        #         HamiMat[(...,)+tuple(loc)] = conj(torch.autograd.grad(HamiMat0[tuple(loc)].real, B_grad, create_graph=False, retain_graph=True)[0])
+        #         HamiMat[(...,)+tuple(loc)] += conj(torch.autograd.grad(HamiMat0[tuple(loc)].imag, B_grad, create_graph=False, retain_graph=True)[0])
+        #         HamiMat0.detach_()
 
-            for ii in range(elemsize):
-                streams[ii].wait_stream(torch.cuda.current_stream())
-            for ii in range(elemsize):
-                loc = [0 for jj in range(len(shp))]
-                n = ii
-                for jj in range(len(shp)):
-                    loc[jj] = n//accu[jj]
-                    n = n % accu[jj]
-                with torch.cuda.stream(streams[ii]):
-                    # print(loc)
-                    HamiMat0[tuple(loc)] = 0.5*conj(torch.autograd.grad(
-                        Hami[(0, 0)][tuple(loc)].real, mu, create_graph=True, retain_graph=True)[0])
-                    HamiMat0[tuple(loc)] += 0.5*1j*conj(torch.autograd.grad(Hami[(0, 0)]
-                                                                            [tuple(loc)].imag, mu, create_graph=True, retain_graph=True)[0])
-                    HamiMat[(...,)+tuple(loc)] = 0.5*conj(torch.autograd.grad(HamiMat0[tuple(loc)
-                                                                                    ].real, B_grad, create_graph=False, retain_graph=True)[0])
-                    HamiMat[(...,)+tuple(loc)] += 0.5*1j*conj(torch.autograd.grad(
-                        HamiMat0[tuple(loc)].imag, B_grad, create_graph=False, retain_graph=True)[0])
-                    # HamiMat0.detach_()
-                    # HamiMat.detach_()
+        for ii in range(elemsize):
+            streams[ii].wait_stream(torch.cuda.current_stream())
+        for ii in range(elemsize):
+            loc = [0 for jj in range(len(shp))]
+            n = ii
+            for jj in range(len(shp)):
+                loc[jj] = n//accu[jj]
+                n = n % accu[jj]
+            with torch.cuda.stream(streams[ii]):
+                # print(loc)
+                HamiMat0[tuple(loc)] = 0.5*conj(torch.autograd.grad(
+                    Hami[(0, 0)][tuple(loc)].real, mu, create_graph=True, retain_graph=True)[0])
+                HamiMat0[tuple(loc)] += 0.5*1j*conj(torch.autograd.grad(Hami[(0, 0)]
+                                                                        [tuple(loc)].imag, mu, create_graph=True, retain_graph=True)[0])
+                HamiMat[(...,)+tuple(loc)] = 0.5*conj(torch.autograd.grad(HamiMat0[tuple(loc)
+                                                                                   ].real, B_grad, create_graph=False, retain_graph=True)[0])
+                HamiMat[(...,)+tuple(loc)] += 0.5*1j*conj(torch.autograd.grad(
+                    HamiMat0[tuple(loc)].imag, B_grad, create_graph=False, retain_graph=True)[0])
+                # HamiMat0.detach_()
+                # HamiMat.detach_()
 
-                    HamiMat0.detach_()
-                    HamiMat.detach_()
-                    # innergrad(ii)
-            t2 = time.time()
-            for ii in range(elemsize):
-                streams[ii].synchronize()
-            print("HamiMat caclulated, time=", t2-t1)
+                HamiMat0.detach_()
+                HamiMat.detach_()
+                # innergrad(ii)
+        t2 = time.time()
+        for ii in range(elemsize):
+            streams[ii].synchronize()
+        print("HamiMat caclulated, time=", t2-t1)
 
-            # HamiMat2 = view(HamiMat, (1024, 1024))
-            # temp = contract(HamiMat2, conj(
-            #     view(state.site((0, 0)), (1024))), ([1], [0]))
-            # print("<Hami>=", 2*contract(temp, view(state.site((0, 0)), (1024)),
-            #                             ([0], [0])).item().real/(2*args.size+2)**3/(2*args.size+1))
+        # HamiMat2 = view(HamiMat, (1024, 1024))
+        # temp = contract(HamiMat2, conj(
+        #     view(state.site((0, 0)), (1024))), ([1], [0]))
+        # print("<Hami>=", 2*contract(temp, view(state.site((0, 0)), (1024)),
+        #                             ([0], [0])).item().real/(2*args.size+2)**3/(2*args.size+1))
 
-            HamiMat = HamiMat.detach().cpu().numpy()
-            np.save(args.datadir +
-                    "kx{}ky{}HamiMat.npy".format(args.kx, args.ky), HamiMat)
-            print("HamiMat saved to "+args.datadir +
-                "kx{}ky{}HamiMat.npy".format(args.kx, args.ky))
+        HamiMat = HamiMat.detach().cpu().numpy()
+        np.save(args.datadir +
+                "kx{}ky{}HamiMat.npy".format(args.kx, args.ky), HamiMat)
+        print("HamiMat saved to "+args.datadir +
+              "kx{}ky{}HamiMat.npy".format(args.kx, args.ky))
 
     # # Testing Area
     # N_para = state.site((0,0)).size()[0]*state.site((0,0)).size()[1]*state.site((0,0)).size()[2]*state.site((0,0)).size()[3]*state.site((0,0)).size()[4]

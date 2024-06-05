@@ -65,6 +65,8 @@ def truncated_svd_gesdd(M, chi, abs_tol=1.0e-14, rel_tol=None, ad_decomp_reg=1.0
     reg = torch.as_tensor(ad_decomp_reg, dtype=M.real.dtype if M.is_complex() else M.dtype,
                           device=M.device)
     U, S, V = SVDGESDD.apply(M, reg, diagnostics)
+    # U, S, Vh = torch.linalg.svd(M)
+    # V = Vh.transpose(-2, -1)
 
     # estimate the chi_new
     chi_new = chi

@@ -152,7 +152,7 @@ do
 
     if [[ "$runDraw" == "True" ]]; then
         #Draw the figure
-        python -u graph.py ${datadir} True "h=${h} Kz=${Kz}" "[0, 4, 8, 16], [r'\$M(\pi,0)\$', r'\$\Gamma(0,0)\$',r'\$K(\pi,\frac{\pi}{2})\$', r'\$M(\pi,0)\$']"
+        python -u graph.py ${datadir} True "h=${h} Kz=${Kz}" "[0, 2, 4, 8], [r'\$M(\pi,0)\$', r'\$\Gamma(0,0)\$',r'\$K(\pi,\frac{\pi}{2})\$', r'\$M(\pi,0)\$']"
     fi
 
 

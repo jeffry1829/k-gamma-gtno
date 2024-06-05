@@ -34,13 +34,13 @@ def Create_Projectors(state, stateDL, env, args):
                 if direction == (-1, 0):
                     ################ edge tensor################
                     vec_coord = (-args.size+i, 0)
-                    new_coord = state.vertexToSite(
+                    new_coord = ACstateDL.vertexToSite(
                         (coord[0]+vec_coord[0], coord[1]+vec_coord[1]))
                     vec = (0, -1)
 
-                    coord_shift_up = stateDL.vertexToSite(
+                    coord_shift_up = ACstateDL.vertexToSite(
                         (new_coord[0]+vec[0], new_coord[1]+vec[1]))
-                    coord_shift_down = stateDL.vertexToSite(
+                    coord_shift_down = ACstateDL.vertexToSite(
                         (new_coord[0]-vec[0], new_coord[1]-vec[1]))
                     P2 = view(P[(i, new_coord, direction)], (env.chi, stateDL.site(
                         coord_shift_down).size()[0], env.chi))
@@ -63,18 +63,18 @@ def Create_Projectors(state, stateDL, env, args):
                     tempT2 = tempT2/tempT2.abs().max()
 
                     vec_coord = (vec_coord[0]+1, vec_coord[1])
-                    new_coord = state.vertexToSite(
+                    new_coord = ACstateDL.vertexToSite(
                         (coord[0]+vec_coord[0], coord[1]+vec_coord[1]))
 
                     ctm_env_ex2.T[(new_coord, direction)] = tempT2.clone()
 
                     ################ corner tensor################
                     vec_coord_u = (-args.size+i, -args.size)
-                    new_coord_u = state.vertexToSite(
+                    new_coord_u = ACstateDL.vertexToSite(
                         (coord[0]+vec_coord_u[0], coord[1]+vec_coord_u[1]))
-                    coord_shift_up = stateDL.vertexToSite(
+                    coord_shift_up = ACstateDL.vertexToSite(
                         (new_coord_u[0]+vec[0], new_coord_u[1]+vec[1]))
-                    coord_shift_down = stateDL.vertexToSite(
+                    coord_shift_down = ACstateDL.vertexToSite(
                         (new_coord_u[0]-vec[0], new_coord_u[1]-vec[1]))
                     P2 = view(P[(i, new_coord_u, direction)], (env.chi, stateDL.site(
                         coord_shift_down).size()[0], env.chi))
@@ -90,17 +90,17 @@ def Create_Projectors(state, stateDL, env, args):
                     tempT2 = nC1/nC1.abs().max()
 
                     vec_coord = (vec_coord_u[0]+1, vec_coord_u[1])
-                    new_coord = state.vertexToSite(
+                    new_coord = ACstateDL.vertexToSite(
                         (coord[0]+vec_coord[0], coord[1]+vec_coord[1]))
 
                     ctm_env_ex2.C[(new_coord, (-1, -1))] = tempT2.clone()
 
                     vec_coord_d = (-args.size+i, args.size+1)
-                    new_coord_d = state.vertexToSite(
+                    new_coord_d = ACstateDL.vertexToSite(
                         (coord[0]+vec_coord_d[0], coord[1]+vec_coord_d[1]))
-                    coord_shift_up = stateDL.vertexToSite(
+                    coord_shift_up = ACstateDL.vertexToSite(
                         (new_coord_d[0]+vec[0], new_coord_d[1]+vec[1]))
-                    coord_shift_down = stateDL.vertexToSite(
+                    coord_shift_down = ACstateDL.vertexToSite(
                         (new_coord_d[0]-vec[0], new_coord_d[1]-vec[1]))
                     P2 = view(P[(i, new_coord_d, direction)], (env.chi, stateDL.site(
                         coord_shift_down).size()[0], env.chi))
@@ -116,7 +116,7 @@ def Create_Projectors(state, stateDL, env, args):
                     tempT2 = nC2/nC2.abs().max()
 
                     vec_coord = (vec_coord_d[0]+1, vec_coord_d[1])
-                    new_coord = state.vertexToSite(
+                    new_coord = ACstateDL.vertexToSite(
                         (coord[0]+vec_coord[0], coord[1]+vec_coord[1]))
 
                     ctm_env_ex2.C[(new_coord, (-1, 1))] = tempT2.clone()
@@ -124,13 +124,13 @@ def Create_Projectors(state, stateDL, env, args):
                 elif direction == (1, 0):
                     ################ edge tensor################
                     vec_coord = (args.size-i, 0)
-                    new_coord = state.vertexToSite(
+                    new_coord = ACstateDL.vertexToSite(
                         (coord[0]+vec_coord[0], coord[1]+vec_coord[1]))
                     vec = (0, 1)
 
-                    coord_shift_down = stateDL.vertexToSite(
+                    coord_shift_down = ACstateDL.vertexToSite(
                         (new_coord[0]+vec[0], new_coord[1]+vec[1]))
-                    coord_shift_up = stateDL.vertexToSite(
+                    coord_shift_up = ACstateDL.vertexToSite(
                         (new_coord[0]-vec[0], new_coord[1]-vec[1]))
                     P2 = view(P[(i, new_coord, direction)], (env.chi,
                               stateDL.site(coord_shift_up).size()[2], env.chi))
@@ -153,18 +153,18 @@ def Create_Projectors(state, stateDL, env, args):
                     tempT2 = tempT2/tempT2.abs().max()
 
                     vec_coord = (vec_coord[0]-1, vec_coord[1])
-                    new_coord = state.vertexToSite(
+                    new_coord = ACstateDL.vertexToSite(
                         (coord[0]+vec_coord[0], coord[1]+vec_coord[1]))
 
                     ctm_env_ex2.T[(new_coord, direction)] = tempT2.clone()
 
                     ################ corner tensor################
                     vec_coord_u = (args.size-i+1, -args.size)
-                    new_coord_u = state.vertexToSite(
+                    new_coord_u = ACstateDL.vertexToSite(
                         (coord[0]+vec_coord_u[0], coord[1]+vec_coord_u[1]))
-                    coord_shift_down = stateDL.vertexToSite(
+                    coord_shift_down = ACstateDL.vertexToSite(
                         (new_coord_u[0]+vec[0], new_coord_u[1]+vec[1]))
-                    coord_shift_up = stateDL.vertexToSite(
+                    coord_shift_up = ACstateDL.vertexToSite(
                         (new_coord_u[0]-vec[0], new_coord_u[1]-vec[1]))
                     P2 = view(P[(i, new_coord_u, direction)], (env.chi,
                               stateDL.site(coord_shift_up).size()[2], env.chi))
@@ -180,17 +180,17 @@ def Create_Projectors(state, stateDL, env, args):
                     tempT2 = nC2/nC2.abs().max()
 
                     vec_coord = (vec_coord_u[0]-1, vec_coord_u[1])
-                    new_coord = state.vertexToSite(
+                    new_coord = ACstateDL.vertexToSite(
                         (coord[0]+vec_coord[0], coord[1]+vec_coord[1]))
 
                     ctm_env_ex2.C[(new_coord, (1, -1))] = tempT2.clone()
 
                     vec_coord_d = (args.size-i+1, args.size+1)
-                    new_coord_d = state.vertexToSite(
+                    new_coord_d = ACstateDL.vertexToSite(
                         (coord[0]+vec_coord_d[0], coord[1]+vec_coord_d[1]))
-                    coord_shift_down = stateDL.vertexToSite(
+                    coord_shift_down = ACstateDL.vertexToSite(
                         (new_coord_d[0]+vec[0], new_coord_d[1]+vec[1]))
-                    coord_shift_up = stateDL.vertexToSite(
+                    coord_shift_up = ACstateDL.vertexToSite(
                         (new_coord_d[0]-vec[0], new_coord_d[1]-vec[1]))
                     P2 = view(P[(i, new_coord_d, direction)], (env.chi,
                               stateDL.site(coord_shift_up).size()[2], env.chi))
@@ -206,7 +206,7 @@ def Create_Projectors(state, stateDL, env, args):
                     tempT2 = nC1/nC1.abs().max()
 
                     vec_coord = (vec_coord_d[0]-1, vec_coord_d[1])
-                    new_coord = state.vertexToSite(
+                    new_coord = ACstateDL.vertexToSite(
                         (coord[0]+vec_coord[0], coord[1]+vec_coord[1]))
 
                     ctm_env_ex2.C[(new_coord, (1, 1))] = tempT2.clone()
@@ -223,13 +223,13 @@ def Create_Projectors(state, stateDL, env, args):
                 if direction == (0, -1):
                     ################ edge tensor################
                     vec_coord = (0, -args.size+i)
-                    new_coord = state.vertexToSite(
+                    new_coord = ACstateDL.vertexToSite(
                         (coord[0]+vec_coord[0], coord[1]+vec_coord[1]))
                     vec = (1, 0)
 
-                    coord_shift_left = stateDL.vertexToSite(
+                    coord_shift_left = ACstateDL.vertexToSite(
                         (new_coord[0]-vec[0], new_coord[1]-vec[1]))
-                    coord_shift_right = stateDL.vertexToSite(
+                    coord_shift_right = ACstateDL.vertexToSite(
                         (new_coord[0]+vec[0], new_coord[1]+vec[1]))
                     P2 = view(P[(i, new_coord, direction)], (env.chi, stateDL.site(
                         coord_shift_left).size()[3], env.chi))
@@ -252,18 +252,18 @@ def Create_Projectors(state, stateDL, env, args):
                     tempT2 = tempT2/tempT2.abs().max()
 
                     vec_coord = (vec_coord[0], vec_coord[1]+1)
-                    new_coord = state.vertexToSite(
+                    new_coord = ACstateDL.vertexToSite(
                         (coord[0]+vec_coord[0], coord[1]+vec_coord[1]))
 
                     ctm_env_ex2.T[(new_coord, direction)] = tempT2.clone()
 
                     ################ corner tensor################
                     vec_coord_l = (-args.size, -args.size+i)
-                    new_coord_l = state.vertexToSite(
+                    new_coord_l = ACstateDL.vertexToSite(
                         (coord[0]+vec_coord_l[0], coord[1]+vec_coord_l[1]))
-                    coord_shift_left = stateDL.vertexToSite(
+                    coord_shift_left = ACstateDL.vertexToSite(
                         (new_coord_l[0]-vec[0], new_coord_l[1]-vec[1]))
-                    coord_shift_right = stateDL.vertexToSite(
+                    coord_shift_right = ACstateDL.vertexToSite(
                         (new_coord_l[0]+vec[0], new_coord_l[1]+vec[1]))
                     P2 = view(P[(i, new_coord_l, direction)], (env.chi, stateDL.site(
                         coord_shift_left).size()[3], env.chi))
@@ -279,17 +279,17 @@ def Create_Projectors(state, stateDL, env, args):
                     tempT2 = nC2/nC2.abs().max()
 
                     vec_coord = (vec_coord_l[0], vec_coord_l[1]+1)
-                    new_coord = state.vertexToSite(
+                    new_coord = ACstateDL.vertexToSite(
                         (coord[0]+vec_coord[0], coord[1]+vec_coord[1]))
 
                     ctm_env_ex2.C[(new_coord, (-1, -1))] = tempT2.clone()
 
                     vec_coord_r = (args.size+1, -args.size+i)
-                    new_coord_r = state.vertexToSite(
+                    new_coord_r = ACstateDL.vertexToSite(
                         (coord[0]+vec_coord_r[0], coord[1]+vec_coord_r[1]))
-                    coord_shift_left = stateDL.vertexToSite(
+                    coord_shift_left = ACstateDL.vertexToSite(
                         (new_coord_r[0]-vec[0], new_coord_r[1]-vec[1]))
-                    coord_shift_right = stateDL.vertexToSite(
+                    coord_shift_right = ACstateDL.vertexToSite(
                         (new_coord_r[0]+vec[0], new_coord_r[1]+vec[1]))
                     P2 = view(P[(i, new_coord_r, direction)], (env.chi, stateDL.site(
                         coord_shift_left).size()[3], env.chi))
@@ -305,7 +305,7 @@ def Create_Projectors(state, stateDL, env, args):
                     tempT2 = nC1/nC1.abs().max()
 
                     vec_coord = (vec_coord_r[0], vec_coord_r[1]+1)
-                    new_coord = state.vertexToSite(
+                    new_coord = ACstateDL.vertexToSite(
                         (coord[0]+vec_coord[0], coord[1]+vec_coord[1]))
 
                     ctm_env_ex2.C[(new_coord, (1, -1))] = tempT2.clone()
@@ -313,13 +313,13 @@ def Create_Projectors(state, stateDL, env, args):
                 elif direction == (0, 1):
                     ################ edge tensor################
                     vec_coord = (0, args.size-i)
-                    new_coord = state.vertexToSite(
+                    new_coord = ACstateDL.vertexToSite(
                         (coord[0]+vec_coord[0], coord[1]+vec_coord[1]))
                     vec = (-1, 0)
 
-                    coord_shift_right = stateDL.vertexToSite(
+                    coord_shift_right = ACstateDL.vertexToSite(
                         (new_coord[0]-vec[0], new_coord[1]-vec[1]))
-                    coord_shift_left = stateDL.vertexToSite(
+                    coord_shift_left = ACstateDL.vertexToSite(
                         (new_coord[0]+vec[0], new_coord[1]+vec[1]))
                     P2 = view(P[(i, new_coord, direction)], (env.chi, stateDL.site(
                         coord_shift_right).size()[1], env.chi))
@@ -342,18 +342,18 @@ def Create_Projectors(state, stateDL, env, args):
                     tempT2 = tempT2/tempT2.abs().max()
 
                     vec_coord = (vec_coord[0], vec_coord[1]-1)
-                    new_coord = state.vertexToSite(
+                    new_coord = ACstateDL.vertexToSite(
                         (coord[0]+vec_coord[0], coord[1]+vec_coord[1]))
 
                     ctm_env_ex2.T[(new_coord, direction)] = tempT2.clone()
 
                     ################ corner tensor################
                     vec_coord_l = (-args.size, args.size-i+1)
-                    new_coord_l = state.vertexToSite(
+                    new_coord_l = ACstateDL.vertexToSite(
                         (coord[0]+vec_coord_l[0], coord[1]+vec_coord_l[1]))
-                    coord_shift_right = stateDL.vertexToSite(
+                    coord_shift_right = ACstateDL.vertexToSite(
                         (new_coord_l[0]-vec[0], new_coord_l[1]-vec[1]))
-                    coord_shift_left = stateDL.vertexToSite(
+                    coord_shift_left = ACstateDL.vertexToSite(
                         (new_coord_l[0]+vec[0], new_coord_l[1]+vec[1]))
                     P2 = view(P[(i, new_coord_l, direction)], (env.chi, stateDL.site(
                         coord_shift_right).size()[1], env.chi))
@@ -369,17 +369,17 @@ def Create_Projectors(state, stateDL, env, args):
                     tempT2 = nC1/nC1.abs().max()
 
                     vec_coord = (vec_coord_l[0], vec_coord_l[1]-1)
-                    new_coord = state.vertexToSite(
+                    new_coord = ACstateDL.vertexToSite(
                         (coord[0]+vec_coord[0], coord[1]+vec_coord[1]))
 
                     ctm_env_ex2.C[(new_coord, (-1, 1))] = tempT2.clone()
 
                     vec_coord_r = (args.size+1, args.size-i+1)
-                    new_coord_r = state.vertexToSite(
+                    new_coord_r = ACstateDL.vertexToSite(
                         (coord[0]+vec_coord_r[0], coord[1]+vec_coord_r[1]))
-                    coord_shift_right = stateDL.vertexToSite(
+                    coord_shift_right = ACstateDL.vertexToSite(
                         (new_coord_r[0]-vec[0], new_coord_r[1]-vec[1]))
-                    coord_shift_left = stateDL.vertexToSite(
+                    coord_shift_left = ACstateDL.vertexToSite(
                         (new_coord_r[0]+vec[0], new_coord_r[1]+vec[1]))
                     P2 = view(P[(i, new_coord_r, direction)], (env.chi, stateDL.site(
                         coord_shift_right).size()[1], env.chi))
@@ -395,7 +395,7 @@ def Create_Projectors(state, stateDL, env, args):
                     tempT2 = nC2/nC2.abs().max()
 
                     vec_coord = (vec_coord_r[0], vec_coord_r[1]-1)
-                    new_coord = state.vertexToSite(
+                    new_coord = ACstateDL.vertexToSite(
                         (coord[0]+vec_coord[0], coord[1]+vec_coord[1]))
 
                     ctm_env_ex2.C[(new_coord, (1, 1))] = tempT2.clone()
@@ -405,13 +405,13 @@ def Create_Projectors(state, stateDL, env, args):
 
 def Create_Norm_Env(state, stateDL, B_grad, env, lam, kx, ky, C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right, args,
                     firsttime, lasttime, ACstateDL):
-    # if cfg.ctm_args.projector_method == '4X4':
-    ctm_get_projectors = ctm_get_projectors_4x4
-    # elif cfg.ctm_args.projector_method == '4X2':
-    #     ctm_get_projectors = ctm_get_projectors_4x2
-    # else:
-    #     raise ValueError("Invalid Projector method: " +
-    #                      str(cfg.ctm_args.projector_method))
+    if cfg.ctm_args.projector_method == '4X4':
+        ctm_get_projectors = ctm_get_projectors_4x4
+    elif cfg.ctm_args.projector_method == '4X2':
+        ctm_get_projectors = ctm_get_projectors_4x2
+    else:
+        raise ValueError("Invalid Projector method: " +
+                         str(cfg.ctm_args.projector_method))
     for coord in stateDL.sites.keys():
         for direction in cfg.ctm_args.ctm_move_sequence:
             if direction == (0, -1):
@@ -436,82 +436,82 @@ def Create_Norm_Env(state, stateDL, B_grad, env, lam, kx, ky, C_up, T_up, C_left
 
                 for i in range(args.size+1):
                     vec_coord_l = (-args.size, -args.size+i)
-                    new_coord_l = state.vertexToSite(
+                    new_coord_l = ACstateDL.vertexToSite(
                         (coord[0]+vec_coord_l[0], coord[1]+vec_coord_l[1]))
-                    coord_shift_left = stateDL.vertexToSite(
+                    coord_shift_left = ACstateDL.vertexToSite(
                         (new_coord_l[0]-vec[0], new_coord_l[1]-vec[1]))
-                    coord_shift_right = stateDL.vertexToSite(
+                    coord_shift_right = ACstateDL.vertexToSite(
                         (new_coord_l[0]+vec[0], new_coord_l[1]+vec[1]))
                     P2, Pt2 = ctm_get_projectors(
                         direction, new_coord_l, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
-                    P2 = view(P2, (env.chi, stateDL.site(
+                    P2 = view(P2, (env.chi, ACstateDL.site(
                         coord_shift_left).size()[3], env.chi))
-                    Pt2 = view(Pt2, (env.chi, stateDL.site(
+                    Pt2 = view(Pt2, (env.chi, ACstateDL.site(
                         new_coord_l).size()[1], env.chi))
                     P1, Pt1 = ctm_get_projectors(
                         direction, coord_shift_right, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
-                    P1 = view(P1, (env.chi, stateDL.site(
+                    P1 = view(P1, (env.chi, ACstateDL.site(
                         new_coord_l).size()[3], env.chi))
-                    Pt1 = view(Pt1, (env.chi, stateDL.site(
+                    Pt1 = view(Pt1, (env.chi, ACstateDL.site(
                         coord_shift_right).size()[1], env.chi))
                     nC2 = contract(C_up["left"], env.T[(
-                        new_coord_l, (-1, 0))], ([0], [0]))
+                        (0, 0), (-1, 0))], ([0], [0]))
                     nC2 = contract(nC2, P2, ([0, 2], [0, 1]))
                     C_up["left"] = nC2/nC2.abs().max()
                     # env.C[(new_coord_l,(-1,-1))] = C_up["left"]
 
                     vec_coord_r = (args.size+1, -args.size+i)
-                    new_coord_r = state.vertexToSite(
+                    new_coord_r = ACstateDL.vertexToSite(
                         (coord[0]+vec_coord_r[0], coord[1]+vec_coord_r[1]))
-                    coord_shift_left = stateDL.vertexToSite(
+                    coord_shift_left = ACstateDL.vertexToSite(
                         (new_coord_r[0]-vec[0], new_coord_r[1]-vec[1]))
-                    coord_shift_right = stateDL.vertexToSite(
+                    coord_shift_right = ACstateDL.vertexToSite(
                         (new_coord_r[0]+vec[0], new_coord_r[1]+vec[1]))
                     P2, Pt2 = ctm_get_projectors(
                         direction, new_coord_r, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
-                    P2 = view(P2, (env.chi, stateDL.site(
+                    P2 = view(P2, (env.chi, ACstateDL.site(
                         coord_shift_left).size()[3], env.chi))
-                    Pt2 = view(Pt2, (env.chi, stateDL.site(
+                    Pt2 = view(Pt2, (env.chi, ACstateDL.site(
                         new_coord_r).size()[1], env.chi))
                     P1, Pt1 = ctm_get_projectors(
                         direction, coord_shift_right, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
-                    P1 = view(P1, (env.chi, stateDL.site(
+                    P1 = view(P1, (env.chi, ACstateDL.site(
                         new_coord_r).size()[3], env.chi))
-                    Pt1 = view(Pt1, (env.chi, stateDL.site(
+                    Pt1 = view(Pt1, (env.chi, ACstateDL.site(
                         coord_shift_right).size()[1], env.chi))
                     nC1 = contract(C_up["right"], env.T[(
-                        new_coord_r, (1, 0))], ([1], [0]))
+                        (0, 0), (1, 0))], ([1], [0]))
                     nC1 = contract(Pt1, nC1, ([0, 1], [0, 1]))
                     C_up["right"] = nC1/nC1.abs().max()
                     # env.C[(new_coord_r,(1,-1))] = C_up["right"]
 
                     for j in range(2*args.size+2):
                         vec_coord = (-args.size+j, -args.size+i)
-                        new_coord = state.vertexToSite(
+                        new_coord = ACstateDL.vertexToSite(
                             (coord[0]+vec_coord[0], coord[1]+vec_coord[1]))
-                        coord_shift_left = stateDL.vertexToSite(
+                        coord_shift_left = ACstateDL.vertexToSite(
                             (new_coord[0]-vec[0], new_coord[1]-vec[1]))
-                        coord_shift_right = stateDL.vertexToSite(
+                        coord_shift_right = ACstateDL.vertexToSite(
                             (new_coord[0]+vec[0], new_coord[1]+vec[1]))
                         P2, Pt2 = ctm_get_projectors(
                             direction, new_coord, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
-                        P2 = view(P2, (env.chi, stateDL.site(
+                        P2 = view(P2, (env.chi, ACstateDL.site(
                             coord_shift_left).size()[3], env.chi))
-                        Pt2 = view(Pt2, (env.chi, stateDL.site(
+                        Pt2 = view(Pt2, (env.chi, ACstateDL.site(
                             new_coord).size()[1], env.chi))
                         P1, Pt1 = ctm_get_projectors(
                             direction, coord_shift_right, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
-                        P1 = view(P1, (env.chi, stateDL.site(
+                        P1 = view(P1, (env.chi, ACstateDL.site(
                             new_coord).size()[3], env.chi))
-                        Pt1 = view(Pt1, (env.chi, stateDL.site(
+                        Pt1 = view(Pt1, (env.chi, ACstateDL.site(
                             coord_shift_right).size()[1], env.chi))
                         if i == args.size and j == args.size and lasttime:
                             nT = contract(Pt2, T_up[(j)], ([0], [0]))
-                            dimsA = state.site(new_coord).size()
+                            dimsA = state.site((0,0)).size()
                             nT = view(
                                 nT, (dimsA[2], dimsA[2], env.chi, dimsA[1], dimsA[1], env.chi))
                             Aket = state.site(
-                                new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
+                                (0,0)) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
                             nT = contract(nT, Aket, ([0, 3], [2, 1]))
                             nT = contract(
                                 nT, view(P1, (env.chi, dimsA[4], dimsA[4], env.chi)), ([3, 6], [0, 1]))
@@ -524,10 +524,10 @@ def Create_Norm_Env(state, stateDL, B_grad, env, lam, kx, ky, C_up, T_up, C_left
                             # env.T[(new_coord,direction)] = T_up[(j)]
                         else:
                             nT = contract(Pt2, T_up[(j)], ([0], [0]))
-                            dimsA = state.site(new_coord).size()
+                            dimsA = state.site((0,0)).size()
                             Aket = state.site(
-                                new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
-                            DL = view(contiguous(einsum('mefgh,mabcd->eafbgchd', Aket, conj(state.site(new_coord)))),
+                                (0,0)) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
+                            DL = view(contiguous(einsum('mefgh,mabcd->eafbgchd', Aket, conj(state.site((0,0))))),
                                       (dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
                             nT = contract(nT, DL, ([0, 2], [1, 0]))
                             nT = contract(nT, P1, ([1, 3], [0, 1]))
@@ -560,80 +560,80 @@ def Create_Norm_Env(state, stateDL, B_grad, env, lam, kx, ky, C_up, T_up, C_left
 
                 for i in range(args.size+1):
                     vec_coord_l = (-args.size, args.size-i+1)
-                    new_coord_l = state.vertexToSite(
+                    new_coord_l = ACstateDL.vertexToSite(
                         (coord[0]+vec_coord_l[0], coord[1]+vec_coord_l[1]))
-                    coord_shift_right = stateDL.vertexToSite(
+                    coord_shift_right = ACstateDL.vertexToSite(
                         (new_coord_l[0]-vec[0], new_coord_l[1]-vec[1]))
-                    coord_shift_left = stateDL.vertexToSite(
+                    coord_shift_left = ACstateDL.vertexToSite(
                         (new_coord_l[0]+vec[0], new_coord_l[1]+vec[1]))
                     P2, Pt2 = ctm_get_projectors(
                         direction, new_coord_l, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
-                    P2 = view(P2, (env.chi, stateDL.site(
+                    P2 = view(P2, (env.chi, ACstateDL.site(
                         coord_shift_right).size()[1], env.chi))
-                    Pt2 = view(Pt2, (env.chi, stateDL.site(
+                    Pt2 = view(Pt2, (env.chi, ACstateDL.site(
                         new_coord_l).size()[3], env.chi))
                     P1, Pt1 = ctm_get_projectors(
                         direction, coord_shift_left, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
-                    P1 = view(P1, (env.chi, stateDL.site(
+                    P1 = view(P1, (env.chi, ACstateDL.site(
                         new_coord_l).size()[1], env.chi))
-                    Pt1 = view(Pt1, (env.chi, stateDL.site(
+                    Pt1 = view(Pt1, (env.chi, ACstateDL.site(
                         coord_shift_left).size()[3], env.chi))
                     nC1 = contract(C_down["left"], env.T[(
-                        new_coord_l, (-1, 0))], ([0], [1]))
+                        (0, 0), (-1, 0))], ([0], [1]))
                     nC1 = contract(nC1, Pt1, ([0, 2], [0, 1]))
                     C_down["left"] = nC1/nC1.abs().max()
                     # env.C[(new_coord_l,(-1,1))] = C_down["left"]
 
                     vec_coord_r = (args.size+1, args.size-i+1)
-                    new_coord_r = state.vertexToSite(
+                    new_coord_r = ACstateDL.vertexToSite(
                         (coord[0]+vec_coord_r[0], coord[1]+vec_coord_r[1]))
-                    coord_shift_right = stateDL.vertexToSite(
+                    coord_shift_right = ACstateDL.vertexToSite(
                         (new_coord_r[0]-vec[0], new_coord_r[1]-vec[1]))
-                    coord_shift_left = stateDL.vertexToSite(
+                    coord_shift_left = ACstateDL.vertexToSite(
                         (new_coord_r[0]+vec[0], new_coord_r[1]+vec[1]))
                     P2, Pt2 = ctm_get_projectors(
                         direction, new_coord_r, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
-                    P2 = view(P2, (env.chi, stateDL.site(
+                    P2 = view(P2, (env.chi, ACstateDL.site(
                         coord_shift_right).size()[1], env.chi))
-                    Pt2 = view(Pt2, (env.chi, stateDL.site(
+                    Pt2 = view(Pt2, (env.chi, ACstateDL.site(
                         new_coord_r).size()[3], env.chi))
                     P1, Pt1 = ctm_get_projectors(
                         direction, coord_shift_left, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
-                    P1 = view(P1, (env.chi, stateDL.site(
+                    P1 = view(P1, (env.chi, ACstateDL.site(
                         new_coord_r).size()[1], env.chi))
-                    Pt1 = view(Pt1, (env.chi, stateDL.site(
+                    Pt1 = view(Pt1, (env.chi, ACstateDL.site(
                         coord_shift_left).size()[3], env.chi))
                     nC2 = contract(C_down["right"], env.T[(
-                        new_coord_r, (1, 0))], ([0], [2]))
+                        (0, 0), (1, 0))], ([0], [2]))
                     nC2 = contract(nC2, P2, ([0, 2], [0, 1]))
                     C_down["right"] = nC2/nC2.abs().max()
                     # env.C[(new_coord_r,(1,1))] = C_down["right"]
 
                     for j in range(2*args.size+2):
                         vec_coord = (-args.size+j, args.size-i+1)
-                        new_coord = state.vertexToSite(
+                        new_coord = ACstateDL.vertexToSite(
                             (coord[0]+vec_coord[0], coord[1]+vec_coord[1]))
-                        coord_shift_right = stateDL.vertexToSite(
+                        coord_shift_right = ACstateDL.vertexToSite(
                             (new_coord[0]-vec[0], new_coord[1]-vec[1]))
-                        coord_shift_left = stateDL.vertexToSite(
+                        coord_shift_left = ACstateDL.vertexToSite(
                             (new_coord[0]+vec[0], new_coord[1]+vec[1]))
                         P2, Pt2 = ctm_get_projectors(
                             direction, new_coord, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
-                        P2 = view(P2, (env.chi, stateDL.site(
+                        P2 = view(P2, (env.chi, ACstateDL.site(
                             coord_shift_right).size()[1], env.chi))
-                        Pt2 = view(Pt2, (env.chi, stateDL.site(
+                        Pt2 = view(Pt2, (env.chi, ACstateDL.site(
                             new_coord).size()[3], env.chi))
                         P1, Pt1 = ctm_get_projectors(
                             direction, coord_shift_left, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
-                        P1 = view(P1, (env.chi, stateDL.site(
+                        P1 = view(P1, (env.chi, ACstateDL.site(
                             new_coord).size()[1], env.chi))
-                        Pt1 = view(Pt1, (env.chi, stateDL.site(
+                        Pt1 = view(Pt1, (env.chi, ACstateDL.site(
                             coord_shift_left).size()[3], env.chi))
                         nT = contract(P1, T_down[(j)], ([0], [1]))
-                        dimsA = state.site(new_coord).size()
+                        dimsA = state.site((0,0)).size()
                         Aket = state.site(
-                            new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
-                        DL = view(contiguous(einsum('mefgh,mabcd->eafbgchd', Aket, conj(state.site(new_coord)))),
+                            (0,0)) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
+                        DL = view(contiguous(einsum('mefgh,mabcd->eafbgchd', Aket, conj(state.site((0,0))))),
                                   (dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
                         nT = contract(nT, DL, ([0, 2], [1, 2]))
                         nT = contract(nT, Pt2, ([1, 3], [0, 1]))
@@ -666,82 +666,82 @@ def Create_Norm_Env(state, stateDL, B_grad, env, lam, kx, ky, C_up, T_up, C_left
 
                 for i in range(args.size+1):
                     vec_coord_u = (-args.size+i, -args.size)
-                    new_coord_u = state.vertexToSite(
+                    new_coord_u = ACstateDL.vertexToSite(
                         (coord[0]+vec_coord_u[0], coord[1]+vec_coord_u[1]))
-                    coord_shift_up = stateDL.vertexToSite(
+                    coord_shift_up = ACstateDL.vertexToSite(
                         (new_coord_u[0]+vec[0], new_coord_u[1]+vec[1]))
-                    coord_shift_down = stateDL.vertexToSite(
+                    coord_shift_down = ACstateDL.vertexToSite(
                         (new_coord_u[0]-vec[0], new_coord_u[1]-vec[1]))
                     P2, Pt2 = ctm_get_projectors(
                         direction, new_coord_u, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
-                    P2 = view(P2, (env.chi, stateDL.site(
+                    P2 = view(P2, (env.chi, ACstateDL.site(
                         coord_shift_down).size()[0], env.chi))
-                    Pt2 = view(Pt2, (env.chi, stateDL.site(
+                    Pt2 = view(Pt2, (env.chi, ACstateDL.site(
                         new_coord_u).size()[2], env.chi))
                     P1, Pt1 = ctm_get_projectors(
                         direction, coord_shift_up, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
-                    P1 = view(P1, (env.chi, stateDL.site(
+                    P1 = view(P1, (env.chi, ACstateDL.site(
                         new_coord_u).size()[0], env.chi))
-                    Pt1 = view(Pt1, (env.chi, stateDL.site(
+                    Pt1 = view(Pt1, (env.chi, ACstateDL.site(
                         coord_shift_up).size()[2], env.chi))
                     nC1 = contract(C_left["up"], env.T[(
-                        new_coord_u, (0, -1))], ([1], [0]))
+                        (0, 0), (0, -1))], ([1], [0]))
                     nC1 = contract(Pt1, nC1, ([0, 1], [0, 1]))
                     C_left["up"] = nC1/nC1.abs().max()
                     # env.C[(new_coord_u,(-1,-1))] = C_left["up"]
 
                     vec_coord_d = (-args.size+i, args.size+1)
-                    new_coord_d = state.vertexToSite(
+                    new_coord_d = ACstateDL.vertexToSite(
                         (coord[0]+vec_coord_d[0], coord[1]+vec_coord_d[1]))
-                    coord_shift_up = stateDL.vertexToSite(
+                    coord_shift_up = ACstateDL.vertexToSite(
                         (new_coord_d[0]+vec[0], new_coord_d[1]+vec[1]))
-                    coord_shift_down = stateDL.vertexToSite(
+                    coord_shift_down = ACstateDL.vertexToSite(
                         (new_coord_d[0]-vec[0], new_coord_d[1]-vec[1]))
                     P2, Pt2 = ctm_get_projectors(
                         direction, new_coord_d, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
-                    P2 = view(P2, (env.chi, stateDL.site(
+                    P2 = view(P2, (env.chi, ACstateDL.site(
                         coord_shift_down).size()[0], env.chi))
-                    Pt2 = view(Pt2, (env.chi, stateDL.site(
+                    Pt2 = view(Pt2, (env.chi, ACstateDL.site(
                         new_coord_d).size()[2], env.chi))
                     P1, Pt1 = ctm_get_projectors(
                         direction, coord_shift_up, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
-                    P1 = view(P1, (env.chi, stateDL.site(
+                    P1 = view(P1, (env.chi, ACstateDL.site(
                         new_coord_d).size()[0], env.chi))
-                    Pt1 = view(Pt1, (env.chi, stateDL.site(
+                    Pt1 = view(Pt1, (env.chi, ACstateDL.site(
                         coord_shift_up).size()[2], env.chi))
                     nC2 = contract(C_left["down"], env.T[(
-                        new_coord_d, (0, 1))], ([1], [1]))
+                        (0,0), (0, 1))], ([1], [1]))
                     nC2 = contract(P2, nC2, ([0, 1], [0, 1]))
                     C_left["down"] = nC2/nC2.abs().max()
                     # env.C[(new_coord_d,(-1,1))] = C_left["down"]
 
                     for j in range(2*args.size+2):
                         vec_coord = (-args.size+i, -args.size+j)
-                        new_coord = state.vertexToSite(
+                        new_coord = ACstateDL.vertexToSite(
                             (coord[0]+vec_coord[0], coord[1]+vec_coord[1]))
-                        coord_shift_up = stateDL.vertexToSite(
+                        coord_shift_up = ACstateDL.vertexToSite(
                             (new_coord[0]+vec[0], new_coord[1]+vec[1]))
-                        coord_shift_down = stateDL.vertexToSite(
+                        coord_shift_down = ACstateDL.vertexToSite(
                             (new_coord[0]-vec[0], new_coord[1]-vec[1]))
                         P2, Pt2 = ctm_get_projectors(
                             direction, new_coord, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
-                        P2 = view(P2, (env.chi, stateDL.site(
+                        P2 = view(P2, (env.chi, ACstateDL.site(
                             coord_shift_down).size()[0], env.chi))
-                        Pt2 = view(Pt2, (env.chi, stateDL.site(
+                        Pt2 = view(Pt2, (env.chi, ACstateDL.site(
                             new_coord).size()[2], env.chi))
                         P1, Pt1 = ctm_get_projectors(
                             direction, coord_shift_up, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
-                        P1 = view(P1, (env.chi, stateDL.site(
+                        P1 = view(P1, (env.chi, ACstateDL.site(
                             new_coord).size()[0], env.chi))
-                        Pt1 = view(Pt1, (env.chi, stateDL.site(
+                        Pt1 = view(Pt1, (env.chi, ACstateDL.site(
                             coord_shift_up).size()[2], env.chi))
                         if i == args.size and j == args.size and lasttime:
                             nT = contract(P1, T_left[(j)], ([0], [0]))
-                            dimsA = state.site(new_coord).size()
+                            dimsA = state.site((0,0)).size()
                             nT = view(
                                 nT, (dimsA[1], dimsA[1], env.chi, env.chi, dimsA[2], dimsA[2]))
                             Aket = state.site(
-                                new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
+                                (0,0)) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
                             nT = contract(nT, Aket, ([0, 4], [1, 2]))
                             nT = contract(
                                 nT, view(Pt2, (env.chi, dimsA[3], dimsA[3], env.chi)), ([2, 5], [0, 1]))
@@ -754,10 +754,10 @@ def Create_Norm_Env(state, stateDL, B_grad, env, lam, kx, ky, C_up, T_up, C_left
                             # env.T[(new_coord,direction)] = T_left[(j)]
                         else:
                             nT = contract(P1, T_left[(j)], ([0], [0]))
-                            dimsA = state.site(new_coord).size()
+                            dimsA = state.site((0,0)).size()
                             Aket = state.site(
-                                new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
-                            DL = view(contiguous(einsum('mefgh,mabcd->eafbgchd', Aket, conj(state.site(new_coord)))),
+                                (0,0)) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
+                            DL = view(contiguous(einsum('mefgh,mabcd->eafbgchd', Aket, conj(state.site((0,0))))),
                                       (dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
                             nT = contract(nT, DL, ([0, 3], [0, 1]))
                             nT = contract(nT, Pt2, ([1, 2], [0, 1]))
@@ -790,80 +790,80 @@ def Create_Norm_Env(state, stateDL, B_grad, env, lam, kx, ky, C_up, T_up, C_left
 
                 for i in range(args.size+1):
                     vec_coord_u = (args.size-i+1, -args.size)
-                    new_coord_u = state.vertexToSite(
+                    new_coord_u = ACstateDL.vertexToSite(
                         (coord[0]+vec_coord_u[0], coord[1]+vec_coord_u[1]))
-                    coord_shift_down = stateDL.vertexToSite(
+                    coord_shift_down = ACstateDL.vertexToSite(
                         (new_coord_u[0]+vec[0], new_coord_u[1]+vec[1]))
-                    coord_shift_up = stateDL.vertexToSite(
+                    coord_shift_up = ACstateDL.vertexToSite(
                         (new_coord_u[0]-vec[0], new_coord_u[1]-vec[1]))
                     P2, Pt2 = ctm_get_projectors(
                         direction, new_coord_u, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
-                    P2 = view(P2, (env.chi, stateDL.site(
+                    P2 = view(P2, (env.chi, ACstateDL.site(
                         coord_shift_up).size()[2], env.chi))
-                    Pt2 = view(Pt2, (env.chi, stateDL.site(
+                    Pt2 = view(Pt2, (env.chi, ACstateDL.site(
                         new_coord_u).size()[0], env.chi))
                     P1, Pt1 = ctm_get_projectors(
                         direction, coord_shift_down, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
-                    P1 = view(P1, (env.chi, stateDL.site(
+                    P1 = view(P1, (env.chi, ACstateDL.site(
                         new_coord_u).size()[2], env.chi))
-                    Pt1 = view(Pt1, (env.chi, stateDL.site(
+                    Pt1 = view(Pt1, (env.chi, ACstateDL.site(
                         coord_shift_down).size()[0], env.chi))
                     nC2 = contract(C_right["up"], env.T[(
-                        new_coord_u, (0, -1))], ([0], [2]))
+                        (0,0), (0, -1))], ([0], [2]))
                     nC2 = contract(nC2, P2, ([0, 2], [0, 1]))
                     C_right["up"] = nC2/nC2.abs().max()
                     # env.C[(new_coord_u,(1,-1))] = C_right["up"]
 
                     vec_coord_d = (args.size-i+1, args.size+1)
-                    new_coord_d = state.vertexToSite(
+                    new_coord_d = ACstateDL.vertexToSite(
                         (coord[0]+vec_coord_d[0], coord[1]+vec_coord_d[1]))
-                    coord_shift_down = stateDL.vertexToSite(
+                    coord_shift_down = ACstateDL.vertexToSite(
                         (new_coord_d[0]+vec[0], new_coord_d[1]+vec[1]))
-                    coord_shift_up = stateDL.vertexToSite(
+                    coord_shift_up = ACstateDL.vertexToSite(
                         (new_coord_d[0]-vec[0], new_coord_d[1]-vec[1]))
                     P2, Pt2 = ctm_get_projectors(
                         direction, new_coord_d, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
-                    P2 = view(P2, (env.chi, stateDL.site(
+                    P2 = view(P2, (env.chi, ACstateDL.site(
                         coord_shift_up).size()[2], env.chi))
-                    Pt2 = view(Pt2, (env.chi, stateDL.site(
+                    Pt2 = view(Pt2, (env.chi, ACstateDL.site(
                         new_coord_d).size()[0], env.chi))
                     P1, Pt1 = ctm_get_projectors(
                         direction, coord_shift_down, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
-                    P1 = view(P1, (env.chi, stateDL.site(
+                    P1 = view(P1, (env.chi, ACstateDL.site(
                         new_coord_d).size()[2], env.chi))
-                    Pt1 = view(Pt1, (env.chi, stateDL.site(
+                    Pt1 = view(Pt1, (env.chi, ACstateDL.site(
                         coord_shift_down).size()[0], env.chi))
                     nC1 = contract(C_right["down"], env.T[(
-                        new_coord_d, (0, 1))], ([1], [2]))
+                        (0,0), (0, 1))], ([1], [2]))
                     nC1 = contract(Pt1, nC1, ([0, 1], [0, 1]))
                     C_right["down"] = nC1/nC1.abs().max()
                     # env.C[(new_coord_d,(1,1))] = C_right["down"]
 
                     for j in range(2*args.size+2):
                         vec_coord = (args.size-i+1, -args.size+j)
-                        new_coord = state.vertexToSite(
+                        new_coord = ACstateDL.vertexToSite(
                             (coord[0]+vec_coord[0], coord[1]+vec_coord[1]))
-                        coord_shift_down = stateDL.vertexToSite(
+                        coord_shift_down = ACstateDL.vertexToSite(
                             (new_coord[0]+vec[0], new_coord[1]+vec[1]))
-                        coord_shift_up = stateDL.vertexToSite(
+                        coord_shift_up = ACstateDL.vertexToSite(
                             (new_coord[0]-vec[0], new_coord[1]-vec[1]))
                         P2, Pt2 = ctm_get_projectors(
                             direction, new_coord, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
-                        P2 = view(P2, (env.chi, stateDL.site(
+                        P2 = view(P2, (env.chi, ACstateDL.site(
                             coord_shift_up).size()[2], env.chi))
-                        Pt2 = view(Pt2, (env.chi, stateDL.site(
+                        Pt2 = view(Pt2, (env.chi, ACstateDL.site(
                             new_coord).size()[0], env.chi))
                         P1, Pt1 = ctm_get_projectors(
                             direction, coord_shift_down, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
-                        P1 = view(P1, (env.chi, stateDL.site(
+                        P1 = view(P1, (env.chi, ACstateDL.site(
                             new_coord).size()[2], env.chi))
-                        Pt1 = view(Pt1, (env.chi, stateDL.site(
+                        Pt1 = view(Pt1, (env.chi, ACstateDL.site(
                             coord_shift_down).size()[0], env.chi))
                         nT = contract(Pt2, T_right[(j)], ([0], [0]))
                         dimsA = state.site(new_coord).size()
                         Aket = state.site(
-                            new_coord) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
-                        DL = view(contiguous(einsum('mefgh,mabcd->eafbgchd', Aket, conj(state.site(new_coord)))),
+                            (0,0)) + lam * torch.exp(-1j*(kx*vec_coord[0]+ky*vec_coord[1])) * B_grad
+                        DL = view(contiguous(einsum('mefgh,mabcd->eafbgchd', Aket, conj(state.site((0,0))))),
                                   (dimsA[1]**2, dimsA[2]**2, dimsA[3]**2, dimsA[4]**2))
                         nT = contract(nT, DL, ([0, 2], [0, 3]))
                         nT = contract(nT, P1, ([1, 3], [0, 1]))

@@ -19,20 +19,20 @@ do
     cp ${datadir}../${statefile} ${datadir}
     reuseCTMRGenv="True"
     removeCTMRGenv="False"
-    extra_flags="--CTMARGS_ctm_force_dl True --MultiGPU True --CTMARGS_projector_eps_multiplet 1e-4 --CTMARGS_ctm_conv_tol 1e-8"
+    extra_flags="--CTMARGS_ctm_force_dl True --MultiGPU False --CTMARGS_projector_eps_multiplet 1e-4 --CTMARGS_ctm_conv_tol 1e-8"
     extra_flags=${extra_flags}" --NormMat True --HamiMat True --CTMARGS_projector_svd_reltol 1e-8"
     extra_flags=${extra_flags}" --CTMARGS_projector_method 4X4 --CTMARGS_projector_svd_method GESDD_CPU"
     extra_flags=${extra_flags}" --CTMARGS_ctm_env_init_type CTMRG --UseVUMPSansazAC False"
     extra_flags=${extra_flags}" --CTMARGS_ctm_absorb_normalization inf"
     SMAMethod="SMA_Kitaev_Correct_Model_gpugraph_divide_Pderv.py"
     StoredMatMethod="SMA_stored_mat_Kitaev_Correct_Model.py"
-    runSMA="True"
-    runStoredMat="True"
+    runSMA="False"
+    runStoredMat="False"
     runDraw="True"
     runGUPTRI="False"
     runDrawGUPTRI="False"
 
-    OnlyOnePoint="True"
+    OnlyOnePoint="False"
     max_iter=100000000
 
     # mkdir -p ${datadir}
@@ -152,7 +152,7 @@ do
 
     if [[ "$runDraw" == "True" ]]; then
         #Draw the figure
-        python -u graph.py ${datadir} True "h=${h} Kz=${Kz}" "[0, 4, 8, 16], [r'\$M(\pi,0)\$', r'\$\Gamma(0,0)\$',r'\$K(\pi,\frac{\pi}{2})\$', r'\$M(\pi,0)\$']"
+        python -u graph.py ${datadir} True "h=${h} Kz=${Kz}" "[0, 2, 4, 8], [r'\$M(\pi,0)\$', r'\$\Gamma(0,0)\$',r'\$K(\pi,\frac{\pi}{2})\$', r'\$M(\pi,0)\$']"
     fi
 
 
