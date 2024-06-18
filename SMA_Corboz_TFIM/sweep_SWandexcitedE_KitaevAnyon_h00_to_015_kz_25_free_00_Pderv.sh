@@ -9,8 +9,13 @@ do
     # h=0.0
     chi=16
     bond_dim=4
-    _size=3
-    _step=4
+    _size=2
+    L=$((2*${_size}+2))
+    tL=$((2*${L}))
+    Lm1=$((L-1))
+    hL=$((L/2))
+    hLp1=$((hL+1))
+    _step=3
     _device="cuda:0"
     _dtype="complex128"
     statefile="${h}_state.json"
@@ -19,8 +24,8 @@ do
     cp ${datadir}../${statefile} ${datadir}
     reuseCTMRGenv="True"
     removeCTMRGenv="False"
-    extra_flags="--CTMARGS_ctm_force_dl True --MultiGPU False --CTMARGS_projector_eps_multiplet 1e-4 --CTMARGS_ctm_conv_tol 1e-8"
-    extra_flags=${extra_flags}" --NormMat True --HamiMat True --CTMARGS_projector_svd_reltol 1e-8"
+    extra_flags="--CTMARGS_ctm_force_dl True --MultiGPU False --CTMARGS_projector_eps_multiplet 1e-12 --CTMARGS_ctm_conv_tol 1e-7"
+    extra_flags=${extra_flags}" --NormMat True --HamiMat True --CTMARGS_projector_svd_reltol 1e-12"
     extra_flags=${extra_flags}" --CTMARGS_projector_method 4X4 --CTMARGS_projector_svd_method GESDD_CPU"
     extra_flags=${extra_flags}" --CTMARGS_ctm_env_init_type CTMRG --UseVUMPSansazAC False"
     extra_flags=${extra_flags}" --CTMARGS_ctm_absorb_normalization inf"
@@ -39,7 +44,7 @@ do
 
     if [[ "$runSMA" == "True" ]]; then
         if [[ "$OnlyOnePoint" == "True" ]]; then
-            kx=0
+            kx=${L}
             ky=0
             echo "kx="${kx} "ky="${ky}
             python -u ${SMAMethod} --GLOBALARGS_dtype ${_dtype} --bond_dim ${bond_dim} --chi ${chi} \
@@ -50,7 +55,7 @@ do
         else
             # Correct Path:
             # M->Gamma
-            for kx in $(seq 8 -${_step} 1); do
+            for kx in $(seq ${L} -${_step} 1); do
                 ky=0
                 echo "kx="${kx} "ky="${ky}
                 python -u ${SMAMethod} --GLOBALARGS_dtype ${_dtype} --bond_dim ${bond_dim} --chi ${chi} \
@@ -60,7 +65,7 @@ do
                 --reuseCTMRGenv ${reuseCTMRGenv} --removeCTMRGenv ${removeCTMRGenv}
             done
             # Gamma->K
-            for kx in $(seq 0 ${_step} 7); do
+            for kx in $(seq 0 ${_step} ${Lm1}); do
                 ky=$(($kx+$kx))
                 echo "kx="${kx} "ky="${ky}
                 python -u ${SMAMethod} --GLOBALARGS_dtype ${_dtype} --bond_dim ${bond_dim} --chi ${chi} \
@@ -70,8 +75,8 @@ do
                 --reuseCTMRGenv ${reuseCTMRGenv} --removeCTMRGenv ${removeCTMRGenv}
             done
             # K->M
-            for ky in $(seq 16 -${_step} 0); do
-                kx=8
+            for ky in $(seq ${tL} -${_step} 0); do
+                kx=${L}
                 # for ky in $(seq 12 -2 1); do
                 echo "kx="${kx} "ky="${ky}
                 python -u ${SMAMethod} --GLOBALARGS_dtype ${_dtype} --bond_dim ${bond_dim} --chi ${chi} \
@@ -107,7 +112,7 @@ do
 
         # Calculate the energy and spectral weight
         if [[ "$OnlyOnePoint" == "True" ]]; then
-            kx=0
+            kx=${L}
             ky=0
             echo "kx="${kx} "ky="${ky}
             python -u ${StoredMatMethod} --GLOBALARGS_dtype ${_dtype} --bond_dim ${bond_dim} --chi ${chi} \
@@ -118,7 +123,7 @@ do
         else
             # Correct Path:
             # M->Gamma
-            for kx in $(seq 8 -${_step} 1); do
+            for kx in $(seq ${L} -${_step} 1); do
                 ky=0
                 echo "kx="${kx} "ky="${ky}
                 python -u ${StoredMatMethod} --GLOBALARGS_dtype ${_dtype} --bond_dim ${bond_dim} --chi ${chi} \
@@ -128,7 +133,7 @@ do
                 --reuseCTMRGenv ${reuseCTMRGenv} --removeCTMRGenv ${removeCTMRGenv}
             done
             # Gamma->K
-            for kx in $(seq 0 ${_step} 7); do
+            for kx in $(seq 0 ${_step} ${Lm1}); do
                 ky=$(($kx+$kx))
                 echo "kx="${kx} "ky="${ky}
                 python -u ${StoredMatMethod} --GLOBALARGS_dtype ${_dtype} --bond_dim ${bond_dim} --chi ${chi} \
@@ -138,8 +143,8 @@ do
                 --reuseCTMRGenv ${reuseCTMRGenv} --removeCTMRGenv ${removeCTMRGenv}
             done
             # K->M
-            for ky in $(seq 16 -${_step} 0); do
-                kx=8
+            for ky in $(seq ${tL} -${_step} 0); do
+                kx=${L}
                 echo "kx="${kx} "ky="${ky}
                 python -u ${StoredMatMethod} --GLOBALARGS_dtype ${_dtype} --bond_dim ${bond_dim} --chi ${chi} \
                 --statefile ${statefile} --size ${_size} --CTMARGS_ctm_max_iter ${max_iter} --GLOBALARGS_device ${_device} \

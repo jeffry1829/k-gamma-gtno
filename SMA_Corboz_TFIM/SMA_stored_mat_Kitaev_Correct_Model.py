@@ -477,6 +477,10 @@ Bs_Ori = Proj@Bs
 # print("ALL_E_lowest_ex=", (Es-energy_per_site.item()))
 print("E_lowest_ex=", Es[0])
 print("ALL_E_lowest_ex=", Es)
+print("E_lowest_ex2=", (2*args.size+2)*(2*args.size+1)
+      * 2*(Es[0].real-energy_per_site.item().real))
+print("ALL_E_lowest_ex2=", (2*args.size+2)*(2*args.size+1)
+      * 2*(Es.real-energy_per_site.item().real))
 
 # print("HamiMat.shape: ", HamiMat.shape)
 # print("NormMat.shape: ", NormMat.shape)
@@ -561,7 +565,7 @@ KzzAconj = ProjDag@KzzAconj
 
 # Plot spectral weight
 # Es = Es.real
-Es = (2*args.size+2)*(2*args.size+1)*(Es.real-energy_per_site.item().real)
+Es = (2*args.size+2)*(2*args.size+1)*2*(Es.real-energy_per_site.item().real)
 # Es = (((2*args.size+2))*((2*args.size+1))
 #       * Es.real-energy_per_site.item().real)
 # Es = Es.real-energy_per_site.item().real

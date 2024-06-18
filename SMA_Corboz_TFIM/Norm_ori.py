@@ -443,13 +443,13 @@ def Create_Norm_Env(state, stateDL, B_grad, env, lam, kx, ky, C_up, T_up, C_left
                     coord_shift_right = ACstateDL.vertexToSite(
                         (new_coord_l[0]+vec[0], new_coord_l[1]+vec[1]))
                     P2, Pt2 = ctm_get_projectors(
-                        direction, new_coord_l, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
+                        direction, new_coord_l, stateDL, env, cfg.ctm_args, cfg.global_args, False, False, False)
                     P2 = view(P2, (env.chi, ACstateDL.site(
                         coord_shift_left).size()[3], env.chi))
                     Pt2 = view(Pt2, (env.chi, ACstateDL.site(
                         new_coord_l).size()[1], env.chi))
                     P1, Pt1 = ctm_get_projectors(
-                        direction, coord_shift_right, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
+                        direction, coord_shift_right, stateDL, env, cfg.ctm_args, cfg.global_args, False, False, False)
                     P1 = view(P1, (env.chi, ACstateDL.site(
                         new_coord_l).size()[3], env.chi))
                     Pt1 = view(Pt1, (env.chi, ACstateDL.site(
@@ -468,13 +468,13 @@ def Create_Norm_Env(state, stateDL, B_grad, env, lam, kx, ky, C_up, T_up, C_left
                     coord_shift_right = ACstateDL.vertexToSite(
                         (new_coord_r[0]+vec[0], new_coord_r[1]+vec[1]))
                     P2, Pt2 = ctm_get_projectors(
-                        direction, new_coord_r, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
+                        direction, new_coord_r, stateDL, env, cfg.ctm_args, cfg.global_args, False, False, False)
                     P2 = view(P2, (env.chi, ACstateDL.site(
                         coord_shift_left).size()[3], env.chi))
                     Pt2 = view(Pt2, (env.chi, ACstateDL.site(
                         new_coord_r).size()[1], env.chi))
                     P1, Pt1 = ctm_get_projectors(
-                        direction, coord_shift_right, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
+                        direction, coord_shift_right, stateDL, env, cfg.ctm_args, cfg.global_args, False, False, False)
                     P1 = view(P1, (env.chi, ACstateDL.site(
                         new_coord_r).size()[3], env.chi))
                     Pt1 = view(Pt1, (env.chi, ACstateDL.site(
@@ -567,13 +567,13 @@ def Create_Norm_Env(state, stateDL, B_grad, env, lam, kx, ky, C_up, T_up, C_left
                     coord_shift_left = ACstateDL.vertexToSite(
                         (new_coord_l[0]+vec[0], new_coord_l[1]+vec[1]))
                     P2, Pt2 = ctm_get_projectors(
-                        direction, new_coord_l, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
+                        direction, new_coord_l, stateDL, env, cfg.ctm_args, cfg.global_args, False, False, False)
                     P2 = view(P2, (env.chi, ACstateDL.site(
                         coord_shift_right).size()[1], env.chi))
                     Pt2 = view(Pt2, (env.chi, ACstateDL.site(
                         new_coord_l).size()[3], env.chi))
                     P1, Pt1 = ctm_get_projectors(
-                        direction, coord_shift_left, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
+                        direction, coord_shift_left, stateDL, env, cfg.ctm_args, cfg.global_args, False, False, False)
                     P1 = view(P1, (env.chi, ACstateDL.site(
                         new_coord_l).size()[1], env.chi))
                     Pt1 = view(Pt1, (env.chi, ACstateDL.site(
@@ -592,13 +592,13 @@ def Create_Norm_Env(state, stateDL, B_grad, env, lam, kx, ky, C_up, T_up, C_left
                     coord_shift_left = ACstateDL.vertexToSite(
                         (new_coord_r[0]+vec[0], new_coord_r[1]+vec[1]))
                     P2, Pt2 = ctm_get_projectors(
-                        direction, new_coord_r, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
+                        direction, new_coord_r, stateDL, env, cfg.ctm_args, cfg.global_args, False, False, False)
                     P2 = view(P2, (env.chi, ACstateDL.site(
                         coord_shift_right).size()[1], env.chi))
                     Pt2 = view(Pt2, (env.chi, ACstateDL.site(
                         new_coord_r).size()[3], env.chi))
                     P1, Pt1 = ctm_get_projectors(
-                        direction, coord_shift_left, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
+                        direction, coord_shift_left, stateDL, env, cfg.ctm_args, cfg.global_args, False, False, False)
                     P1 = view(P1, (env.chi, ACstateDL.site(
                         new_coord_r).size()[1], env.chi))
                     Pt1 = view(Pt1, (env.chi, ACstateDL.site(
@@ -673,13 +673,13 @@ def Create_Norm_Env(state, stateDL, B_grad, env, lam, kx, ky, C_up, T_up, C_left
                     coord_shift_down = ACstateDL.vertexToSite(
                         (new_coord_u[0]-vec[0], new_coord_u[1]-vec[1]))
                     P2, Pt2 = ctm_get_projectors(
-                        direction, new_coord_u, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
+                        direction, new_coord_u, stateDL, env, cfg.ctm_args, cfg.global_args, False, False, False)
                     P2 = view(P2, (env.chi, ACstateDL.site(
                         coord_shift_down).size()[0], env.chi))
                     Pt2 = view(Pt2, (env.chi, ACstateDL.site(
                         new_coord_u).size()[2], env.chi))
                     P1, Pt1 = ctm_get_projectors(
-                        direction, coord_shift_up, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
+                        direction, coord_shift_up, stateDL, env, cfg.ctm_args, cfg.global_args, False, False, False)
                     P1 = view(P1, (env.chi, ACstateDL.site(
                         new_coord_u).size()[0], env.chi))
                     Pt1 = view(Pt1, (env.chi, ACstateDL.site(
@@ -698,13 +698,13 @@ def Create_Norm_Env(state, stateDL, B_grad, env, lam, kx, ky, C_up, T_up, C_left
                     coord_shift_down = ACstateDL.vertexToSite(
                         (new_coord_d[0]-vec[0], new_coord_d[1]-vec[1]))
                     P2, Pt2 = ctm_get_projectors(
-                        direction, new_coord_d, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
+                        direction, new_coord_d, stateDL, env, cfg.ctm_args, cfg.global_args, False, False, False)
                     P2 = view(P2, (env.chi, ACstateDL.site(
                         coord_shift_down).size()[0], env.chi))
                     Pt2 = view(Pt2, (env.chi, ACstateDL.site(
                         new_coord_d).size()[2], env.chi))
                     P1, Pt1 = ctm_get_projectors(
-                        direction, coord_shift_up, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
+                        direction, coord_shift_up, stateDL, env, cfg.ctm_args, cfg.global_args, False, False, False)
                     P1 = view(P1, (env.chi, ACstateDL.site(
                         new_coord_d).size()[0], env.chi))
                     Pt1 = view(Pt1, (env.chi, ACstateDL.site(
@@ -797,13 +797,13 @@ def Create_Norm_Env(state, stateDL, B_grad, env, lam, kx, ky, C_up, T_up, C_left
                     coord_shift_up = ACstateDL.vertexToSite(
                         (new_coord_u[0]-vec[0], new_coord_u[1]-vec[1]))
                     P2, Pt2 = ctm_get_projectors(
-                        direction, new_coord_u, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
+                        direction, new_coord_u, stateDL, env, cfg.ctm_args, cfg.global_args, False, False, False)
                     P2 = view(P2, (env.chi, ACstateDL.site(
                         coord_shift_up).size()[2], env.chi))
                     Pt2 = view(Pt2, (env.chi, ACstateDL.site(
                         new_coord_u).size()[0], env.chi))
                     P1, Pt1 = ctm_get_projectors(
-                        direction, coord_shift_down, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
+                        direction, coord_shift_down, stateDL, env, cfg.ctm_args, cfg.global_args, False, False, False)
                     P1 = view(P1, (env.chi, ACstateDL.site(
                         new_coord_u).size()[2], env.chi))
                     Pt1 = view(Pt1, (env.chi, ACstateDL.site(
@@ -822,13 +822,13 @@ def Create_Norm_Env(state, stateDL, B_grad, env, lam, kx, ky, C_up, T_up, C_left
                     coord_shift_up = ACstateDL.vertexToSite(
                         (new_coord_d[0]-vec[0], new_coord_d[1]-vec[1]))
                     P2, Pt2 = ctm_get_projectors(
-                        direction, new_coord_d, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
+                        direction, new_coord_d, stateDL, env, cfg.ctm_args, cfg.global_args, False, False, False)
                     P2 = view(P2, (env.chi, ACstateDL.site(
                         coord_shift_up).size()[2], env.chi))
                     Pt2 = view(Pt2, (env.chi, ACstateDL.site(
                         new_coord_d).size()[0], env.chi))
                     P1, Pt1 = ctm_get_projectors(
-                        direction, coord_shift_down, ACstateDL, env, cfg.ctm_args, cfg.global_args, False, False, True)
+                        direction, coord_shift_down, stateDL, env, cfg.ctm_args, cfg.global_args, False, False, False)
                     P1 = view(P1, (env.chi, ACstateDL.site(
                         new_coord_d).size()[2], env.chi))
                     Pt1 = view(Pt1, (env.chi, ACstateDL.site(

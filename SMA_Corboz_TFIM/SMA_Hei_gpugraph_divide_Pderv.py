@@ -418,7 +418,6 @@ if len(state.sites) == 1:
     # prepare more sites for boundary conditions
     for i in range(-args.size-3, args.size+2+3):
         for j in range(-args.size-3, args.size+2+3):
-            print("phase", lam * torch.exp(-1j*(kx*i+ky*j)))
             ACsites_[(i, j)] = base + lam * torch.exp(-1j*(kx*i+ky*j)) * B_grad
             # ACsites_[(i, j)] = base
 
@@ -506,8 +505,8 @@ if len(state.sites) == 1:
     # prepare more sites for boundary conditions
     for i in range(-args.size-3, args.size+2+3):
         for j in range(-args.size-3, args.size+2+3):
-            # ACsites_[(i, j)] = base + lam * torch.exp(-1j*(kx*i+ky*j)) * B_grad
-            ACsites_[(i, j)] = base
+            ACsites_[(i, j)] = base + lam * torch.exp(-1j*(kx*i+ky*j)) * B_grad
+            # ACsites_[(i, j)] = base
     ACstate = IPEPS(ACsites_, vertexToSite=lattice_to_site)
     # ACsitesDL = dict()
     # for coord, A in ACstate.sites.items():

@@ -3,9 +3,9 @@ for j2 in 0.0
 do
     j1=1.0
     # j2=${j2}
-    chi=16
+    chi=8
     bond_dim=2
-    _size=3
+    _size=2
     L=$((2*${_size}+2))
     Lm1=$((L-1))
     hL=$((L/2))
@@ -13,14 +13,16 @@ do
     _step=4
     _device="cuda:1"
     _dtype="complex128"
-    statefile="ex-j20D2chi${chi}c4vdtypefloat64_state.json"
+    # statefile="ex-j20D2chi8c4v_state.json"
+    statefile="ex-j20D2chi${chi}c4v_state.json"
+    # statefile="ex-j20D2chi${chi}c4vdtypefloat64_state.json"
     datadir="data/Hei_Pderv_j1${j1}j2${j2}chi${chi}size${_size}bonddim${bond_dim}dtype${_dtype}/"
     mkdir -p ${datadir}
     cp ${datadir}../${statefile} ${datadir}
     reuseCTMRGenv="True"
     removeCTMRGenv="False"
-    extra_flags="--CTMARGS_ctm_force_dl True --MultiGPU False --CTMARGS_projector_eps_multiplet 1e-4 --CTMARGS_ctm_conv_tol 1e-8"
-    extra_flags=${extra_flags}" --NormMat True --HamiMat True --CTMARGS_projector_svd_reltol 1e-8"
+    extra_flags="--CTMARGS_ctm_force_dl True --MultiGPU False --CTMARGS_projector_eps_multiplet 1e-12 --CTMARGS_ctm_conv_tol 1e-8"
+    extra_flags=${extra_flags}" --NormMat True --HamiMat True --CTMARGS_projector_svd_reltol 1e-12"
     extra_flags=${extra_flags}" --CTMARGS_projector_method 4X4 --CTMARGS_projector_svd_method GESDD_CPU"
     extra_flags=${extra_flags}" --CTMARGS_ctm_env_init_type CTMRG --UseVUMPSansazAC False"
     extra_flags=${extra_flags}" --CTMARGS_ctm_absorb_normalization inf"
@@ -39,7 +41,7 @@ do
 
     if [[ "$runSMA" == "True" ]]; then
         if [[ "$OnlyOnePoint" == "True" ]]; then
-            kx=8
+            kx=${L}
             ky=0
             echo "kx="${kx} "ky="${ky}
             python -u ${SMAMethod} --GLOBALARGS_dtype ${_dtype} --bond_dim ${bond_dim} --chi ${chi} \
@@ -131,7 +133,7 @@ do
 
         # Calculate the energy and spectral weight
         if [[ "$OnlyOnePoint" == "True" ]]; then
-            kx=8
+            kx=${L}
             ky=0
             echo "kx="${kx} "ky="${ky}
             python -u ${StoredMatMethod} --GLOBALARGS_dtype ${_dtype} --bond_dim ${bond_dim} --chi ${chi} \

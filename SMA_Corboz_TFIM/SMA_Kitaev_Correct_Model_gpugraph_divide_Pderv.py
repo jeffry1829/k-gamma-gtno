@@ -794,8 +794,8 @@ if len(state.sites) == 1:
     # prepare more sites for boundary conditions
     for i in range(-args.size-3, args.size+2+3):
         for j in range(-args.size-3, args.size+2+3):
-            # ACsites_[(i, j)] = base + lam * torch.exp(-1j*(kx*i+ky*j)) * B_grad
-            ACsites_[(i, j)] = base
+            ACsites_[(i, j)] = base + lam * torch.exp(-1j*(kx*i+ky*j)) * B_grad
+            # ACsites_[(i, j)] = base
     ACstate = IPEPS(ACsites_, vertexToSite=lattice_to_site)
     # ACsitesDL = dict()
     # for coord, A in ACstate.sites.items():
@@ -851,7 +851,7 @@ if len(state.sites) == 1:
                 shp[len(shp)-1-ii+1]
         print("Start caclulating HamiMat...")
         t1 = time.time()
-        streams = [torch.cuda.Stream() for i in range(elemsize)]
+        # streams = [torch.cuda.Stream() for i in range(elemsize)]
         # @torch.compile
         # def innergrad(ii):
         #     loc = [0 for jj in range(len(shp))]
@@ -867,33 +867,33 @@ if len(state.sites) == 1:
         #         HamiMat[(...,)+tuple(loc)] += conj(torch.autograd.grad(HamiMat0[tuple(loc)].imag, B_grad, create_graph=False, retain_graph=True)[0])
         #         HamiMat0.detach_()
 
-        for ii in range(elemsize):
-            streams[ii].wait_stream(torch.cuda.current_stream())
+        # for ii in range(elemsize):
+        #     streams[ii].wait_stream(torch.cuda.current_stream())
         for ii in range(elemsize):
             loc = [0 for jj in range(len(shp))]
             n = ii
             for jj in range(len(shp)):
                 loc[jj] = n//accu[jj]
                 n = n % accu[jj]
-            with torch.cuda.stream(streams[ii]):
-                # print(loc)
-                HamiMat0[tuple(loc)] = 0.5*conj(torch.autograd.grad(
-                    Hami[(0, 0)][tuple(loc)].real, mu, create_graph=True, retain_graph=True)[0])
-                HamiMat0[tuple(loc)] += 0.5*1j*conj(torch.autograd.grad(Hami[(0, 0)]
-                                                                        [tuple(loc)].imag, mu, create_graph=True, retain_graph=True)[0])
-                HamiMat[(...,)+tuple(loc)] = 0.5*conj(torch.autograd.grad(HamiMat0[tuple(loc)
-                                                                                   ].real, B_grad, create_graph=False, retain_graph=True)[0])
-                HamiMat[(...,)+tuple(loc)] += 0.5*1j*conj(torch.autograd.grad(
-                    HamiMat0[tuple(loc)].imag, B_grad, create_graph=False, retain_graph=True)[0])
-                # HamiMat0.detach_()
-                # HamiMat.detach_()
+            # with torch.cuda.stream(streams[ii]):
+            # print(loc)
+            HamiMat0[tuple(loc)] = 0.5*conj(torch.autograd.grad(
+                Hami[(0, 0)][tuple(loc)].real, mu, create_graph=True, retain_graph=True)[0])
+            HamiMat0[tuple(loc)] += 0.5*1j*conj(torch.autograd.grad(Hami[(0, 0)]
+                                                                    [tuple(loc)].imag, mu, create_graph=True, retain_graph=True)[0])
+            HamiMat[(...,)+tuple(loc)] = 0.5*conj(torch.autograd.grad(HamiMat0[tuple(loc)
+                                                                               ].real, B_grad, create_graph=False, retain_graph=True)[0])
+            HamiMat[(...,)+tuple(loc)] += 0.5*1j*conj(torch.autograd.grad(
+                HamiMat0[tuple(loc)].imag, B_grad, create_graph=False, retain_graph=True)[0])
+            # HamiMat0.detach_()
+            # HamiMat.detach_()
 
-                HamiMat0.detach_()
-                HamiMat.detach_()
-                # innergrad(ii)
+            HamiMat0.detach_()
+            HamiMat.detach_()
+            # innergrad(ii)
         t2 = time.time()
-        for ii in range(elemsize):
-            streams[ii].synchronize()
+        # for ii in range(elemsize):
+        #     streams[ii].synchronize()
         print("HamiMat caclulated, time=", t2-t1)
 
         # HamiMat2 = view(HamiMat, (1024, 1024))
