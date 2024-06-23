@@ -52,8 +52,10 @@ parser.add_argument("--kx", type=float, default=0.,
                     help="kx of TFIM")
 parser.add_argument("--ky", type=float, default=0.,
                     help="ky of TFIM")
-parser.add_argument("--j1", type=float, default=1., help="nearest-neighbour coupling")
-parser.add_argument("--j2", type=float, default=0., help="next nearest-neighbour coupling")
+parser.add_argument("--j1", type=float, default=1.,
+                    help="nearest-neighbour coupling")
+parser.add_argument("--j2", type=float, default=0.,
+                    help="next nearest-neighbour coupling")
 parser.add_argument("--size", type=int, default=10, help="effective size")
 parser.add_argument("--statefile", type=str, default="TFIM_output_state.json",
                     help="filename for TFIM input state")
@@ -101,17 +103,26 @@ def _cast_to_real(t):
 
 
 state = read_ipeps(args.datadir+args.statefile, global_args=cfg.global_args)
+
+
 def symmetrize(state):
-    A= state.site((0,0))
-    A_symm= make_c4v_symm_A1(A)
-    symm_state= IPEPS({(0,0): A_symm}, vertexToSite=state.vertexToSite)
+    A = state.site((0, 0))
+    if A.is_complex():
+        A_symm = make_c4v_symm(A.real) + \
+            make_c4v_symm(A.imag, irreps=["A2"]) * 1.0j
+    else:
+        A_symm = make_c4v_symm(A)
+    # A_symm = make_c4v_symm_A1(A)
+    symm_state = IPEPS({(0, 0): A_symm}, vertexToSite=state.vertexToSite)
     return symm_state
-state= symmetrize(state)
+
+
+state = symmetrize(state)
 ENVfilenameC = args.datadir+Path(args.statefile).stem+"ENVC"+"chi" + \
     str(args.chi)+"size"+str(args.size)+".pt"
 ENVfilenameT = args.datadir+Path(args.statefile).stem+"ENVT"+"chi" + \
     str(args.chi)+"size"+str(args.size)+".pt"
-    
+
 if str(state.sites[(0, 0)].dtype) == str(cfg.global_args.torch_dtype) and str(state.sites[(0, 0)].device) == str(cfg.global_args.device):
     print("state.dtype and state.device are already correct")
 else:
@@ -138,6 +149,7 @@ kx = kx_int*torch.pi/(2*args.size+2)
 ky = ky_int*torch.pi/(2*args.size+2)
 print("kx=", kx/torch.pi*(2*args.size+2))
 print("ky=", ky/torch.pi*(2*args.size+2))
+
 
 def ctmrg_conv_energy(state2, env, history, ctm_args=cfg.ctm_args):
     torch.set_printoptions(profile="full")
@@ -260,18 +272,21 @@ if args.reuseCTMRGenv and not (os.path.exists(ENVfilenameC) or os.path.exists(EN
 # env, _, *ctm_log = ctmrg.run(state, env, conv_check=ctmrg_conv_energy)
 
 SS = model.SS_rot
-iden= torch.eye(2,dtype=cfg.global_args.torch_dtype,device=cfg.global_args.device).contiguous()
+iden = torch.eye(2, dtype=cfg.global_args.torch_dtype,
+                 device=cfg.global_args.device).contiguous()
 H_temp = args.j1 * SS
-lam = torch.tensor(0.0,dtype=cfg.global_args.torch_dtype,device=cfg.global_args.device).requires_grad_(True)
-lamb = torch.tensor(1.0,dtype=cfg.global_args.torch_dtype,device=cfg.global_args.device)
-iden2 = torch.einsum('ij,kl->ikjl',iden,iden)
+lam = torch.tensor(0.0, dtype=cfg.global_args.torch_dtype,
+                   device=cfg.global_args.device).requires_grad_(True)
+lamb = torch.tensor(1.0, dtype=cfg.global_args.torch_dtype,
+                    device=cfg.global_args.device)
+iden2 = torch.einsum('ij,kl->ikjl', iden, iden)
 H = iden2 + lam * H_temp
 # H2 = iden2
 
 # calculate the energy per bond
-rdm2x1= rdm2x1((0,0),state,env)
-energy_per_site= torch.einsum('ijkl,ijkl',rdm2x1,H_temp)
-print ("E_per_bond=", energy_per_site.item().real)
+rdm2x1 = rdm2x1((0, 0), state, env)
+energy_per_site = torch.einsum('ijkl,ijkl', rdm2x1, H_temp)
+print("E_per_bond=", energy_per_site.item().real)
 
 NormMat = np.load(args.datadir+"kx{}ky{}NormMat.npy".format(args.kx, args.ky))
 HamiMat = np.load(args.datadir+"kx{}ky{}HamiMat.npy".format(args.kx, args.ky))
@@ -371,7 +386,7 @@ idx = np.argsort(-np.abs(e))
 e = e[idx]
 v = v[:, idx]
 ################ Projector###############
-eig_size = 1
+eig_size = 5
 if kx == 0 and ky == 0:
     eig_size = eig_size + 1
 eig_truncate_up = 0
@@ -500,7 +515,7 @@ for i in range(Es.shape[0]):
         np.linalg.norm(((Bs_Ori[:, i]))@NormMat_Ori@(SzAconj_Ori))**2
     SW.append((i, Es[i], ans))
     points.append((0, Es[i]))
-    values.append(ans)\
+    values.append(ans)
 
 with open(args.datadir+"SW.txt", "a") as f:
     f.write("#kx={}, ky={}, j1={}, j2={}\n".format(
@@ -516,20 +531,115 @@ with open(args.datadir+"SW.txt", "a") as f:
 # plt.gcf().set_size_inches(6, 6)
 # plt.show()
 
-# SSF
+# # SSF
+# if (args.SSF == True):
+#     with torch.no_grad():
+#         P, Pt = Create_Projectors(state, stateDL, env, args)
+#     B_grad = torch.zeros((len(state.sites), model.phys_dim, bond_dim, bond_dim, bond_dim, bond_dim),
+#                          dtype=cfg.global_args.torch_dtype, device=cfg.global_args.device)
+#     if len(state.sites) == 1:
+#         B_grad[0].requires_grad_(True)
+#         sitesB = {(0, 0): B_grad[0]}
+#         stateB = IPEPS(sitesB, state.vertexToSite)
+#     B_grad = B_grad[0].requires_grad_(True)
+
+#     tmp_rdm = rdm.rdm1x1((0, 0), state, env)
+#     sxsx_exp = torch.trace(tmp_rdm@Sx)
+#     # sx_rot_exp = torch.trace(tmp_rdm@Sx_rot)
+#     sysy_exp = torch.trace(tmp_rdm@Sy)
+#     # sy_rot_exp = torch.trace(tmp_rdm@Sy_rot)
+#     szsz_exp = torch.trace(tmp_rdm@Sz)
+#     # sz_rot_exp = torch.trace(tmp_rdm@Sz_rot)
+#     # print (sx_exp,sx_rot_exp,sy_exp,sy_rot_exp,sz_exp,sz_rot_exp)
+
+#     lam = torch.tensor(0.0, dtype=cfg.global_args.torch_dtype,
+#                        device=cfg.global_args.device)
+#     lamb = torch.tensor(0.0, dtype=cfg.global_args.torch_dtype,
+#                         device=cfg.global_args.device).requires_grad_(True)
+#     # C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right = Create_Stat_Env(state, stateDL, stateB, env, P, Pt, lam, lamb, iden, Sx, Sx_rot, Sx, sx_exp, sx_rot_exp, 1.0, kx, ky, args)
+#     C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right = Create_Stat_Env(
+#         state, stateDL, B_grad, env, P, Pt, lam, lamb, Id, Sx, Sx, Sx, sxsx_exp, sxsx_exp, 1.0, kx, ky, args)
+#     Hami, Hami2 = Create_Stat(state, env, C_up, T_up, C_left,
+#                               T_left, C_down, T_down, C_right, T_right, args)
+#     Ham = contract(Hami[(0, 0)], conj(state.site((0, 0))),
+#                    ([0, 1, 2, 3, 4], [0, 1, 2, 3, 4]))
+#     # sx_exp2 = Ham.detach()
+#     # print (sx_exp2/norm_factor)
+#     # print (sx_exp*iden)
+#     stat_x = conj(torch.autograd.grad(
+#         Ham.real, lamb, retain_graph=True, create_graph=False)[0])
+#     stat_x = stat_x + \
+#         1j*conj(torch.autograd.grad(Ham.imag, lamb, retain_graph=True,
+#                                     create_graph=False)[0])
+#     # Ham.backward()
+#     # stat_x = lamb.real.grad + lamb.imag.grad
+
+#     lam = torch.tensor(0.0, dtype=cfg.global_args.torch_dtype,
+#                        device=cfg.global_args.device)
+#     lamb = torch.tensor(0.0, dtype=cfg.global_args.torch_dtype,
+#                         device=cfg.global_args.device).requires_grad_(True)
+#     C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right = Create_Stat_Env(
+#         state, stateDL, B_grad, env, P, Pt, lam, lamb, Id, Sy, Sy, Sy, sysy_exp, sysy_exp, 1.0, kx, ky, args)
+#     Hami, Hami2 = Create_Stat(state, env, C_up, T_up, C_left,
+#                               T_left, C_down, T_down, C_right, T_right, args)
+#     Ham = contract(Hami[(0, 0)], conj(state.site((0, 0))),
+#                    ([0, 1, 2, 3, 4], [0, 1, 2, 3, 4]))
+
+#     stat_y = conj(torch.autograd.grad(
+#         Ham.real, lamb, retain_graph=True, create_graph=False)[0])
+#     stat_y = stat_y + \
+#         1j*conj(torch.autograd.grad(Ham.imag, lamb, retain_graph=True,
+#                                     create_graph=False)[0])
+#     # Ham.backward()
+#     # stat_y = lamb.real.grad + lamb.imag.grad
+
+#     lam = torch.tensor(0.0, dtype=cfg.global_args.torch_dtype,
+#                        device=cfg.global_args.device)
+#     lamb = torch.tensor(0.0, dtype=cfg.global_args.torch_dtype,
+#                         device=cfg.global_args.device).requires_grad_(True)
+#     C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right = Create_Stat_Env(
+#         state, stateDL, B_grad, env, P, Pt, lam, lamb, Id, Sz, Sz, Sz, szsz_exp, szsz_exp, 1.0, kx, ky, args)
+#     Hami, Hami2 = Create_Stat(state, env, C_up, T_up, C_left,
+#                               T_left, C_down, T_down, C_right, T_right, args)
+#     Ham = contract(Hami[(0, 0)], conj(state.site((0, 0))),
+#                    ([0, 1, 2, 3, 4], [0, 1, 2, 3, 4]))
+
+#     stat_z = conj(torch.autograd.grad(Ham.real, lamb,
+#                                       retain_graph=True, create_graph=False)[0])
+#     stat_z = stat_z + 1j*conj(torch.autograd.grad(Ham.imag,
+#                                                   lamb, retain_graph=True, create_graph=False)[0])
+#     # Ham.backward()
+#     # stat_z = lamb.real.grad + lamb.imag.grad
+
+#     norm_factor = 1.0
+
+#     SSF = ((stat_x)/norm_factor/2).item().real + ((stat_y)/norm_factor /
+#                                                   2).item().real + ((stat_z)/norm_factor/2).item().real
+#     print("Static_structure_factor=", SSF)
+#     print(((stat_x)/norm_factor/2).item().real, ((stat_y)/norm_factor /
+#                                                  2).item().real, ((stat_z)/norm_factor/2).item().real)
+
+#     with open(args.datadir+"SSF.txt", "a") as f:
+#         f.write("#kx={}, ky={}, j1={}, j2={}\n".format(
+#             args.kx, args.ky, args.j1, args.j2))
+#         f.write("{}\n".format(SSF))
+
+
+# Use only S_rot
 if (args.SSF == True):
     rot_op = s2.BP_rot()
-    iden= torch.eye(2,dtype=cfg.global_args.torch_dtype,device=cfg.global_args.device).contiguous()
+    iden = torch.eye(2, dtype=cfg.global_args.torch_dtype,
+                     device=cfg.global_args.device).contiguous()
     S = s2.SP()
-    S_rot = torch.einsum('ki,kc,ca->ia',rot_op,S,rot_op)
+    S_rot = torch.einsum('ki,kc,ca->ia', rot_op, S, rot_op)
     Sm = s2.SM()
-    Sm_rot = torch.einsum('ki,kc,ca->ia',rot_op,Sm,rot_op)
+    Sm_rot = torch.einsum('ki,kc,ca->ia', rot_op, Sm, rot_op)
     Sx = (S+Sm)/2.
-    Sx_rot = torch.einsum('ki,kc,ca->ia',rot_op,Sx,rot_op)
+    Sx_rot = torch.einsum('ki,kc,ca->ia', rot_op, Sx, rot_op)
     Sy = (S-Sm)/2./1j
-    Sy_rot = torch.einsum('ki,kc,ca->ia',rot_op,Sy,rot_op)
+    Sy_rot = torch.einsum('ki,kc,ca->ia', rot_op, Sy, rot_op)
     Sz = s2.SZ()
-    Sz_rot = torch.einsum('ki,kc,ca->ia',rot_op,Sz,rot_op)
+    Sz_rot = torch.einsum('ki,kc,ca->ia', rot_op, Sz, rot_op)
     with torch.no_grad():
         P, Pt = Create_Projectors(state, stateDL, env, args)
     B_grad = torch.zeros((len(state.sites), model.phys_dim, bond_dim, bond_dim, bond_dim, bond_dim),
@@ -555,7 +665,7 @@ if (args.SSF == True):
                         device=cfg.global_args.device).requires_grad_(True)
     # C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right = Create_Stat_Env(state, stateDL, stateB, env, P, Pt, lam, lamb, iden, Sx, Sx_rot, Sx, sx_exp, sx_rot_exp, 1.0, kx, ky, args)
     C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right = Create_Stat_Env(
-        state, stateDL, B_grad, env, P, Pt, lam, lamb, iden, Sx, Sx_rot, Sx, sxsx_exp, sxsx_exp, 1.0, kx, ky, args)
+        state, stateDL, B_grad, env, P, Pt, lam, lamb, iden, Sx_rot, Sx_rot, Sx_rot, sx_rot_exp, sx_rot_exp, 1.0, kx, ky, args)
     Hami, Hami2 = Create_Stat(
         state, env, C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right, args)
     Ham = contract(Hami[(0, 0)], conj(state.site((0, 0))),
@@ -576,7 +686,7 @@ if (args.SSF == True):
     lamb = torch.tensor(0.0, dtype=cfg.global_args.torch_dtype,
                         device=cfg.global_args.device).requires_grad_(True)
     C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right = Create_Stat_Env(
-        state, stateDL, B_grad, env, P, Pt, lam, lamb, iden, Sy, Sy_rot, Sy, sysy_exp, sysy_exp, 1.0, kx, ky, args)
+        state, stateDL, B_grad, env, P, Pt, lam, lamb, iden, Sy_rot, Sy_rot, Sy_rot, sy_rot_exp, sy_rot_exp, 1.0, kx, ky, args)
     Hami, Hami2 = Create_Stat(
         state, env, C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right, args)
     Ham = contract(Hami[(0, 0)], conj(state.site((0, 0))),
@@ -595,7 +705,7 @@ if (args.SSF == True):
     lamb = torch.tensor(0.0, dtype=cfg.global_args.torch_dtype,
                         device=cfg.global_args.device).requires_grad_(True)
     C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right = Create_Stat_Env(
-        state, stateDL, B_grad, env, P, Pt, lam, lamb, iden, Sz, Sz_rot, Sz, szsz_exp, szsz_exp, 1.0, kx, ky, args)
+        state, stateDL, B_grad, env, P, Pt, lam, lamb, iden, Sz_rot, Sz_rot, Sz_rot, sz_rot_exp, sz_rot_exp, 1.0, kx, ky, args)
     Hami, Hami2 = Create_Stat(
         state, env, C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right, args)
     Ham = contract(Hami[(0, 0)], conj(state.site((0, 0))),
@@ -619,5 +729,112 @@ if (args.SSF == True):
 
     with open(args.datadir+"SSF.txt", "a") as f:
         f.write("#kx={}, ky={}, j1={}, j2={}\n".format(
-        args.kx, args.ky, args.j1, args.j2))
+            args.kx, args.ky, args.j1, args.j2))
         f.write("{}\n".format(SSF))
+
+# Wei-Lin Version
+# if (args.SSF == True):
+#     rot_op = s2.BP_rot()
+#     iden = torch.eye(2, dtype=cfg.global_args.torch_dtype,
+#                      device=cfg.global_args.device).contiguous()
+#     S = s2.SP()
+#     S_rot = torch.einsum('ki,kc,ca->ia', rot_op, S, rot_op)
+#     Sm = s2.SM()
+#     Sm_rot = torch.einsum('ki,kc,ca->ia', rot_op, Sm, rot_op)
+#     Sx = (S+Sm)/2.
+#     Sx_rot = torch.einsum('ki,kc,ca->ia', rot_op, Sx, rot_op)
+#     Sy = (S-Sm)/2./1j
+#     Sy_rot = torch.einsum('ki,kc,ca->ia', rot_op, Sy, rot_op)
+#     Sz = s2.SZ()
+#     Sz_rot = torch.einsum('ki,kc,ca->ia', rot_op, Sz, rot_op)
+#     with torch.no_grad():
+#         P, Pt = Create_Projectors(state, stateDL, env, args)
+#     B_grad = torch.zeros((len(state.sites), model.phys_dim, bond_dim, bond_dim, bond_dim, bond_dim),
+#                          dtype=cfg.global_args.torch_dtype, device=cfg.global_args.device)
+#     if len(state.sites) == 1:
+#         B_grad[0].requires_grad_(True)
+#         sitesB = {(0, 0): B_grad[0]}
+#         stateB = IPEPS(sitesB, state.vertexToSite)
+#     B_grad = B_grad[0].requires_grad_(True)
+
+#     tmp_rdm = rdm.rdm1x1((0, 0), state, env)
+#     sxsx_exp = torch.trace(tmp_rdm@Sx)
+#     sx_rot_exp = torch.trace(tmp_rdm@Sx_rot)
+#     sysy_exp = torch.trace(tmp_rdm@Sy)
+#     sy_rot_exp = torch.trace(tmp_rdm@Sy_rot)
+#     szsz_exp = torch.trace(tmp_rdm@Sz)
+#     sz_rot_exp = torch.trace(tmp_rdm@Sz_rot)
+#     # print (sx_exp,sx_rot_exp,sy_exp,sy_rot_exp,sz_exp,sz_rot_exp)
+
+#     lam = torch.tensor(0.0, dtype=cfg.global_args.torch_dtype,
+#                        device=cfg.global_args.device)
+#     lamb = torch.tensor(0.0, dtype=cfg.global_args.torch_dtype,
+#                         device=cfg.global_args.device).requires_grad_(True)
+#     # C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right = Create_Stat_Env(state, stateDL, stateB, env, P, Pt, lam, lamb, iden, Sx, Sx_rot, Sx, sx_exp, sx_rot_exp, 1.0, kx, ky, args)
+#     C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right = Create_Stat_Env(
+#         state, stateDL, B_grad, env, P, Pt, lam, lamb, iden, Sx, Sx_rot, Sx, sxsx_exp, sxsx_exp, 1.0, kx, ky, args)
+#     Hami, Hami2 = Create_Stat(
+#         state, env, C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right, args)
+#     Ham = contract(Hami[(0, 0)], conj(state.site((0, 0))),
+#                    ([0, 1, 2, 3, 4], [0, 1, 2, 3, 4]))
+#     # sx_exp2 = Ham.detach()
+#     # print (sx_exp2/norm_factor)
+#     # print (sx_exp*iden)
+#     stat_x = conj(torch.autograd.grad(
+#         Ham.real, lamb, retain_graph=True, create_graph=False)[0])
+#     stat_x = stat_x + \
+#         1j*conj(torch.autograd.grad(
+#             Ham.imag, lamb, retain_graph=True, create_graph=False)[0])
+#     # Ham.backward()
+#     # stat_x = lamb.grad
+
+#     lam = torch.tensor(0.0, dtype=cfg.global_args.torch_dtype,
+#                        device=cfg.global_args.device)
+#     lamb = torch.tensor(0.0, dtype=cfg.global_args.torch_dtype,
+#                         device=cfg.global_args.device).requires_grad_(True)
+#     C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right = Create_Stat_Env(
+#         state, stateDL, B_grad, env, P, Pt, lam, lamb, iden, Sy, Sy_rot, Sy, sysy_exp, sysy_exp, 1.0, kx, ky, args)
+#     Hami, Hami2 = Create_Stat(
+#         state, env, C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right, args)
+#     Ham = contract(Hami[(0, 0)], conj(state.site((0, 0))),
+#                    ([0, 1, 2, 3, 4], [0, 1, 2, 3, 4]))
+
+#     stat_y = conj(torch.autograd.grad(
+#         Ham.real, lamb, retain_graph=True, create_graph=False)[0])
+#     stat_y = stat_y + \
+#         1j*conj(torch.autograd.grad(
+#             Ham.imag, lamb, retain_graph=True, create_graph=False)[0])
+#     # Ham.backward()
+#     # stat_y = lamb.grad
+
+#     lam = torch.tensor(0.0, dtype=cfg.global_args.torch_dtype,
+#                        device=cfg.global_args.device)
+#     lamb = torch.tensor(0.0, dtype=cfg.global_args.torch_dtype,
+#                         device=cfg.global_args.device).requires_grad_(True)
+#     C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right = Create_Stat_Env(
+#         state, stateDL, B_grad, env, P, Pt, lam, lamb, iden, Sz, Sz_rot, Sz, szsz_exp, szsz_exp, 1.0, kx, ky, args)
+#     Hami, Hami2 = Create_Stat(
+#         state, env, C_up, T_up, C_left, T_left, C_down, T_down, C_right, T_right, args)
+#     Ham = contract(Hami[(0, 0)], conj(state.site((0, 0))),
+#                    ([0, 1, 2, 3, 4], [0, 1, 2, 3, 4]))
+
+#     stat_z = conj(torch.autograd.grad(
+#         Ham.real, lamb, retain_graph=True, create_graph=False)[0])
+#     stat_z = stat_z + \
+#         1j*conj(torch.autograd.grad(
+#             Ham.imag, lamb, retain_graph=True, create_graph=False)[0])
+#     # Ham.backward()
+#     # stat_z = lamb.grad
+
+#     norm_factor = 1.0
+
+#     SSF = ((stat_x)/norm_factor/2).item().real + ((stat_y)/norm_factor /
+#                                                   2).item().real + ((stat_z)/norm_factor/2).item().real
+#     print("Static_structure_factor=", SSF)
+#     print(((stat_x)/norm_factor/2).item().real, ((stat_y)/norm_factor /
+#           2).item().real, ((stat_z)/norm_factor/2).item().real)
+
+#     with open(args.datadir+"SSF.txt", "a") as f:
+#         f.write("#kx={}, ky={}, j1={}, j2={}\n".format(
+#             args.kx, args.ky, args.j1, args.j2))
+#         f.write("{}\n".format(SSF))

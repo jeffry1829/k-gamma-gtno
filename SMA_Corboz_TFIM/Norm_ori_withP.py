@@ -13,10 +13,11 @@ from math import sqrt
 # from ctm.generic.ctmrg import *
 from ctm.generic import ctmrg
 
-bond_dim = 4
+# bond_dim = 3
 
 
 def ctmrg_conv_energy(state2, env, history, ctm_args=cfg.ctm_args):
+    bond_dim = int(sqrt(env.T[((0, 0), (0, -1))].size()[1]))
     if not history:
         history = []
     old = []

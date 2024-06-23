@@ -429,7 +429,7 @@ idx = np.argsort(-np.abs(e))
 e = e[idx]
 v = v[:, idx]
 ################ Projector###############
-eig_size = 60
+eig_size = 1
 if kx == 0 and ky == 0:
     eig_size = eig_size + 1
 eig_truncate_up = 0

@@ -141,8 +141,9 @@ class KITAEV():
         # YYII = (torch.einsum('ij,ab,cd,ef->iacejbdf',Sy, Id, Id, Sy)+torch.einsum('ij,ab,cd,ef->iacejbdf',Id, Sy, Sy, Id))/2
         YYII = torch.einsum('ij,ab,cd,ef->iacejbdf', Sy, Id, Id, Sy)
 
-        H = 0.5*(torch.einsum('ij,ab->iajb', Sx+Sy+Sz, Id) +
-                 torch.einsum('ij,ab->iajb', Id, Sx+Sy+Sz))
+        # PREVIOUSly H is /2
+        H = (torch.einsum('ij,ab->iajb', Sx+Sy+Sz, Id) +
+             torch.einsum('ij,ab->iajb', Id, Sx+Sy+Sz))/4
         # XZII = torch.einsum('ij,ab,cd,ef->iacejbdf',Sx, Id, Id, Sz)
         # ZXII = torch.einsum('ij,ab,cd,ef->iacejbdf',Sz, Id, Id, Sx)
         # return YZII+ZYII, XZII+ZXII, XY+YX

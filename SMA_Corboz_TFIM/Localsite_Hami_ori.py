@@ -94,15 +94,15 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                     P2, Pt2 = ctm_get_projectors(
                         direction, new_coord_l, stateDL, env, cfg.ctm_args, cfg.global_args, False, False, False)
                     P2 = view(P2, (env.chi, ACstate.site(
-                        coord_shift_left).size()[3]**2, env.chi)).to(local_device)
+                        coord_shift_left).size()[4]**2, env.chi)).to(local_device)
                     Pt2 = view(Pt2, (env.chi, ACstate.site(
-                        new_coord_l).size()[1]**2, env.chi)).to(local_device)
+                        new_coord_l).size()[2]**2, env.chi)).to(local_device)
                     P1, Pt1 = ctm_get_projectors(
                         direction, coord_shift_right, stateDL, env, cfg.ctm_args, cfg.global_args, False, False, False)
                     P1 = view(P1, (env.chi, ACstate.site(
-                        new_coord_l).size()[3]**2, env.chi)).to(local_device)
+                        new_coord_l).size()[4]**2, env.chi)).to(local_device)
                     Pt1 = view(Pt1, (env.chi, ACstate.site(
-                        coord_shift_right).size()[1]**2, env.chi)).to(local_device)
+                        coord_shift_right).size()[2]**2, env.chi)).to(local_device)
                     # P2 = view(P[(i,new_coord_l,direction)], (env.chi,stateDL.site(coord_shift_left).size()[3],env.chi))
                     # Pt2 = view(Pt[(i,new_coord_l,direction)], (env.chi,stateDL.site(new_coord_l).size()[1],env.chi))
                     # P1 = view(P[(i,coord_shift_right,direction)], (env.chi,stateDL.site(new_coord_l).size()[3],env.chi))
@@ -123,15 +123,15 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                     P2, Pt2 = ctm_get_projectors(
                         direction, new_coord_r, stateDL, env, cfg.ctm_args, cfg.global_args, False, False, False)
                     P2 = view(P2, (env.chi, ACstate.site(
-                        coord_shift_left).size()[3]**2, env.chi)).to(local_device)
+                        coord_shift_left).size()[4]**2, env.chi)).to(local_device)
                     Pt2 = view(Pt2, (env.chi, ACstate.site(
-                        new_coord_r).size()[1]**2, env.chi)).to(local_device)
+                        new_coord_r).size()[2]**2, env.chi)).to(local_device)
                     P1, Pt1 = ctm_get_projectors(
                         direction, coord_shift_right, stateDL, env, cfg.ctm_args, cfg.global_args, False, False, False)
                     P1 = view(P1, (env.chi, ACstate.site(
-                        new_coord_r).size()[3]**2, env.chi)).to(local_device)
+                        new_coord_r).size()[4]**2, env.chi)).to(local_device)
                     Pt1 = view(Pt1, (env.chi, ACstate.site(
-                        coord_shift_right).size()[1]**2, env.chi)).to(local_device)
+                        coord_shift_right).size()[2]**2, env.chi)).to(local_device)
                     # P2 = view(P[(i,new_coord_r,direction)], (env.chi,stateDL.site(coord_shift_left).size()[3],env.chi))
                     # Pt2 = view(Pt[(i,new_coord_r,direction)], (env.chi,stateDL.site(new_coord_r).size()[1],env.chi))
                     # P1 = view(P[(i,coord_shift_right,direction)], (env.chi,stateDL.site(new_coord_r).size()[3],env.chi))
@@ -153,15 +153,15 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                         P2, Pt2 = ctm_get_projectors(
                             direction, new_coord, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Id, Id, Honsite, conj(state.site(new_coord)))
                         P2 = view(P2, (env.chi, ACstate.site(
-                            coord_shift_left).size()[3]**2, env.chi)).to(local_device)
+                            coord_shift_left).size()[4]**2, env.chi)).to(local_device)
                         Pt2 = view(Pt2, (env.chi, ACstate.site(
-                            new_coord).size()[1]**2, env.chi)).to(local_device)
+                            new_coord).size()[2]**2, env.chi)).to(local_device)
                         P1, Pt1 = ctm_get_projectors(
                             direction, coord_shift_right, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Id, Id, Honsite, conj(state.site(coord_shift_right)))
                         P1 = view(P1, (env.chi, ACstate.site(
-                            new_coord).size()[3]**2, env.chi)).to(local_device)
+                            new_coord).size()[4]**2, env.chi)).to(local_device)
                         Pt1 = view(Pt1, (env.chi, ACstate.site(
-                            coord_shift_right).size()[1]**2, env.chi)).to(local_device)
+                            coord_shift_right).size()[2]**2, env.chi)).to(local_device)
                         # P2 = view(P[(i,new_coord,direction)], (env.chi,stateDL.site(coord_shift_left).size()[3],env.chi))
                         # # Guess
                         # #           |---0 chi
@@ -498,15 +498,15 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                     P2, Pt2 = ctm_get_projectors(
                         direction, new_coord_l, stateDL, env, cfg.ctm_args, cfg.global_args, False, False, False)
                     P2 = view(P2, (env.chi, ACstate.site(
-                        coord_shift_right).size()[1]**2, env.chi)).to(local_device)
+                        coord_shift_right).size()[2]**2, env.chi)).to(local_device)
                     Pt2 = view(Pt2, (env.chi, ACstate.site(
-                        new_coord_l).size()[3]**2, env.chi)).to(local_device)
+                        new_coord_l).size()[4]**2, env.chi)).to(local_device)
                     P1, Pt1 = ctm_get_projectors(
                         direction, coord_shift_left, stateDL, env, cfg.ctm_args, cfg.global_args, False, False, False)
                     P1 = view(P1, (env.chi, ACstate.site(
-                        new_coord_l).size()[1]**2, env.chi)).to(local_device)
+                        new_coord_l).size()[2]**2, env.chi)).to(local_device)
                     Pt1 = view(Pt1, (env.chi, ACstate.site(
-                        coord_shift_left).size()[3]**2, env.chi)).to(local_device)
+                        coord_shift_left).size()[4]**2, env.chi)).to(local_device)
                     # P2 = view(P[(i,new_coord_l,direction)], (env.chi,stateDL.site(coord_shift_right).size()[1],env.chi))
                     # Pt2 = view(Pt[(i,new_coord_l,direction)], (env.chi,stateDL.site(new_coord_l).size()[3],env.chi))
                     # P1 = view(P[(i,coord_shift_left,direction)], (env.chi,stateDL.site(new_coord_l).size()[1],env.chi))
@@ -527,15 +527,15 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                     P2, Pt2 = ctm_get_projectors(
                         direction, new_coord_r, stateDL, env, cfg.ctm_args, cfg.global_args, False, False, False)
                     P2 = view(P2, (env.chi, ACstate.site(
-                        coord_shift_right).size()[1]**2, env.chi)).to(local_device)
+                        coord_shift_right).size()[2]**2, env.chi)).to(local_device)
                     Pt2 = view(Pt2, (env.chi, ACstate.site(
-                        new_coord_r).size()[3]**2, env.chi)).to(local_device)
+                        new_coord_r).size()[4]**2, env.chi)).to(local_device)
                     P1, Pt1 = ctm_get_projectors(
                         direction, coord_shift_left, stateDL, env, cfg.ctm_args, cfg.global_args, False, False, False)
                     P1 = view(P1, (env.chi, ACstate.site(
-                        new_coord_r).size()[1]**2, env.chi)).to(local_device)
+                        new_coord_r).size()[2]**2, env.chi)).to(local_device)
                     Pt1 = view(Pt1, (env.chi, ACstate.site(
-                        coord_shift_left).size()[3]**2, env.chi)).to(local_device)
+                        coord_shift_left).size()[4]**2, env.chi)).to(local_device)
                     # P2 = view(P[(i,new_coord_r,direction)], (env.chi,stateDL.site(coord_shift_right).size()[1],env.chi))
                     # Pt2 = view(Pt[(i,new_coord_r,direction)], (env.chi,stateDL.site(new_coord_r).size()[3],env.chi))
                     # P1 = view(P[(i,coord_shift_left,direction)], (env.chi,stateDL.site(new_coord_r).size()[1],env.chi))
@@ -557,15 +557,15 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                         P2, Pt2 = ctm_get_projectors(
                             direction, new_coord, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Id, Id, Honsite, conj(state.site(new_coord)))
                         P2 = view(P2, (env.chi, ACstate.site(
-                            coord_shift_right).size()[1]**2, env.chi)).to(local_device)
+                            coord_shift_right).size()[2]**2, env.chi)).to(local_device)
                         Pt2 = view(Pt2, (env.chi, ACstate.site(
-                            new_coord).size()[3]**2, env.chi)).to(local_device)
+                            new_coord).size()[4]**2, env.chi)).to(local_device)
                         P1, Pt1 = ctm_get_projectors(
                             direction, coord_shift_left, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Id, Id, Honsite, conj(state.site(coord_shift_left)))
                         P1 = view(P1, (env.chi, ACstate.site(
-                            new_coord).size()[1]**2, env.chi)).to(local_device)
+                            new_coord).size()[2]**2, env.chi)).to(local_device)
                         Pt1 = view(Pt1, (env.chi, ACstate.site(
-                            coord_shift_left).size()[3]**2, env.chi)).to(local_device)
+                            coord_shift_left).size()[4]**2, env.chi)).to(local_device)
                         # P2 = view(P[(i,new_coord,direction)], (env.chi,stateDL.site(coord_shift_right).size()[1],env.chi))
                         # Pt2 = view(Pt[(i,new_coord,direction)], (env.chi,stateDL.site(new_coord).size()[3],env.chi))
                         # P1 = view(P[(i,coord_shift_left,direction)], (env.chi,stateDL.site(new_coord).size()[1],env.chi))
@@ -708,15 +708,15 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                     P2, Pt2 = ctm_get_projectors(
                         direction, new_coord_u, stateDL, env, cfg.ctm_args, cfg.global_args, False, False, False)
                     P2 = view(P2, (env.chi, ACstate.site(
-                        coord_shift_down).size()[0]**2, env.chi)).to(local_device)
+                        coord_shift_down).size()[1]**2, env.chi)).to(local_device)
                     Pt2 = view(Pt2, (env.chi, ACstate.site(
-                        new_coord_u).size()[2]**2, env.chi)).to(local_device)
+                        new_coord_u).size()[3]**2, env.chi)).to(local_device)
                     P1, Pt1 = ctm_get_projectors(
                         direction, coord_shift_up, stateDL, env, cfg.ctm_args, cfg.global_args, False, False, False)
                     P1 = view(P1, (env.chi, ACstate.site(
-                        new_coord_u).size()[0]**2, env.chi)).to(local_device)
+                        new_coord_u).size()[1]**2, env.chi)).to(local_device)
                     Pt1 = view(Pt1, (env.chi, ACstate.site(
-                        coord_shift_up).size()[2]**2, env.chi)).to(local_device)
+                        coord_shift_up).size()[3]**2, env.chi)).to(local_device)
                     # P2 = view(P[(i,new_coord_u,direction)], (env.chi,stateDL.site(coord_shift_down).size()[0],env.chi))
                     # Pt2 = view(Pt[(i,new_coord_u,direction)], (env.chi,stateDL.site(new_coord_u).size()[2],env.chi))
                     # P1 = view(P[(i,coord_shift_up,direction)], (env.chi,stateDL.site(new_coord_u).size()[0],env.chi))
@@ -737,15 +737,15 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                     P2, Pt2 = ctm_get_projectors(
                         direction, new_coord_d, stateDL, env, cfg.ctm_args, cfg.global_args, False, False, False)
                     P2 = view(P2, (env.chi, ACstate.site(
-                        coord_shift_down).size()[0]**2, env.chi)).to(local_device)
+                        coord_shift_down).size()[1]**2, env.chi)).to(local_device)
                     Pt2 = view(Pt2, (env.chi, ACstate.site(
-                        new_coord_d).size()[2]**2, env.chi)).to(local_device)
+                        new_coord_d).size()[3]**2, env.chi)).to(local_device)
                     P1, Pt1 = ctm_get_projectors(
                         direction, coord_shift_up, stateDL, env, cfg.ctm_args, cfg.global_args, False, False, False)
                     P1 = view(P1, (env.chi, ACstate.site(
-                        new_coord_d).size()[0]**2, env.chi)).to(local_device)
+                        new_coord_d).size()[1]**2, env.chi)).to(local_device)
                     Pt1 = view(Pt1, (env.chi, ACstate.site(
-                        coord_shift_up).size()[2]**2, env.chi)).to(local_device)
+                        coord_shift_up).size()[3]**2, env.chi)).to(local_device)
                     # P2 = view(P[(i,new_coord_d,direction)], (env.chi,stateDL.site(coord_shift_down).size()[0],env.chi))
                     # Pt2 = view(Pt[(i,new_coord_d,direction)], (env.chi,stateDL.site(new_coord_d).size()[2],env.chi))
                     # P1 = view(P[(i,coord_shift_up,direction)], (env.chi,stateDL.site(new_coord_d).size()[0],env.chi))
@@ -767,15 +767,15 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                         P2, Pt2 = ctm_get_projectors(
                             direction, new_coord, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Id, Id, Honsite, conj(state.site(new_coord)))
                         P2 = view(P2, (env.chi, ACstate.site(
-                            coord_shift_down).size()[0]**2, env.chi)).to(local_device)
+                            coord_shift_down).size()[1]**2, env.chi)).to(local_device)
                         Pt2 = view(Pt2, (env.chi, ACstate.site(
-                            new_coord).size()[2]**2, env.chi)).to(local_device)
+                            new_coord).size()[3]**2, env.chi)).to(local_device)
                         P1, Pt1 = ctm_get_projectors(
                             direction, coord_shift_up, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Id, Id, Honsite, conj(state.site(coord_shift_up)))
                         P1 = view(P1, (env.chi, ACstate.site(
-                            new_coord).size()[0]**2, env.chi)).to(local_device)
+                            new_coord).size()[1]**2, env.chi)).to(local_device)
                         Pt1 = view(Pt1, (env.chi, ACstate.site(
-                            coord_shift_up).size()[2]**2, env.chi)).to(local_device)
+                            coord_shift_up).size()[3]**2, env.chi)).to(local_device)
                         # P2 = view(P[(i,new_coord,direction)], (env.chi,stateDL.site(coord_shift_down).size()[0],env.chi))
                         # Pt2 = view(Pt[(i,new_coord,direction)], (env.chi,stateDL.site(new_coord).size()[2],env.chi))
                         # P1 = view(P[(i,coord_shift_up,direction)], (env.chi,stateDL.site(new_coord).size()[0],env.chi))
@@ -964,15 +964,15 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                     P2, Pt2 = ctm_get_projectors(
                         direction, new_coord_u, stateDL, env, cfg.ctm_args, cfg.global_args, False, False, False)
                     P2 = view(P2, (env.chi, ACstate.site(
-                        coord_shift_up).size()[2]**2, env.chi)).to(local_device)
+                        coord_shift_up).size()[3]**2, env.chi)).to(local_device)
                     Pt2 = view(Pt2, (env.chi, ACstate.site(
-                        new_coord_u).size()[0]**2, env.chi)).to(local_device)
+                        new_coord_u).size()[1]**2, env.chi)).to(local_device)
                     P1, Pt1 = ctm_get_projectors(
                         direction, coord_shift_down, stateDL, env, cfg.ctm_args, cfg.global_args, False, False, False)
                     P1 = view(P1, (env.chi, ACstate.site(
-                        new_coord_u).size()[2]**2, env.chi)).to(local_device)
+                        new_coord_u).size()[3]**2, env.chi)).to(local_device)
                     Pt1 = view(Pt1, (env.chi, ACstate.site(
-                        coord_shift_down).size()[0]**2, env.chi)).to(local_device)
+                        coord_shift_down).size()[1]**2, env.chi)).to(local_device)
                     # P2 = view(P[(i,new_coord_u,direction)], (env.chi,stateDL.site(coord_shift_up).size()[2],env.chi))
                     # Pt2 = view(Pt[(i,new_coord_u,direction)], (env.chi,stateDL.site(new_coord_u).size()[0],env.chi))
                     # P1 = view(P[(i,coord_shift_down,direction)], (env.chi,stateDL.site(new_coord_u).size()[2],env.chi))
@@ -993,15 +993,15 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                     P2, Pt2 = ctm_get_projectors(
                         direction, new_coord_d, stateDL, env, cfg.ctm_args, cfg.global_args, False, False, False)
                     P2 = view(P2, (env.chi, ACstate.site(
-                        coord_shift_up).size()[2]**2, env.chi)).to(local_device)
+                        coord_shift_up).size()[3]**2, env.chi)).to(local_device)
                     Pt2 = view(Pt2, (env.chi, ACstate.site(
-                        new_coord_d).size()[0]**2, env.chi)).to(local_device)
+                        new_coord_d).size()[1]**2, env.chi)).to(local_device)
                     P1, Pt1 = ctm_get_projectors(
                         direction, coord_shift_down, stateDL, env, cfg.ctm_args, cfg.global_args, False, False, False)
                     P1 = view(P1, (env.chi, ACstate.site(
-                        new_coord_d).size()[2]**2, env.chi)).to(local_device)
+                        new_coord_d).size()[3]**2, env.chi)).to(local_device)
                     Pt1 = view(Pt1, (env.chi, ACstate.site(
-                        coord_shift_down).size()[0]**2, env.chi)).to(local_device)
+                        coord_shift_down).size()[1]**2, env.chi)).to(local_device)
                     # P2 = view(P[(i,new_coord_d,direction)], (env.chi,stateDL.site(coord_shift_up).size()[2],env.chi))
                     # Pt2 = view(Pt[(i,new_coord_d,direction)], (env.chi,stateDL.site(new_coord_d).size()[0],env.chi))
                     # P1 = view(P[(i,coord_shift_down,direction)], (env.chi,stateDL.site(new_coord_d).size()[2],env.chi))
@@ -1022,15 +1022,15 @@ def Create_Localsite_Hami_Env(state, stateDL, B_grad, env, lam, Hx, Hy, Honsite,
                         P2, Pt2 = ctm_get_projectors(
                             direction, new_coord, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Id, Id, Honsite, conj(state.site(new_coord)))
                         P2 = view(P2, (env.chi, ACstate.site(
-                            coord_shift_up).size()[2]**2, env.chi)).to(local_device)
+                            coord_shift_up).size()[3]**2, env.chi)).to(local_device)
                         Pt2 = view(Pt2, (env.chi, ACstate.site(
-                            new_coord).size()[0]**2, env.chi)).to(local_device)
+                            new_coord).size()[1]**2, env.chi)).to(local_device)
                         P1, Pt1 = ctm_get_projectors(
                             direction, coord_shift_down, ACstate, env, cfg.ctm_args, cfg.global_args, False, True, True, Id, Id, Honsite, conj(state.site(coord_shift_down)))
                         P1 = view(P1, (env.chi, ACstate.site(
-                            new_coord).size()[2]**2, env.chi)).to(local_device)
+                            new_coord).size()[3]**2, env.chi)).to(local_device)
                         Pt1 = view(Pt1, (env.chi, ACstate.site(
-                            coord_shift_down).size()[0]**2, env.chi)).to(local_device)
+                            coord_shift_down).size()[1]**2, env.chi)).to(local_device)
                         # P2 = view(P[(i,new_coord,direction)], (env.chi,stateDL.site(coord_shift_up).size()[2],env.chi))
                         # Pt2 = view(Pt[(i,new_coord,direction)], (env.chi,stateDL.site(new_coord).size()[0],env.chi))
                         # # Guess, Pt2=

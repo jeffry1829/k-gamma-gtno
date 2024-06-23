@@ -19,7 +19,8 @@ do
     _device="cuda:1"
     _dtype="complex128"
     statefile="${h}_state.json"
-    datadir="data/HsuKe/h_00_to_015_kz_1_free/KitaevAnyon_Pderv_Jx${Jx}Jy${Jy}Jz${Jz}h${h}chi${chi}size${_size}bonddim${bond_dim}dtype${_dtype}/"
+    # datadir="data/HsuKe/h_00_to_015_kz_1_free/KitaevAnyon_Pderv_Jx${Jx}Jy${Jy}Jz${Jz}h${h}chi${chi}size${_size}bonddim${bond_dim}dtype${_dtype}/"
+    datadir="data/HsuKe/correcth_h_00_to_015_kz_1_free/KitaevAnyon_Pderv_Jx${Jx}Jy${Jy}Jz${Jz}h${h}chi${chi}size${_size}bonddim${bond_dim}dtype${_dtype}/"
     mkdir -p ${datadir}
     cp ${datadir}../${statefile} ${datadir}
     reuseCTMRGenv="True"
@@ -31,8 +32,8 @@ do
     extra_flags=${extra_flags}" --CTMARGS_ctm_absorb_normalization inf"
     SMAMethod="SMA_Kitaev_Correct_Model_gpugraph_divide_Pderv.py"
     StoredMatMethod="SMA_stored_mat_Kitaev_Correct_Model.py"
-    runSMA="False"
-    runStoredMat="True"
+    runSMA="F"
+    runStoredMat="F"
     runDraw="True"
     runGUPTRI="False"
     runDrawGUPTRI="False"

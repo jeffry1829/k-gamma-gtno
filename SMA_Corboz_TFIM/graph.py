@@ -267,6 +267,7 @@ with open(datadir+"SW.txt", "r") as f:
             z.append(np.log(float(line.split()[1])))
         else:
             z.append(float(line.split()[1]))
+    grpSWs.append(singleSW)
 
 # # x is (kx,ky)
 # # y is w
@@ -333,6 +334,52 @@ plt.gcf().set_size_inches(6, 6)
 plt.colorbar()
 plt.show()
 
+# Plot with connecting line
+ax = plt.subplot()
+plt.grid(True, linestyle='-', color='0.75', markersize=5)
+plt.scatter(x, y, s=30, c=z,
+            marker='o', cmap=cm.get_cmap('viridis'))
+eig_size_num = []
+tmp = 1
+prevx = x[0]
+GS_x_grp = 0
+for i in range(1, len(x)):
+    if prevx == x[i]:
+        tmp += 1
+    else:
+        if len(eig_size_num) > 0 and eig_size_num[-1] != tmp and GS_x_grp == 0:
+            GS_x_grp = len(eig_size_num)
+        eig_size_num.append(tmp)
+        tmp = 1
+        prevx = x[i]
+eig_size_num.append(tmp)
+general_eigsize = eig_size_num[0]
+revisedx = [[] for i in range(len(eig_size_num))]
+revisedy = [[] for i in range(len(eig_size_num))]
+if GS_x_grp == 0:
+    general_eigsize -= 1
+
+for i in range(general_eigsize):
+    for j in range(len(eig_size_num)):
+        tmp = 0
+        if j == GS_x_grp:
+            tmp = 1
+        revisedx[j].append(x[tmp+i+sum(eig_size_num[:j])])
+        revisedy[j].append(y[tmp+i+sum(eig_size_num[:j])])
+plt.plot(revisedx, revisedy, 'k-', linewidth=0.5)
+plt.title('(momentum, energy) to spectral weight')
+if not DefineTitleAndTick:
+    plt.xticks([0, 4, 8, 16], [r'$M(\pi,0)$', r'$\Gamma(0,0)$',
+                               r'$K(\pi,\frac{\pi}{2})$', r'$M(\pi,0)$'])
+if DefineTitleAndTick:
+    plt.title("(momentum, energy) to spectral weight "+TitleEval)
+    eval("plt.xticks("+TickEval+")")
+plt.xlabel('momentum')
+plt.ylabel('excitation energy')
+plt.gcf().set_size_inches(6, 6)
+plt.colorbar()
+plt.show()
+
 # fig, ax = plt.subplots(figsize=(6.5,5), dpi = 100)
 # plt.pcolormesh(points[0], points[1], values, alpha=None, norm=None, cmap=None, vmin=None, vmax=None, shading= 'gouraud', antialiased=True, data=None)
 # plt.colorbar()
@@ -345,6 +392,8 @@ cntlst = []
 cnt = -1
 for i in range(len(grpSWs)):
     sumSW.append(sum(grpSWs[i]))
+    if i == GS_x_grp:
+        sumSW[-1] -= grpSWs[i][0]
     cnt += 1
     cntlst.append(cnt)
 ax = plt.subplot()

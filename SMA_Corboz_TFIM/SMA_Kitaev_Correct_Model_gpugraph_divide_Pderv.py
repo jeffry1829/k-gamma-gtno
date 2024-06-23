@@ -539,7 +539,8 @@ IZ = torch.einsum('ij,ab->iajb', Id, Sz).reshape(4, 4)
 ZI = torch.einsum('ij,ab->iajb', Sz, Id).reshape(4, 4)
 SI = torch.einsum('ij,ab->iajb', Sx+Sy+Sz, Id)
 IS = torch.einsum('ij,ab->iajb', Id, Sx+Sy+Sz)
-HH = 0.5*(SI+IS)
+# HH = 0.5*(SI+IS)
+HH = SI+IS
 HHII = torch.einsum('iajb,cd,ef->iacejbdf', HH,
                     Id, Id).reshape(4, 4, 4, 4)
 IIHH = torch.einsum('mn,kl,iajb->mkianljb', Id,

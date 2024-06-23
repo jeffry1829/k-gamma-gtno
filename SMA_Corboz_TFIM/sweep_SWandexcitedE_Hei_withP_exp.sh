@@ -4,16 +4,16 @@ do
     j1=1.0
     # j2=${j2}
     chi=8
-    bond_dim=2
-    _size=3
+    bond_dim=3
+    _size=2
     L=$((2*${_size}+2))
     Lm1=$((L-1))
     hL=$((L/2))
     hLp1=$((hL+1))
-    _step=4
-    _device="cuda:1"
+    _step=3
+    _device="cuda:2"
     _dtype="complex128"
-    statefile="ex-j20D2chi8c4v_state.json"
+    statefile="ex-j20D3chi8c4v_state.json"
     datadir="data/Hei_Pderv_j1${j1}j2${j2}chi${chi}size${_size}bonddim${bond_dim}dtype${_dtype}/"
     mkdir -p ${datadir}
     cp ${datadir}../${statefile} ${datadir}
@@ -27,7 +27,7 @@ do
     SMAMethod="SMA_Hei_gpugraph_divide_withP.py"
     StoredMatMethod="SMA_stored_mat_Hei.py"
     runSMA="False"
-    runStoredMat="False"
+    runStoredMat="True"
     runDraw="True"
     runGUPTRI="False"
     runDrawGUPTRI="False"
@@ -196,7 +196,7 @@ do
 
     if [[ "$runDraw" == "True" ]]; then
         #Draw the figure
-        python -u graph.py ${datadir} True "h=${h} Kz=${Kz}" "[0,2,3,4,6,7], [r'\$M(\pi,0)\$', r'\$X(\pi,\pi)\$',r'\$S(\frac{\pi}{2},\frac{\pi}{2})\$', r'\$\Gamma(0,0)\$', r'\$M(\pi,0)\$', r'\$S(\frac{\pi}{2},\frac{\pi}{2})\$']"
+        python -u graph.py ${datadir} True "J1=${j1}, J2=${j2}" "[0,2,3,4,6,7], [r'\$M(\pi,0)\$', r'\$X(\pi,\pi)\$',r'\$S(\frac{\pi}{2},\frac{\pi}{2})\$', r'\$\Gamma(0,0)\$', r'\$M(\pi,0)\$', r'\$S(\frac{\pi}{2},\frac{\pi}{2})\$']"
     fi
 
 

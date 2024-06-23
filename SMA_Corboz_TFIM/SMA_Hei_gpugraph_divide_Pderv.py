@@ -89,8 +89,10 @@ parser.add_argument("--kx", type=float, default=0.,
                     help="kx")
 parser.add_argument("--ky", type=float, default=0.,
                     help="ky")
-parser.add_argument("--j1", type=float, default=1., help="nearest-neighbour coupling")
-parser.add_argument("--j2", type=float, default=0., help="next nearest-neighbour coupling")
+parser.add_argument("--j1", type=float, default=1.,
+                    help="nearest-neighbour coupling")
+parser.add_argument("--j2", type=float, default=0.,
+                    help="next nearest-neighbour coupling")
 parser.add_argument("--size", type=int, default=10, help="effective size")
 
 parser.add_argument("--statefile", type=str, default="TFIM_output_state.json",
@@ -147,14 +149,24 @@ bond_dim = args.bond_dim
 
 state = read_ipeps(args.datadir+args.statefile)
 # generate the tensor with c4v symmetry
+
+
 def symmetrize(state):
-    A= state.site((0,0))
-    A_symm= make_c4v_symm_A1(A)
-    symm_state= IPEPS({(0,0): A_symm}, vertexToSite=state.vertexToSite)
+    A = state.site((0, 0))
+    if A.is_complex():
+        A_symm = make_c4v_symm(A.real) + \
+            make_c4v_symm(A.imag, irreps=["A2"]) * 1.0j
+    else:
+        A_symm = make_c4v_symm(A)
+    # A_symm = make_c4v_symm_A1(A)
+    symm_state = IPEPS({(0, 0): A_symm}, vertexToSite=state.vertexToSite)
     return symm_state
-state= symmetrize(state)
-Numpyfilename = args.datadir+Path(args.statefile).stem+"j1"+str(args.j1)+"j2"+str(args.j2)+\
-        "dtype"+str(cfg.global_args.dtype)+".npy"
+
+
+state = symmetrize(state)
+
+Numpyfilename = args.datadir+Path(args.statefile).stem+"j1"+str(args.j1)+"j2"+str(args.j2) +\
+    "dtype"+str(cfg.global_args.dtype)+".npy"
 if not os.path.exists(Numpyfilename):
     print("Saving state.sites((0,0)) to Numpy file: "+Numpyfilename)
     np.save(Numpyfilename, state.sites[(0, 0)].detach().cpu().numpy())
@@ -177,6 +189,7 @@ for coord, A in state.sites.items():
 stateDL = IPEPS(sitesDL, state.vertexToSite)
 
 difftograph = []
+
 
 def ctmrg_conv_energy(state2, env, history, ctm_args=cfg.ctm_args):
     torch.set_printoptions(profile="full")
@@ -379,18 +392,19 @@ print("kx=", kx/torch.pi*(2*args.size+2))
 print("ky=", ky/torch.pi*(2*args.size+2))
 ################ Static structure factor###############
 SS = model.SS_rot
-iden= torch.eye(2,dtype=cfg.global_args.torch_dtype,device=cfg.global_args.device).contiguous()
+iden = torch.eye(2, dtype=cfg.global_args.torch_dtype,
+                 device=cfg.global_args.device).contiguous()
 H_temp = args.j1 * SS
 # lam = torch.tensor(0.0,dtype=cfg.global_args.torch_dtype,device=cfg.global_args.device).requires_grad_(True)
 # lamb = torch.tensor(1.0,dtype=cfg.global_args.torch_dtype,device=cfg.global_args.device)
-iden2 = torch.einsum('ij,kl->ikjl',iden,iden)
+iden2 = torch.einsum('ij,kl->ikjl', iden, iden)
 # H = iden2 + lam * H_temp
 # H2 = iden2
 
 # calculate the energy per bond
-rdm2x1= rdm2x1((0,0),state,env)
-energy_per_site= torch.einsum('ijkl,ijkl',rdm2x1,H_temp)
-print ("E_per_bond=", energy_per_site.item().real)
+rdm2x1 = rdm2x1((0, 0), state, env)
+energy_per_site = torch.einsum('ijkl,ijkl', rdm2x1, H_temp)
+print("E_per_bond=", energy_per_site.item().real)
 
 torch.autograd.set_detect_anomaly(False)
 
@@ -400,7 +414,7 @@ if len(state.sites) == 1:
     B_grad[0].requires_grad_(True)
     sitesB = {(0, 0): B_grad[0]}
     stateB = IPEPS(sitesB, state.vertexToSite)
-    
+
 if len(state.sites) == 1:
     ### new P Pt?###
 
@@ -569,7 +583,7 @@ if len(state.sites) == 1:
             HamiMat0[tuple(loc)] += 0.5*1j*conj(torch.autograd.grad(Hami[(0, 0)]
                                                                     [tuple(loc)].imag, mu, create_graph=True, retain_graph=True)[0])
             HamiMat[(...,)+tuple(loc)] = 0.5*conj(torch.autograd.grad(HamiMat0[tuple(loc)
-                                                                                ].real, B_grad, create_graph=False, retain_graph=True)[0])
+                                                                               ].real, B_grad, create_graph=False, retain_graph=True)[0])
             HamiMat[(...,)+tuple(loc)] += 0.5*1j*conj(torch.autograd.grad(
                 HamiMat0[tuple(loc)].imag, B_grad, create_graph=False, retain_graph=True)[0])
             # HamiMat0.detach_()
@@ -582,7 +596,6 @@ if len(state.sites) == 1:
         # for ii in range(elemsize):
         #     streams[ii].synchronize()
         print("HamiMat caclulated, time=", t2-t1)
-
 
         HamiMat = HamiMat.detach().cpu().numpy()
         np.save(args.datadir +
