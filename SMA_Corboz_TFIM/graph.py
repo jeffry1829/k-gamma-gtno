@@ -91,54 +91,54 @@ pylab.rcParams.update(params)
 
 # Plot two vison
 
-if os.path.isfile(datadir+"TV.txt") == True:
-    cnt = -1
-    Es = []
-    TVs = []
-    points = []
-    values = []
+# if os.path.isfile(datadir+"TV.txt") == True:
+#     cnt = -1
+#     Es = []
+#     TVs = []
+#     points = []
+#     values = []
 
-    x = []
-    y = []
-    z = []
-    with open(datadir+"TV.txt", "r") as f:
-        for line in f:
-            # if cnt>=1:
-            #     break
-            if line[0] == "#":
-                cnt += 1
-                continue
-            Es.append(float(line.split()[0]))
-            TVs.append(float(line.split()[1]))
-            points.append((cnt, float(line.split()[0])))
-            values.append(float(line.split()[1]))
-            x.append(cnt)
-            y.append(float(line.split()[0]))
-            z.append(float(line.split()[1]))
+#     x = []
+#     y = []
+#     z = []
+#     with open(datadir+"TV.txt", "r") as f:
+#         for line in f:
+#             # if cnt>=1:
+#             #     break
+#             if line[0] == "#":
+#                 cnt += 1
+#                 continue
+#             Es.append(float(line.split()[0]))
+#             TVs.append(float(line.split()[1]))
+#             points.append((cnt, float(line.split()[0])))
+#             values.append(float(line.split()[1]))
+#             x.append(cnt)
+#             y.append(float(line.split()[0]))
+#             z.append(float(line.split()[1]))
 
-    from matplotlib import cm
-    ax = plt.subplot()
-    plt.grid(True, linestyle='-', color='0.75')
-    # scatter with colormap mapping to z value
-    plt.scatter(x, y, s=20, c=z, marker='o', cmap=cm.get_cmap('viridis'))
-    plt.title('(momentum, energy) to Kzz')
-    # plt.xticks([0, 8, 16, 32], [r'$M(\pi,0)$', r'$\Gamma(0,0)$',
-    #                             r'$K(\pi,\frac{\pi}{2})$', r'$M(\pi,0)$'])
-    if not DefineTitleAndTick:
-        plt.xticks([0, 4, 8, 16], [r'$M(\pi,0)$', r'$\Gamma(0,0)$',
-                                   r'$K(\pi,\frac{\pi}{2})$', r'$M(\pi,0)$'])
-    # plt.xticks([0, 6, 9, 12, 18, 21], [r'$M(\pi,0)$', r'$X(\pi,\pi)$',
-    #            r'$S(\frac{\pi}{2},\frac{\pi}{2})$', r'$\Gamma(0,0)$', r'$M(\pi,0)$', r'$S(\frac{\pi}{2},\frac{\pi}{2})$'])
-    # plt.xticks([0,12,18,24,36,42],[r'$M(\pi,0)$',r'$X(\pi,\pi)$',r'$S(\frac{\pi}{2},\frac{\pi}{2})$',r'$\Gamma(0,0)$',r'$M(\pi,0)$',r'$S(\frac{\pi}{2},\frac{\pi}{2})$'])
-    # plt.xticks([0,12,18,24],[r'$M(\pi,0)$',r'$X(\pi,\pi)$',r'$S(\frac{\pi}{2},\frac{\pi}{2})$',r'$\Gamma(0,0)$'])
-    if DefineTitleAndTick:
-        plt.title("(momentum, energy) to Kzz " + TitleEval)
-        eval("plt.xticks("+TickEval+")")
-    plt.xlabel('momentum')
-    plt.ylabel('excitation energy')
-    plt.gcf().set_size_inches(6, 6)
-    plt.colorbar()
-    plt.show()
+#     from matplotlib import cm
+#     ax = plt.subplot()
+#     plt.grid(True, linestyle='-', color='0.75')
+#     # scatter with colormap mapping to z value
+#     plt.scatter(x, y, s=20, c=z, marker='o', cmap=cm.get_cmap('viridis'))
+#     plt.title('(momentum, energy) to Kzz')
+#     # plt.xticks([0, 8, 16, 32], [r'$M(\pi,0)$', r'$\Gamma(0,0)$',
+#     #                             r'$K(\pi,\frac{\pi}{2})$', r'$M(\pi,0)$'])
+#     if not DefineTitleAndTick:
+#         plt.xticks([0, 4, 8, 16], [r'$M(\pi,0)$', r'$\Gamma(0,0)$',
+#                                    r'$K(\pi,\frac{\pi}{2})$', r'$M(\pi,0)$'])
+#     # plt.xticks([0, 6, 9, 12, 18, 21], [r'$M(\pi,0)$', r'$X(\pi,\pi)$',
+#     #            r'$S(\frac{\pi}{2},\frac{\pi}{2})$', r'$\Gamma(0,0)$', r'$M(\pi,0)$', r'$S(\frac{\pi}{2},\frac{\pi}{2})$'])
+#     # plt.xticks([0,12,18,24,36,42],[r'$M(\pi,0)$',r'$X(\pi,\pi)$',r'$S(\frac{\pi}{2},\frac{\pi}{2})$',r'$\Gamma(0,0)$',r'$M(\pi,0)$',r'$S(\frac{\pi}{2},\frac{\pi}{2})$'])
+#     # plt.xticks([0,12,18,24],[r'$M(\pi,0)$',r'$X(\pi,\pi)$',r'$S(\frac{\pi}{2},\frac{\pi}{2})$',r'$\Gamma(0,0)$'])
+#     if DefineTitleAndTick:
+#         plt.title("(momentum, energy) to Kzz " + TitleEval)
+#         eval("plt.xticks("+TickEval+")")
+#     plt.xlabel('momentum')
+#     plt.ylabel('excitation energy')
+#     plt.gcf().set_size_inches(6, 6)
+#     plt.colorbar()
+#     plt.show()
 
 if os.path.isfile(datadir+"XXA.txt") == True:
     cnt = -1
@@ -257,10 +257,10 @@ with open(datadir+"SW.txt", "r") as f:
         else:
             SWs.append(float(line.split()[1]))
         points.append((cnt, float(line.split()[0])))
-        if USE_LOG_SW:
-            values.append(np.log(float(line.split()[1])))
-        else:
-            values.append(float(line.split()[1]))
+        # if USE_LOG_SW:
+        #     values.append(np.log(float(line.split()[1])))
+        # else:
+        values.append(float(line.split()[1]))
         x.append(cnt)
         y.append(float(line.split()[0]))
         if USE_LOG_SW:
@@ -269,47 +269,67 @@ with open(datadir+"SW.txt", "r") as f:
             z.append(float(line.split()[1]))
     grpSWs.append(singleSW)
 
-# # x is (kx,ky)
-# # y is w
-# grid_step = 1
-# grid_x, grid_y = np.mgrid[0:cnt:grid_step, np.amin(Es):
-#                           np.amax(Es):grid_step]
-# points2 = points.copy()
-# values2 = values.copy()
-# for _x in np.arange(0, cnt+1, grid_step):
-#     for _y in np.arange(math.floor(np.amin(Es)), math.ceil(np.amax(Es)), grid_step):
-#         points2.append((_x, _y))
-#         val = 0
-#         for i, pt in enumerate(points):
-#             distanceptsq = (pt[0]-_x)**2+(pt[1]-_y)**2
-#             sigma = 0.1
-#             val += values[i]*np.exp(-distanceptsq /
-#                                     (2*sigma**2))/np.sqrt(2*np.pi*sigma**2)
-#         # values2.append(0)
-#         values2.append(val)
-# grid_z2 = griddata(points2, values2, (grid_x, grid_y), method='linear')
-# # plt.subplot(221)
-# # plt.imshow(grid_z2.T, extent=(0,1,np.amin(Es),np.amax(Es)), origin='lower')
-# plt.subplot()
-# im = plt.imshow(grid_z2.T, extent=(
-#     0, cnt, np.amin(Es), np.amax(Es)), origin='lower', aspect='auto')
-# plt.title('spectral weight')
-# # plt.xticks([0, 8, 16, 32], [r'$M(\pi,0)$', r'$\Gamma(0,0)$',
-# #            r'$K(\pi,\frac{\pi}{2})$', r'$M(\pi,0)$'])
-# # plt.xticks([0, 6, 12, 24], [r'$M(\pi,0)$', r'$\Gamma(0,0)$',
-# #            r'$K(\pi,\frac{\pi}{2})$', r'$M(\pi,0)$'])
+# x is (kx,ky)
+# y is w
+x_scale = (np.amax(Es)-np.amin(Es))/cnt
+stepnum = 110
+grid_step = (np.amax(Es)-np.amin(Es))/stepnum
+grid_x, grid_y = np.mgrid[0:cnt*x_scale:grid_step, np.amin(Es):
+                          np.amax(Es):grid_step]
+points2 = points.copy()
+values2 = values.copy()
+# for _x in np.linspace(0, cnt*x_scale, stepnum):
+for _x in np.linspace(0, cnt*x_scale, stepnum):
+    for _y in np.linspace(np.floor(np.amin(Es)), np.ceil(np.amax(Es)), stepnum):
+        points2.append((_x, _y))
+        val = 0
+        for i, pt in enumerate(points):
+            distanceptsq = ((pt[0]*x_scale)-_x)**2+(pt[1]-_y)**2
+            sigma = 0.099*x_scale
+            # if distanceptsq < 0.01:
+            #     print("distanceptsq = "+str(distanceptsq)+"")
+            #     print("pt = "+str(pt)+"")
+            #     print("_x = "+str(_x)+"")
+            #     print("_y = "+str(_y)+"")
+            #     print("pt[0]*x_scale = "+str(pt[0]*x_scale)+"")
+            val += values[i]*np.exp(-distanceptsq /
+                                    (2*sigma**2))/np.sqrt(2*np.pi*sigma**2)
+        # values2.append(0)
+        # if USE_LOG_SW:
+            # values2.append(np.log(val))
+        # else:
+        values2.append(val)
+grid_z2 = griddata(points2, values2, (grid_x, grid_y), method='linear')
+# plt.subplot(221)
+# plt.imshow(grid_z2.T, extent=(0,1,np.amin(Es),np.amax(Es)), origin='lower')
+plt.subplot()
+im = plt.imshow(grid_z2.T, extent=(
+    0, cnt*x_scale, np.amin(Es), np.amax(Es)), origin='lower', aspect='auto')
+plt.title('spectral weight')
+# plt.xticks([0, 8, 16, 32], [r'$M(\pi,0)$', r'$\Gamma(0,0)$',
+#            r'$K(\pi,\frac{\pi}{2})$', r'$M(\pi,0)$'])
+# plt.xticks([0, 6, 12, 24], [r'$M(\pi,0)$', r'$\Gamma(0,0)$',
+#            r'$K(\pi,\frac{\pi}{2})$', r'$M(\pi,0)$'])
 # plt.xticks([0, 6, 9, 12, 18, 21], [r'$M(\pi,0)$', r'$X(\pi,\pi)$',
 #            r'$S(\frac{\pi}{2},\frac{\pi}{2})$', r'$\Gamma(0,0)$', r'$M(\pi,0)$', r'$S(\frac{\pi}{2},\frac{\pi}{2})$'])
-# # plt.xticks([0,12,18,24,36,42],[r'$M(\pi,0)$',r'$X(\pi,\pi)$',r'$S(\frac{\pi}{2},\frac{\pi}{2})$',r'$\Gamma(0,0)$',r'$M(\pi,0)$',r'$S(\frac{\pi}{2},\frac{\pi}{2})$'])
-# # plt.xticks([0,6,9,12],[r'$M(\pi,0)$',r'$X(\pi,\pi)$',r'$S(\frac{\pi}{2},\frac{\pi}{2})$',r'$\Gamma(0,0)$'])
-# plt.xlabel('momentum')
-# plt.ylabel('excitation energy')
-# plt.gcf().set_size_inches(6, 6)
-# ax = plt.gca()
-# divider = make_axes_locatable(ax)
-# cax = divider.append_axes("right", size="5%", pad=0.05)
-# plt.colorbar(im, cax=cax)
-# plt.show()
+if not DefineTitleAndTick:
+    plt.xticks([0, 4, 8, 16], [r'$M(\pi,0)$', r'$\Gamma(0,0)$',
+                               r'$K(\pi,\frac{\pi}{2})$', r'$M(\pi,0)$'])
+if DefineTitleAndTick:
+    plt.title("(momentum, energy) to spectral weight "+TitleEval)
+    # eval("plt.xticks("+TickEval+")")
+plt.xticks(
+    list(map(lambda x: x*x_scale, [0, 3, 6, 12])), [r'$M(\pi,0)$', r'$\Gamma(0,0)$', r'$K(\pi,\frac{\pi}{2})$', r'$M(\pi,0)$'])
+# plt.xticks([0,12,18,24,36,42],[r'$M(\pi,0)$',r'$X(\pi,\pi)$',r'$S(\frac{\pi}{2},\frac{\pi}{2})$',r'$\Gamma(0,0)$',r'$M(\pi,0)$',r'$S(\frac{\pi}{2},\frac{\pi}{2})$'])
+# plt.xticks([0,6,9,12],[r'$M(\pi,0)$',r'$X(\pi,\pi)$',r'$S(\frac{\pi}{2},\frac{\pi}{2})$',r'$\Gamma(0,0)$'])
+plt.xlabel('momentum')
+plt.ylabel('excitation energy')
+plt.gcf().set_size_inches(6, 6)
+ax = plt.gca()
+divider = make_axes_locatable(ax)
+cax = divider.append_axes("right", size="5%", pad=0.05)
+plt.colorbar(im, cax=cax)
+plt.show()
 
 ax = plt.subplot()
 plt.grid(True, linestyle='-', color='0.75')

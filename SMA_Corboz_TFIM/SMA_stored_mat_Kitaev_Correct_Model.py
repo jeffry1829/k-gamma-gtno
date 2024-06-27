@@ -97,9 +97,9 @@ else:
     args.SSF = False
 
 # cfg.print_config()
-torch.set_num_threads(64)
-torch.set_num_interop_threads(64)  # Inter-op parallelism
-torch.set_num_threads(64)  # Intra-op parallelism
+torch.set_num_interop_threads(1)  # Inter-op parallelism
+torch.set_num_threads(1)  # Intra-op parallelism
+
 model = aniso_k.KITAEV(kx=args.Jx, ky=args.Jy, kz=args.Jz, h=args.h)
 energy_f = model.energy_2x2
 bond_dim = args.bond_dim
@@ -429,7 +429,7 @@ idx = np.argsort(-np.abs(e))
 e = e[idx]
 v = v[:, idx]
 ################ Projector###############
-eig_size = 1
+eig_size = 3
 if kx == 0 and ky == 0:
     eig_size = eig_size + 1
 eig_truncate_up = 0
@@ -512,6 +512,7 @@ YI = torch.einsum('ij,ab->iajb', Sy, Id).reshape(4, 4)
 IZ = torch.einsum('ij,ab->iajb', Id, Sz).reshape(4, 4)
 ZI = torch.einsum('ij,ab->iajb', Sz, Id).reshape(4, 4)
 XX = torch.einsum('ij,ab->iajb', Sx, Sx).reshape(4, 4)
+YY = torch.einsum('ij,ab->iajb', Sy, Sy).reshape(4, 4)
 ZZ = torch.einsum('ij,ab->iajb', Sz, Sz).reshape(4, 4)
 II = torch.einsum('ij,ab->iajb', Id, Id).reshape(4, 4)
 IXIX = IX+XI
@@ -521,6 +522,9 @@ IZIZ = IZ+ZI
 OpX = IX+XI
 OpY = IY+YI
 OpZ = IZ+ZI
+# OpX = XX
+# OpY = YY
+# OpZ = ZZ
 OpXX = XX
 OpZZ = ZZ
 A_Ori = state.site((0, 0)).flatten().detach().cpu().numpy()
@@ -559,7 +563,13 @@ SzA = ProjDag@SzA
 SxAconj = ProjDag@SxAconj
 SyAconj = ProjDag@SyAconj
 SzAconj = ProjDag@SzAconj
-# KxxA = ProjDag@KxxA
+KxxA_Ori = KxxA
+KxxAconj_Ori = KxxAconj
+KxxA = ProjDag@KxxA
+KxxAconj = ProjDag@KxxAconj
+
+KzzA_Ori = KzzA
+KzzAconj_Ori = KzzAconj
 KzzA = ProjDag@KzzA
 KzzAconj = ProjDag@KzzAconj
 
@@ -585,30 +595,13 @@ values = []
 # Spectral weight
 SW = []
 for i in range(Es.shape[0]):
-    # Bs_Ori_reshape = torch.from_numpy(Bs_Ori[:, i]).to(cfg.global_args.device).reshape((4,-1))
-    # SxBs_Ori_reshape = torch.einsum('ij,jk->ik', OpX, Bs_Ori_reshape)
-    # SxBs_Ori = SxBs_Ori_reshape.flatten().detach().cpu().numpy()
-    # SyBs_Ori_reshape = torch.einsum('ij,jk->ik', OpY, Bs_Ori_reshape)
-    # SyBs_Ori = SyBs_Ori_reshape.flatten().detach().cpu().numpy()
-    # SzBs_Ori_reshape = torch.einsum('ij,jk->ik', OpZ, Bs_Ori_reshape)
-    # SzBs_Ori = SzBs_Ori_reshape.flatten().detach().cpu().numpy()
-
-    # ans = np.linalg.norm(((Bs[:, i]))@NormMat@np.transpose(SxA))**2 +\
-    #     np.linalg.norm(((Bs[:, i]))@NormMat@np.transpose(SyA))**2 +\
-    #     np.linalg.norm(((Bs[:, i]))@NormMat@np.transpose(SzA))**2
-    ans = np.linalg.norm(((Bs_Ori[:, i]))@NormMat_Ori@(SxAconj_Ori))**2 +\
-        np.linalg.norm(((Bs_Ori[:, i]))@NormMat_Ori@(SyAconj_Ori))**2 +\
-        np.linalg.norm(((Bs_Ori[:, i]))@NormMat_Ori@(SzAconj_Ori))**2
-    # ans = np.linalg.norm((SxBs_Ori)@NormMat_Ori@cA_Ori)**2 +\
-    #     np.linalg.norm((SyBs_Ori)@NormMat_Ori@cA_Ori)**2 +\
-    #     np.linalg.norm((SzBs_Ori)@NormMat_Ori@cA_Ori)**2
+    # ans = np.linalg.norm(((Bs_Ori[:, i]))@NormMat_Ori@(SxAconj_Ori))**2 +\
+    #     np.linalg.norm(((Bs_Ori[:, i]))@NormMat_Ori@(SyAconj_Ori))**2 +\
+    #     np.linalg.norm(((Bs_Ori[:, i]))@NormMat_Ori@(SzAconj_Ori))**2
+    ans = np.linalg.norm(((Bs_Ori[:, i]))@NormMat_Ori@(SxAconj_Ori))**2
     SW.append((i, Es[i], ans))
     points.append((0, Es[i]))
     values.append(ans)
-    # points.append((1, Es[i]))
-    # values.append(ans)
-    # print(Es[i])
-    # print("spectral weight:", ans)
 
 with open(args.datadir+"SW.txt", "a") as f:
     f.write("#kx={}, ky={}, Jx={}, Jy={}, Jz={}, h={}\n".format(
@@ -639,11 +632,12 @@ with open(args.datadir+"TV.txt", "a") as f:
 # XX*A energy
 XXA = []
 for i in range(Es.shape[0]):
-    ans = ((KxxA))@HamiMat_Ori@KxxAconj
+    ans = ((KxxA_Ori))@HamiMat_Ori@KxxAconj_Ori
     ans = ans.real
     XXA.append((i, Es[i], ans))
 
-print("XXA: ", ((KxxA))@HamiMat_Ori@KxxAconj)
+print("XXA: ", ((KxxA_Ori))@HamiMat_Ori@KxxAconj_Ori)
+# print("XXA: ", ((KxxA))@HamiMat_Ori@KxxAconj)
 with open(args.datadir+"XXA.txt", "a") as f:
     f.write("#kx={}, ky={}, Jx={}, Jy={}, Jz={}, h={}\n".format(
         args.kx, args.ky, args.Jx, args.Jy, args.Jz, args.h))

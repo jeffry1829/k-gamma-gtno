@@ -93,7 +93,7 @@ import logging
 from ctm.generic import rdm
 import os
 from pathlib import Path
-from torchviz import make_dot
+# from torchviz import make_dot
 log = logging.getLogger(__name__)
 
 tStart = time.time()
@@ -159,9 +159,9 @@ else:
     args.UseVUMPSansazAC = False
 # cfg.print_config()
 # torch.set_num_threads(args.omp_cores)
-torch.set_num_threads(64)
-torch.set_num_interop_threads(64)  # Inter-op parallelism
-torch.set_num_threads(64)  # Intra-op parallelism
+torch.set_num_threads(1)
+torch.set_num_interop_threads(1)  # Inter-op parallelism
+torch.set_num_threads(1)  # Intra-op parallelism
 model = aniso_k.KITAEV(kx=args.Jx, ky=args.Jy, kz=args.Jz, h=args.h)
 energy_f = model.energy_2x2
 bond_dim = args.bond_dim

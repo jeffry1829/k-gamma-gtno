@@ -33,7 +33,7 @@ do
     SMAMethod="SMA_Kitaev_Correct_Model_gpugraph_divide_Pderv.py"
     StoredMatMethod="SMA_stored_mat_Kitaev_Correct_Model.py"
     runSMA="F"
-    runStoredMat="F"
+    runStoredMat="True"
     runDraw="True"
     runGUPTRI="False"
     runDrawGUPTRI="False"
